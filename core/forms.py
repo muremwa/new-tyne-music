@@ -5,6 +5,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as __
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import validate_email
 
 from .models import User
 
@@ -74,3 +75,32 @@ class CoreUserCreationForm(forms.Form):
             new_user.set_password(data['password'])
             new_user.save()
             return new_user
+
+
+class CoreUserEditForm(CoreUserCreationForm):
+    password = None
+    password_2 = None
+    username = forms.CharField(required=False)
+    email = forms.CharField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username:
+            username = super().clean_username()
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            validate_email(email)
+        return email
+
+    def save(self):
+        if self.has_changed():
+            for field in self.changed_data:
+                setattr(self.user, field, self.cleaned_data.get(field))
+            self.user.save()

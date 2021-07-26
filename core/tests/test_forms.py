@@ -1,7 +1,7 @@
 from django.test import TestCase, tag
 
 from core.models import User
-from core.forms import CoreUserCreationForm
+from core.forms import CoreUserCreationForm, CoreUserEditForm
 
 
 @tag('core-s')
@@ -86,3 +86,50 @@ class CoreFormTestCase(TestCase):
             users = User.objects.filter(username=self.data.get('username'))
             self.assertEqual(users.count(), 1)
             self.assertEqual(user.pk, users[0].pk)
+
+    def test_form_edit_form(self):
+        # bad email
+        uef = CoreUserEditForm(data={
+            'email': 'bad_email'
+        }, user=self.user)
+        self.assertListEqual(uef.errors.get('email', []), ['Enter a valid email address.'])
+
+        # bad username
+        uef = CoreUserEditForm(data={
+            'username': '@bad_email'
+        }, user=self.user)
+        self.assertListEqual(uef.errors.get('username', []), [
+            'No special characters on username (like: @), except _'
+        ])
+
+        # correct username
+        uef = CoreUserEditForm(data={
+            'username': 'good_user'
+        }, user=self.user)
+        self.assertEqual(uef.is_valid(), True)
+        if uef.is_valid():
+            uef.save()
+            us = User.objects.get(pk=self.user.pk)
+            self.assertEqual(us.username, 'good_user')
+
+        # correct email
+        uef = CoreUserEditForm(data={
+            'email': 'good@email.com'
+        }, user=self.user)
+        self.assertEqual(uef.is_valid(), True)
+        if uef.is_valid():
+            uef.save()
+            us = User.objects.get(pk=self.user.pk)
+            self.assertEqual(us.email, 'good@email.com')
+
+        # both correct username & email
+        uef = CoreUserEditForm(data={
+            'username': 'tyne_user',
+            'email': 'new@tyne.com'
+        }, user=self.user)
+        self.assertEqual(uef.is_valid(), True)
+        if uef.is_valid():
+            uef.save()
+            us = User.objects.get(pk=self.user.pk)
+            self.assertEqual(us.username, 'tyne_user')
+            self.assertEqual(us.email, 'new@tyne.com')
