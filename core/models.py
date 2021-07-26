@@ -23,6 +23,13 @@ class User(AbstractUser):
         return super().clean()
 
     @property
+    def c_tier(self):
+        if self.tier == 'S':
+            return SINGLE
+        elif self.tier == 'F':
+            return FAMILY
+
+    @property
     def main_profile(self):
         all_profiles = self.profile_set.order_by('pk')
         main_profiles = [profile for profile in all_profiles if profile.main]
@@ -39,8 +46,8 @@ class User(AbstractUser):
 
     @property
     def profile_full(self):
-        max = 1 if self.tier == 'S' else 6
-        return self.profile_count >= max
+        max_ = 1 if self.tier == 'S' else 6
+        return self.profile_count >= max_
 
     def save(self, *args, **kwargs):
         self.clean()

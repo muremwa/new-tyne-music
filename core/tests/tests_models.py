@@ -1,9 +1,10 @@
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.core.exceptions import ValidationError
 
-from .models import User, Profile
+from core.models import User, Profile
 
 
+@tag('core-m')
 class UserTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
