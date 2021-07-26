@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import ObjectDoesNotExist
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as __
 from django.core.exceptions import ValidationError
@@ -15,11 +16,16 @@ TIERS = (
 
 
 class User(AbstractUser):
+    email = models.EmailField(blank=False, null=False, unique=True)
     tier = models.CharField(max_length=2, choices=TIERS, default='S')
 
     def clean(self):
         if not self.email:
             raise ValidationError(__('Email field required'))
+
+        if not self.pk and User.objects.filter(email=self.email).count() > 0:
+            raise ValidationError(__('User with this Email already exists'))
+
         return super().clean()
 
     @property

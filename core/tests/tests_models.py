@@ -177,3 +177,11 @@ class UserTestCase(TestCase):
         m.main = False
         m.save()
         self.assertEqual(self.user.main_profile, None)
+
+    def test_user_email(self):
+        with self.assertRaisesRegex(ValidationError, 'User with this Email already exists'):
+            User.objects.create_user(
+                username='pat',
+                password='pass@123',
+                email='test@test.com',
+            )
