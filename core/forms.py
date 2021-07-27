@@ -10,7 +10,27 @@ from django.core.validators import validate_email
 from .models import User, Profile
 
 
-class CoreUserCreationForm(forms.Form):
+class SmartForm(forms.Form):
+    """Add field information retrieval sugar"""
+    def fields_info(self):
+        """Get all fields with help_text and whether they are required"""
+        fields_ = {}
+
+        for key in self.fields:
+            field_ = self.fields.get(key)
+
+            if field_:
+                fields_.update({
+                    key: {
+                        'help': field_.help_text if hasattr(field_, 'help_text') else '',
+                        'required': field_.required if hasattr(field_, 'required') else False
+                    }
+                })
+        return fields_
+
+
+class CoreUserCreationForm(SmartForm):
+    """If the form is valid returns the new created user"""
     username = forms.CharField(max_length=191, required=True, help_text='A unique username')
     email = forms.EmailField(required=True, help_text='Your email address')
     password = forms.CharField(required=True, help_text='A strong password')
@@ -92,6 +112,10 @@ class CoreUserCreationForm(forms.Form):
 
 
 class CoreUserEditForm(CoreUserCreationForm):
+    """
+        Edits a user but doesn't return, it's assumed you have access to the user already.\n
+        Takes a positional argument user, that is to be edited
+    """
     password = None
     password_2 = None
     username = forms.CharField(required=False, help_text='A unique username')
@@ -114,7 +138,8 @@ class CoreUserEditForm(CoreUserCreationForm):
             self.user.save()
 
 
-class ProfileCreateForm(forms.Form):
+class ProfileCreateForm(SmartForm):
+    """If the form is valid returns the new created profile"""
     profile_name = forms.CharField(required=True, help_text='A name for your profile')
     is_minor = forms.BooleanField(required=False, initial=False, help_text='Is the profile for a child')
     profile_image = forms.ImageField(required=False, help_text='An image for your profile')
@@ -151,6 +176,10 @@ class ProfileCreateForm(forms.Form):
 
 
 class ProfileEditForm(ProfileCreateForm):
+    """
+        Edits an existing profile, nothing is returned.\n
+        Takes a keyword argument profile, that is to be edited.
+    """
     account = None
     profile_name = forms.CharField(required=False, help_text='A name for your profile')
 

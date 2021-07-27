@@ -174,6 +174,47 @@ class CoreUserFormTestCase(TestCase):
             self.assertEqual(us.username, 'tyne_user')
             self.assertEqual(us.email, 'new@tyne.com')
 
+    @tag('core-fu-sm')
+    def test_smart_fields_info(self):
+        c_form = CoreUserCreationForm()
+
+        creator = {
+            'username': {
+                'help': c_form.fields.get('username').help_text,
+                'required': c_form.fields.get('username').required
+            },
+            'email': {
+                'help': c_form.fields.get('email').help_text,
+                'required': c_form.fields.get('email').required
+            },
+            'password': {
+                'help': c_form.fields.get('password').help_text,
+                'required': c_form.fields.get('password').required
+            },
+            'password_2': {
+                'help': c_form.fields.get('password_2').help_text,
+                'required': c_form.fields.get('password_2').required
+            },
+
+        }
+
+        self.assertDictEqual(c_form.fields_info(), creator)
+
+        e_form = CoreUserEditForm(user=None)
+
+        editor = {
+            'username': {
+                'help': e_form.fields.get('username').help_text,
+                'required': False
+            },
+            'email': {
+                'help': e_form.fields.get('email').help_text,
+                'required': False
+            }
+        }
+
+        self.assertDictEqual(e_form.fields_info(), editor)
+
 
 @tag('core-fp')
 class ProfileFormTestCase(TestCase):
@@ -259,3 +300,48 @@ class ProfileFormTestCase(TestCase):
             pef.save()
             x_profile.refresh_from_db()
             self.assertEqual(x_profile.minor, True)
+
+    @tag('core-fp-sm')
+    def test_smart_profile_form(self):
+        c_form = ProfileCreateForm()
+
+        creator = {
+            'profile_name': {
+                'help': c_form.fields.get('profile_name').help_text,
+                'required': c_form.fields.get('profile_name').required
+            },
+            'profile_image': {
+                'help': c_form.fields.get('profile_image').help_text,
+                'required': c_form.fields.get('profile_image').required
+            },
+            'is_minor': {
+                'help': c_form.fields.get('is_minor').help_text,
+                'required': c_form.fields.get('is_minor').required
+            },
+            'account': {
+                'help': c_form.fields.get('account').help_text,
+                'required': c_form.fields.get('account').required
+            }
+        }
+
+        self.assertDictEqual(c_form.fields_info(), creator)
+
+        e_form = ProfileEditForm(profile=None)
+
+        editor = {
+            'profile_name': {
+                'help': e_form.fields.get('profile_name').help_text,
+                'required': False
+            },
+            'profile_image': {
+                'help': e_form.fields.get('profile_image').help_text,
+                'required': False
+            },
+            'is_minor': {
+                'help': e_form.fields.get('is_minor').help_text,
+                'required': False
+            },
+
+        }
+
+        self.assertDictEqual(e_form.fields_info(), editor)
