@@ -11,10 +11,10 @@ from .models import User, Profile
 
 
 class CoreUserCreationForm(forms.Form):
-    username = forms.CharField(max_length=191, required=True, help_text='Enter a unique username')
-    email = forms.EmailField(required=True)
-    password = forms.CharField(required=True)
-    password_2 = forms.CharField(required=True)
+    username = forms.CharField(max_length=191, required=True, help_text='A unique username')
+    email = forms.EmailField(required=True, help_text='Your email address')
+    password = forms.CharField(required=True, help_text='A strong password')
+    password_2 = forms.CharField(required=True, help_text='Repeat the password')
 
     @property
     def errors(self):
@@ -94,8 +94,8 @@ class CoreUserCreationForm(forms.Form):
 class CoreUserEditForm(CoreUserCreationForm):
     password = None
     password_2 = None
-    username = forms.CharField(required=False)
-    email = forms.CharField(required=False)
+    username = forms.CharField(required=False, help_text='A unique username')
+    email = forms.CharField(required=False, help_text='You email address')
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
@@ -115,9 +115,9 @@ class CoreUserEditForm(CoreUserCreationForm):
 
 
 class ProfileCreateForm(forms.Form):
-    profile_name = forms.CharField(required=True)
-    is_minor = forms.BooleanField(required=False, initial=False)
-    profile_image = forms.ImageField(required=False)
+    profile_name = forms.CharField(required=True, help_text='A name for your profile')
+    is_minor = forms.BooleanField(required=False, initial=False, help_text='Is the profile for a child')
+    profile_image = forms.ImageField(required=False, help_text='An image for your profile')
     account = forms.ModelChoiceField(queryset=User.objects.all())
 
     def clean(self):
@@ -152,7 +152,7 @@ class ProfileCreateForm(forms.Form):
 
 class ProfileEditForm(ProfileCreateForm):
     account = None
-    profile_name = forms.CharField(required=False)
+    profile_name = forms.CharField(required=False, help_text='A name for your profile')
 
     def __init__(self, *args, **kwargs):
         self.profile = kwargs.pop('profile')
