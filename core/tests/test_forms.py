@@ -1,7 +1,7 @@
 from django.test import TestCase, tag
 
 from core.models import User, Profile
-from core.forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm
+from core.forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm, ProfileEditForm
 
 
 @tag('core-fu')
@@ -143,9 +143,6 @@ class ProfileFormTestCase(TestCase):
             email='test@test.com',
             password='pass@123',
         )
-        self.data = {
-            'profile_name': 'new_profile',
-        }
 
     def test_profile_creation_form(self):
         # account full
@@ -197,3 +194,28 @@ class ProfileFormTestCase(TestCase):
             self.assertEqual(new_profile in list(self.user.profile_set.all()), True)
             self.assertEqual(new_profile.main, False)
             self.assertEqual(new_profile.minor, True)
+
+    def test_profile_edit_form(self):
+        x_profile: Profile = self.user.main_profile
+
+        # name
+        pef = ProfileEditForm({
+            'profile_name': 'new_name'
+        }, profile=x_profile)
+        self.assertEqual(pef.is_valid(), True)
+
+        if pef.is_valid():
+            pef.save()
+            x_profile.refresh_from_db()
+            self.assertEqual(x_profile.name, 'new_name')
+
+        # minor
+        pef = ProfileEditForm({
+            'is_minor': True
+        }, profile=x_profile)
+        self.assertEqual(pef.is_valid(), True)
+
+        if pef.is_valid():
+            pef.save()
+            x_profile.refresh_from_db()
+            self.assertEqual(x_profile.minor, True)

@@ -140,3 +140,24 @@ class ProfileCreateForm(forms.Form):
                 new_profile.save()
 
                 return new_profile
+
+
+class ProfileEditForm(ProfileCreateForm):
+    account = None
+    profile_name = forms.CharField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        self.profile = kwargs.pop('profile')
+        super().__init__(*args, **kwargs)
+
+    def save(self):
+        if self.has_changed():
+            key_maps = {
+                'profile_name': 'name',
+                'profile_image': 'avi',
+                'is_minor': 'minor'
+            }
+            for field in self.changed_data:
+                a_name = key_maps.get(field)
+                setattr(self.profile, a_name, self.cleaned_data.get(field))
+            self.profile.save()
