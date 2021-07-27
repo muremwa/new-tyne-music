@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import ObjectDoesNotExist
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as __
 from django.core.exceptions import ValidationError
@@ -78,7 +77,7 @@ def upload_avi(instance: 'Profile', filename: str):
 class Profile(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
-    main = models.BooleanField()
+    main = models.BooleanField(default=False)
     minor = models.BooleanField(default=False)
     avi = models.ImageField(upload_to=upload_avi, default='/defaults/default_profile.jpg')
     objects = models.Manager()
