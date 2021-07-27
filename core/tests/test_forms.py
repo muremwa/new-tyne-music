@@ -19,6 +19,24 @@ class CoreUserFormTestCase(TestCase):
             'password_2': 'pass@123'
         }
 
+    @tag('core-fu-ue')
+    def test_username_exists(self):
+        self.data.update({
+            'username': self.user.username
+        })
+        usf = CoreUserCreationForm(data=self.data)
+        self.assertEqual(usf.is_valid(), False)
+        self.assertEqual(usf.errors.get('username', []), [f'The username \'{self.user.username}\' already exists'])
+
+    @tag('core-fu-ee')
+    def test_email_exists(self):
+        self.data.update({
+            'email': self.user.email
+        })
+        usf = CoreUserCreationForm(data=self.data)
+        self.assertEqual(usf.is_valid(), False)
+        self.assertEqual(usf.errors.get('email', []), [f'The email \'{self.user.email}\' already exists'])
+
     def test_passwords_similar(self):
         self.data.update({
             'password_2': '24224'
@@ -87,7 +105,29 @@ class CoreUserFormTestCase(TestCase):
             self.assertEqual(users.count(), 1)
             self.assertEqual(user.pk, users[0].pk)
 
+    @tag('core-fu-uef')
     def test_form_edit_form(self):
+        x = User(
+            username='w',
+            email='a@b.com',
+            password='pass@123',
+        )
+        x.save()
+
+        # duplicate email address
+        uef = CoreUserEditForm(data={
+            'email': x.email
+        }, user=self.user)
+        self.assertEqual(uef.is_valid(), False)
+        self.assertListEqual(uef.errors.get('email', []), [f'The email \'{x.email}\' already exists'])
+
+        # duplicate username
+        uef = CoreUserEditForm(data={
+            'username': x.username
+        }, user=self.user)
+        self.assertEqual(uef.is_valid(), False)
+        self.assertListEqual(uef.errors.get('username', []), [f'The username \'{x.username}\' already exists'])
+
         # bad email
         uef = CoreUserEditForm(data={
             'email': 'bad_email'

@@ -11,7 +11,7 @@ from .models import User, Profile
 
 
 class CoreUserCreationForm(forms.Form):
-    username = forms.CharField(max_length=191, required=True)
+    username = forms.CharField(max_length=191, required=True, help_text='Enter a unique username')
     email = forms.EmailField(required=True)
     password = forms.CharField(required=True)
     password_2 = forms.CharField(required=True)
@@ -53,6 +53,10 @@ class CoreUserCreationForm(forms.Form):
         username = self.cleaned_data.get('username')
         User.username_validator(username)
 
+        # username exists
+        if User.objects.filter(username=username).count() > 0:
+            raise ValidationError(__(f'The username \'{username}\' already exists'))
+
         # weird characters
         pt = compile(r'[^0-9a-zA-Z_]')
         if search(pt, username):
@@ -60,6 +64,16 @@ class CoreUserCreationForm(forms.Form):
             raise ValidationError(__(f'No special characters on username (like: {", ".join(illegals)}), except _'))
 
         return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            validate_email(email)
+
+        # email exists
+        if User.objects.filter(email=email).count() > 0:
+            raise ValidationError(__(f'The email \'{email}\' already exists'))
+        return email
 
     def save(self):
         data: Dict = self.cleaned_data
@@ -92,12 +106,6 @@ class CoreUserEditForm(CoreUserCreationForm):
         if username:
             username = super().clean_username()
         return username
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if email:
-            validate_email(email)
-        return email
 
     def save(self):
         if self.has_changed():
