@@ -7,14 +7,14 @@ from django.utils.translation import ugettext_lazy as __
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import validate_email
 
-from .models import User
+from .models import User, Profile
 
 
 class CoreUserCreationForm(forms.Form):
-    username = forms.CharField(max_length=191)
-    email = forms.EmailField()
-    password = forms.CharField()
-    password_2 = forms.CharField()
+    username = forms.CharField(max_length=191, required=True)
+    email = forms.EmailField(required=True)
+    password = forms.CharField(required=True)
+    password_2 = forms.CharField(required=True)
 
     @property
     def errors(self):
@@ -104,3 +104,39 @@ class CoreUserEditForm(CoreUserCreationForm):
             for field in self.changed_data:
                 setattr(self.user, field, self.cleaned_data.get(field))
             self.user.save()
+
+
+class ProfileCreateForm(forms.Form):
+    profile_name = forms.CharField(required=True)
+    is_minor = forms.BooleanField(required=False, initial=False)
+    profile_image = forms.ImageField(required=False)
+    account = forms.ModelChoiceField(queryset=User.objects.all())
+
+    def clean(self):
+        data: Dict = self.cleaned_data
+
+        if 'account' in data.keys():
+            account: User = data.get('account')
+            if account.profile_full:
+                raise ValidationError(__('Account limit reached'))
+        return data
+
+    def save(self):
+        if self.has_changed():
+            name = self.cleaned_data.get('profile_name')
+            user = self.cleaned_data.get('account')
+            minor = self.cleaned_data.get('is_minor')
+            avi = self.cleaned_data.get('profile_image')
+
+            if all([name, user]):
+                new_profile = Profile(
+                    name=name,
+                    user=user,
+                    minor=minor
+                )
+
+                if 'profile_image' in self.changed_data:
+                    new_profile.avi = avi
+                new_profile.save()
+
+                return new_profile

@@ -1,11 +1,11 @@
 from django.test import TestCase, tag
 
-from core.models import User
-from core.forms import CoreUserCreationForm, CoreUserEditForm
+from core.models import User, Profile
+from core.forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm
 
 
-@tag('core-s')
-class CoreFormTestCase(TestCase):
+@tag('core-fu')
+class CoreUserFormTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             username='test1',
@@ -133,3 +133,67 @@ class CoreFormTestCase(TestCase):
             us = User.objects.get(pk=self.user.pk)
             self.assertEqual(us.username, 'tyne_user')
             self.assertEqual(us.email, 'new@tyne.com')
+
+
+@tag('core-fp')
+class ProfileFormTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='test1',
+            email='test@test.com',
+            password='pass@123',
+        )
+        self.data = {
+            'profile_name': 'new_profile',
+        }
+
+    def test_profile_creation_form(self):
+        # account full
+        pcf = ProfileCreateForm(data={
+            'profile_name': 'name_1',
+            'account': self.user.pk,
+        })
+        self.assertEqual(pcf.is_valid(), False)
+        self.assertListEqual(pcf.errors.get('__all__', []), ['Account limit reached'])
+
+        self.user.tier = 'F'
+        self.user.save()
+
+        # no account
+        pcf = ProfileCreateForm(data={
+            'profile_name': 'name_1'
+        })
+        self.assertEqual(pcf.is_valid(), False)
+        self.assertListEqual(pcf.errors.get('account', []), ['This field is required.'])
+
+        # no profile_name
+        pcf = ProfileCreateForm(data={
+            'account': self.user.pk,
+        })
+        self.assertEqual(pcf.is_valid(), False)
+        self.assertListEqual(pcf.errors.get('profile_name', []), ['This field is required.'])
+
+        # correct details
+        pcf = ProfileCreateForm(data={
+            'profile_name': 'name_1',
+            'account': self.user.pk,
+        })
+        self.assertEqual(pcf.is_valid(), True)
+        if pcf.is_valid():
+            new_profile = pcf.save()
+            self.assertEqual(new_profile in list(self.user.profile_set.all()), True)
+            self.assertEqual(new_profile.main, False)
+            self.assertEqual(new_profile.minor, False)
+
+        # correct details with minor as true
+        pcf = ProfileCreateForm(data={
+            'profile_name': 'name_1',
+            'account': self.user.pk,
+            'is_minor': True
+        })
+        self.assertEqual(pcf.is_valid(), True)
+        if pcf.is_valid():
+            new_profile = pcf.save()
+            self.assertEqual(new_profile in list(self.user.profile_set.all()), True)
+            self.assertEqual(new_profile.main, False)
+            self.assertEqual(new_profile.minor, True)
