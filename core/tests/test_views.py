@@ -125,6 +125,80 @@ class AccountActionTestCase(APITestCase):
         self.assertEqual(response.status_code, 202)
         self.assertEqual(response.json(), self.def_resp)
 
+    @tag('core-v-a-ep')
+    def test_edit_user_post(self):
+        url = reverse('core:account-action', kwargs={'action': EDIT_USER})
+
+        # without being authenticated
+        response = self.client.post(url, data={
+            'username': 'jim'
+        })
+        self.def_resp.update({
+            'success': False,
+            'error': 'user is not authenticated'
+        })
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), self.def_resp)
+        self.def_resp.pop('error')
+
+        # authenticate user
+        self.client.force_login(self.user)
+
+        # authenticated user with wrong details
+        data = {
+            'username': '&username',
+            'email': 'email'
+        }
+        for key in data.keys():
+            datum = {key: data.get(key)}
+
+            form = CoreUserEditForm(data=datum, user=self.user)
+            response = self.client.post(url, data=datum)
+            self.def_resp.update({
+                'errors': form.errors
+            })
+            self.assertEqual(response.status_code, 400)
+            self.assertDictEqual(response.json(), self.def_resp)
+            self.def_resp.pop('errors')
+
+        # authenticated user correct details
+        data = {
+            'username': 'new_username',
+            'email': 'email_new@test.com'
+        }
+        self.def_resp['success'] = True
+
+        # both details
+        response = self.client.post(url, data=data)
+        self.def_resp.update({
+            'edited': data
+        })
+        self.user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(self.def_resp, response.json())
+        for key in data.keys():
+            self.assertEqual(getattr(self.user, key), data.get(key))
+        self.def_resp.pop('edited')
+
+        # each detail
+        data = {
+            'username': 'username_r',
+            'email': 'email_r@test.com'
+        }
+        for key in data.keys():
+            datum = {
+                key: data.get(key)
+            }
+            response = self.client.post(url, data=datum)
+            self.def_resp.update({
+                'edited': datum
+            })
+            self.user.refresh_from_db()
+            self.assertEqual(response.status_code, 200)
+            self.assertDictEqual(self.def_resp, response.json())
+            self.assertEqual(getattr(self.user, key), datum[key])
+            self.def_resp.pop('edited')
+
 
 @tag('core-v-l')
 class LoginTestCase(APITestCase):

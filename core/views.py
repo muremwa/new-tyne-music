@@ -94,9 +94,39 @@ def account_action(request, action):
                 })
 
             elif action == EDIT_USER:
-                response.update({
-                    'message': 'Coming soon'
-                })
+                if request.user.is_authenticated:
+                    _post_req = {
+                        'success': False
+                    }
+                    resp_status = status.HTTP_400_BAD_REQUEST
+                    data = {
+                        'username': request.POST.get('username'),
+                        'email': request.POST.get('email')
+                    }
+                    data = {key: data[key] for key in data if data[key]}
+
+                    if data.keys():
+                        form = CoreUserEditForm(data=data, user=request.user)
+
+                        if form.is_valid():
+                            form.save()
+                            _post_req.update({
+                                'edited': data,
+                                'success': True
+                            })
+                            resp_status = status.HTTP_200_OK
+
+                        else:
+                            _post_req.update({'errors': form.errors})
+
+                    response.update(_post_req)
+
+                else:
+                    response.update({
+                        'success': False,
+                        'error': 'user is not authenticated'
+                    })
+                    resp_status = status.HTTP_401_UNAUTHORIZED
 
     return Response(response, status=resp_status)
 
