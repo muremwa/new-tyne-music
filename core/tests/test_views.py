@@ -38,13 +38,27 @@ class AccountActionTestCase(APITestCase):
         self.assertEqual(response.status_code, 404)
         self.assertDictEqual(response.json(), self.def_resp)
 
+    @tag('core-v-a-gu')
     def test_get_user(self):
         url = f"{reverse('core:account-action', kwargs={'action': GET_USER})}?username={self.user.username}"
+        user_info = UserSerializer(self.user).data
+        profiles = user_info.pop('profiles')
         self.def_resp.update({
             "action": "Retrieve user",
-            "user": UserSerializer(self.user).data
+            "user": user_info
         })
         response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), self.def_resp)
+
+        self.client.force_login(user=self.user)
+        response = self.client.get(url)
+        user_info.update({
+            'profiles': profiles
+        })
+        self.def_resp.update({
+            'user': user_info
+        })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), self.def_resp)
 
@@ -110,3 +124,72 @@ class AccountActionTestCase(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 202)
         self.assertEqual(response.json(), self.def_resp)
+
+
+@tag('core-v-l')
+class LoginTestCase(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self._pass = 'pass@123'
+        self.user = User.objects.create_user(
+            username='login_user',
+            email='email@test.com',
+            password=self._pass
+        )
+        self.def_resp = {
+            'url': 'user authentication',
+        }
+        self.url = reverse('core:login')
+
+    def test_login_get(self):
+        self.def_resp.update({
+            'fields': ['username', 'email', 'password'],
+            'returns': ['token', 'user_data']
+        })
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), self.def_resp)
+
+    def test_login_post_wrong_data(self):
+        self.def_resp.update({
+            'success': False,
+            'error': 'Wrong Credentials'
+        })
+        response = self.client.post(self.url, data={
+            'username': self.user.username,
+            'password': 'wrong_password'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(response.json(), self.def_resp)
+
+    def test_login_with_username_or_email(self):
+        self.def_resp.update({
+            'success': True,
+            'token': self.user.get_user_auth_token().key,
+            'details': UserSerializer(self.user).data
+        })
+
+        # login with username
+        response = self.client.post(self.url, data={
+            'username': self.user.username,
+            'password': self._pass
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), self.def_resp)
+
+        # login with email
+        response = self.client.post(self.url, data={
+            'email': self.user.email,
+            'password': self._pass
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), self.def_resp)
+
+        # login with email and username
+        response = self.client.post(self.url, data={
+            'username': self.user.username,
+            'email': self.user.email,
+            'password': self._pass
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), self.def_resp)
