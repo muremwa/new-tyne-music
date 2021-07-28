@@ -1,7 +1,10 @@
-from django.test import TestCase, tag
+from django.test import TestCase, tag, TransactionTestCase
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
+from rest_framework.authtoken.models import Token
 
 from core.models import User, Profile
+from core.forms import CoreUserCreationForm
 
 
 @tag('core-m')
@@ -185,3 +188,41 @@ class UserTestCase(TestCase):
                 password='pass@123',
                 email='test@test.com',
             )
+
+
+@tag('core-m-a')
+class AuthTokenTestCase(TransactionTestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='test1',
+            first_name='Test',
+            last_name='One',
+            email='test@test.com',
+            password='newuser@123'
+        )
+
+    def test_get_auth_token(self):
+        # user without token
+        self.assertEqual(Token.objects.filter(user=self.user).count(), 0)
+        token = self.user.get_user_auth_token()
+        token_ = Token.objects.get(user=self.user)
+        self.assertEqual(token, token_)
+
+        # attempt to create another token for the same user
+        with self.assertRaisesRegex(IntegrityError, 'UNIQUE constraint failed: authtoken_token.user_id'):
+            Token.objects.create(user=self.user)
+
+        # token from a user created using a form
+        usf = CoreUserCreationForm(data={
+            'username': 'tokenTest',
+            'email': 'token@test.com',
+            'password': 'pass@123',
+            'password_2': 'pass@123'
+        })
+        self.assertEqual(usf.is_valid(), True)
+        if usf.is_valid():
+            us_d = usf.save()
+            user = us_d.get('new_user')
+            token__ = Token.objects.get(user=user)
+            self.assertEqual(token__.key, us_d.get('token_key'))
+            self.assertEqual(token__, user.get_user_auth_token())

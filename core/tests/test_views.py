@@ -1,8 +1,9 @@
 from django.test import tag
 from django.shortcuts import reverse
 from rest_framework.test import APITestCase, APIClient
+from rest_framework.authtoken.models import Token
 
-from core.views import account_action, CREATE_USER, EDIT_USER, GET_USER
+from core.views import CREATE_USER, EDIT_USER, GET_USER
 from core.models import User
 from core.serializers import UserSerializer
 from core.forms import CoreUserCreationForm, CoreUserEditForm
@@ -52,6 +53,7 @@ class AccountActionTestCase(APITestCase):
 
         self.def_resp.update({
             "action": "Create a new user",
+            'login_required': False,
             "fields": CoreUserCreationForm().fields_info()
         })
         response = self.client.get(url)
@@ -88,8 +90,10 @@ class AccountActionTestCase(APITestCase):
         self.def_resp.pop('errors')
         response = self.client.post(url, data=data)
         user = User.objects.get(username='abs_new_username')
+        token = Token.objects.get(user=user)
         self.def_resp.update({
-            'new_user': UserSerializer(user).data
+            'new_user': UserSerializer(user).data,
+            'user_token': token.key
         })
         self.assertEqual(response.status_code, 201)
         self.assertDictEqual(response.json(), self.def_resp)
@@ -99,16 +103,10 @@ class AccountActionTestCase(APITestCase):
 
         self.def_resp.update({
             'action': 'Edit an existing user',
+            'login_required': True,
             'fields': CoreUserEditForm(user=None).fields_info()
         })
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 202)
         self.assertEqual(response.json(), self.def_resp)
-
-    def test_edit_user_post(self):
-        url = reverse('core:account-action', kwargs={'action': EDIT_USER})
-
-        data_1 = {
-            'username': self.user.username,
-        }

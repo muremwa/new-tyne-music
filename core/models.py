@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as __
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from rest_framework.authtoken.models import Token
 
 
 SINGLE = 'Single'
@@ -53,6 +54,19 @@ class User(AbstractUser):
     def profile_full(self):
         max_ = 1 if self.tier == 'S' else 6
         return self.profile_count >= max_
+
+    def get_user_auth_token(self):
+        token = None
+        if self.pk:
+            tokens = Token.objects.filter(user=self.pk)
+
+            if tokens.count() == 1:
+                token = tokens[0]
+            elif tokens.count() == 0:
+                user = User.objects.get(pk=self.pk)
+                token = Token.objects.create(user=user)
+
+        return token
 
     def save(self, *args, **kwargs):
         self.clean()

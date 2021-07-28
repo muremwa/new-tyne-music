@@ -1,5 +1,6 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework import permissions
 from rest_framework import status
 from django.shortcuts import reverse
 
@@ -14,6 +15,7 @@ GET_USER = 'get'
 
 
 @api_view(['GET', 'POST'])
+@permission_classes([permissions.AllowAny])
 def account_action(request, action):
     response = {
         'url': 'account action'
@@ -56,6 +58,7 @@ def account_action(request, action):
                 form = CoreUserCreationForm() if action == CREATE_USER else CoreUserEditForm(user=None)
                 response.update({
                     'action': 'Create a new user' if action == CREATE_USER else 'Edit an existing user',
+                    'login_required': True if action == EDIT_USER else False,
                     'fields': form.fields_info()
                 })
 
@@ -65,10 +68,11 @@ def account_action(request, action):
                 form = CoreUserCreationForm(data=request.POST)
 
                 if form.is_valid():
-                    user = form.save()
+                    user_data = form.save()
                     response.update({
                         'success': True,
-                        'new_user': UserSerializer(user).data
+                        'new_user': UserSerializer(user_data.get('new_user', {})).data,
+                        'user_token': user_data.get('token_key')
                     })
                     resp_status = status.HTTP_201_CREATED
 

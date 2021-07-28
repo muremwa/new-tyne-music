@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as __
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import validate_email
+from rest_framework.authtoken.models import Token
 
 from .models import User, Profile
 
@@ -30,7 +31,12 @@ class SmartForm(forms.Form):
 
 
 class CoreUserCreationForm(SmartForm):
-    """If the form is valid returns the new created user"""
+    """
+        If the form is valid returns a dict with:\n
+        The new created user. -> 'new_user'\n
+        And\n
+        The user authtoken. -> 'token_key'
+    """
     username = forms.CharField(max_length=191, required=True, help_text='A unique username')
     email = forms.EmailField(required=True, help_text='Your email address')
     password = forms.CharField(required=True, help_text='A strong password')
@@ -96,6 +102,13 @@ class CoreUserCreationForm(SmartForm):
         return email
 
     def save(self):
+        """
+            If form is valid and data changed, returns \n
+            {\n
+                'new_user': User ->  USER instance,\n
+                'token_key': Token.key -> STRING\n
+            }\n
+        """
         data: Dict = self.cleaned_data
         av_items = data.keys()
         req_items = ['username', 'email', 'password']
@@ -108,7 +121,11 @@ class CoreUserCreationForm(SmartForm):
             )
             new_user.set_password(data['password'])
             new_user.save()
-            return new_user
+            new_user_token: Token = Token.objects.create(user=new_user)
+            return {
+                'new_user': new_user,
+                'token_key': new_user_token.key
+            }
 
 
 class CoreUserEditForm(CoreUserCreationForm):

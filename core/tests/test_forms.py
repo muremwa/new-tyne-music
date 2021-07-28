@@ -1,4 +1,7 @@
+from typing import Dict, List
+
 from django.test import TestCase, tag
+from rest_framework.authtoken.models import Token
 
 from core.models import User, Profile
 from core.forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm, ProfileEditForm
@@ -96,14 +99,21 @@ class CoreUserFormTestCase(TestCase):
         usf = CoreUserCreationForm(data=self.data)
         self.assertListEqual(usf.errors.get('email', []), ['Enter a valid email address.'])
 
+    @tag('core-fu-fs')
     def test_form_saving(self):
         usf = CoreUserCreationForm(data=self.data)
 
         if usf.is_valid():
-            user = usf.save()
+            user_data: Dict = usf.save()
+            self.assertListEqual(list(user_data.keys()), ['new_user', 'token_key'])
+            user = user_data.get('new_user')
+            token = user_data.get('token_key')
             users = User.objects.filter(username=self.data.get('username'))
+            tokens: List[Token] = list(Token.objects.filter(user=users[0]))
             self.assertEqual(users.count(), 1)
+            self.assertEqual(len(tokens), 1)
             self.assertEqual(user.pk, users[0].pk)
+            self.assertEqual(token, tokens[0].key)
 
     @tag('core-fu-uef')
     def test_form_edit_form(self):
