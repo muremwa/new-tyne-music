@@ -158,9 +158,15 @@ class CoreUserEditForm(CoreUserCreationForm):
 class ProfileCreateForm(SmartForm):
     """If the form is valid returns the new created profile"""
     profile_name = forms.CharField(required=True, help_text='A name for your profile')
-    is_minor = forms.BooleanField(required=False, initial=False, help_text='Is the profile for a child')
+    is_minor = forms.BooleanField(required=False, help_text='Is the profile for a child')
     profile_image = forms.ImageField(required=False, help_text='An image for your profile')
     account = forms.ModelChoiceField(queryset=User.objects.all())
+    key_maps = {
+        'profile_name': 'name',
+        'profile_image': 'avi',
+        'is_minor': 'minor',
+        'account': 'user'
+    }
 
     def clean(self):
         data: Dict = self.cleaned_data
@@ -205,13 +211,7 @@ class ProfileEditForm(ProfileCreateForm):
         super().__init__(*args, **kwargs)
 
     def save(self):
-        if self.has_changed():
-            key_maps = {
-                'profile_name': 'name',
-                'profile_image': 'avi',
-                'is_minor': 'minor'
-            }
-            for field in self.changed_data:
-                a_name = key_maps.get(field)
-                setattr(self.profile, a_name, self.cleaned_data.get(field))
-            self.profile.save()
+        for field in self.cleaned_data.keys():
+            a_name = self.key_maps.get(field)
+            setattr(self.profile, a_name, self.cleaned_data.get(field))
+        self.profile.save()

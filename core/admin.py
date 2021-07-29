@@ -8,7 +8,7 @@ class ProfileInline(admin.StackedInline):
     can_delete = False
     max_num = 6
     show_change_link = True
-    readonly_fields = ['main']
+    readonly_fields = ['main', 'user']
 
     def get_max_num(self, request, obj=None, **kwargs):
         return 1 if obj.tier == 'S' else 6
@@ -66,7 +66,7 @@ class ProfileModelAdmin(admin.ModelAdmin):
             }
         )
     ]
-    readonly_fields = ['main']
+    readonly_fields = ['main', 'user']
     search_fields = ('name',)
     list_display = ('name', 'main', 'email', 'tier')
 
