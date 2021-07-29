@@ -4,6 +4,8 @@ def is_string_true_or_false(item: str) -> bool:
     if type(item) == str:
         if item.isdigit():
             item = int(item)
+        if item in ['false', 'False']:
+            item = 0
         res = bool(item)
     else:
         raise ValueError('Only str allowed')
