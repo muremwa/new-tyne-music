@@ -5,8 +5,8 @@ from rest_framework.authtoken.models import Token
 
 from core.views import CREATE_USER, EDIT_USER, GET_USER
 from core.models import User
-from core.serializers import UserSerializer
-from core.forms import CoreUserCreationForm, CoreUserEditForm
+from core.serializers import UserSerializer, ProfileSerializer
+from core.forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm
 
 
 # noinspection PyPep8Naming
@@ -267,3 +267,77 @@ class LoginTestCase(APITestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.json(), self.def_resp)
+
+
+@tag('core-v-pc')
+class ProfileActionTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='login_user',
+            email='email@test.com',
+            password='pass@123'
+        )
+        self.client = APIClient()
+        self.create_url = reverse('core:profile-create')
+
+    def test_create_get(self):
+        # user not authenticated
+        resp = {"detail": "Authentication credentials were not provided."}
+        response = self.client.get(self.create_url)
+        self.assertEqual(response.status_code, 401)
+        self.assertDictEqual(response.json(), resp)
+
+        self.client.force_login(user=self.user)
+
+        # user authenticated
+        _fields = ProfileCreateForm().fields_info()
+        _fields.pop('account')
+        resp = {
+            'url action': 'Create profiles',
+            'fields': _fields
+        }
+        response = self.client.get(self.create_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(resp, response.json())
+
+    def test_create_post(self):
+        # user not authenticated
+        resp = {"detail": "Authentication credentials were not provided."}
+        response = self.client.post(self.create_url)
+        self.assertEqual(response.status_code, 401)
+        self.assertDictEqual(response.json(), resp)
+
+        self.client.force_login(user=self.user)
+
+        # authenticated user - account limit reached
+        data = {
+            'profile_name': 'jimmy',
+            'account': self.user.pk
+        }
+        form = ProfileCreateForm(data)
+        errors = form.errors
+        data.pop('account')
+
+        resp = {
+            'url action': 'Create profiles',
+            'success': False,
+            'errors': errors
+        }
+        response = self.client.post(self.create_url, data=data)
+        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.json(), resp)
+
+        # authenticated user - correct details
+        self.user.tier = 'F'
+        self.user.save()
+        data = {
+            'profile_name': 'jimmy',
+        }
+        response = self.client.post(self.create_url, data=data)
+        resp = {
+            'url action': 'Create profiles',
+            'success': True,
+            'profile': ProfileSerializer(self.user.profile_set.get(pk=2)).data
+        }
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), resp)

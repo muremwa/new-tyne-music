@@ -6,9 +6,10 @@ from django.shortcuts import reverse
 from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
 
-from .forms import CoreUserCreationForm, CoreUserEditForm
-from .serializers import UserSerializer
+from .forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm
+from .serializers import UserSerializer, ProfileSerializer
 from .models import User
+from tyne_utils.funcs import is_string_true_or_false
 
 
 EDIT_USER = 'edit'
@@ -19,6 +20,31 @@ GET_USER = 'get'
 @api_view(['GET', 'POST'])
 @permission_classes([permissions.AllowAny])
 def account_action(request, action):
+    """
+        Account actions
+        1. GET_USER user \n
+            - url -> /core/accounts/get?username=username
+            - Fetches the user with the username 'username's details
+            - If you're authenticated provides details about profiles
+
+        2. CREATE_USER \n
+            -url -> /core/accounts/create/
+            - Creates a new user and returns their details
+            - Requires {
+                            'username': 'STRING',
+                            'email': 'EMAIL',
+                            'password': 'STRING',
+                            'password_2': 'STRING'
+                        }
+
+        2. EDIT_USER \n
+            -url -> /core/accounts/create/
+            - Creates a new user and returns their details
+            - Requires {
+                            'username': 'STRING',
+                            'email': 'EMAIL',
+                        } -> ANY or BOTH of the two.
+    """
     response = {
         'url': 'account action'
     }
@@ -134,6 +160,11 @@ def account_action(request, action):
 @api_view(['GET', 'POST'])
 @permission_classes([])
 def login(request):
+    """
+        LOGIN_URL -> /core/login/
+        Username or email and password
+        returns user details including token
+    """
     response = {
         'url': 'user authentication'
     }
@@ -179,3 +210,47 @@ def login(request):
         response.update(_post_resp)
 
     return Response(response, status=resp_status)
+
+
+@api_view(['GET', 'POST'])
+def profile_create(request):
+    """
+        Create a new user profile for the authenticated user-> core/profile/create/
+        ['profile_name', 'is_minor', 'profile_image']
+    """
+    response = {
+        'url action': 'Create profiles'
+    }
+    response_status = status.HTTP_200_OK
+
+    if request.method == 'GET':
+        fields = ProfileCreateForm().fields_info()
+        fields.pop('account')
+        response.update({
+            'fields': fields
+        })
+
+    elif request.method == 'POST':
+        response['success'] = False
+        response_status = status.HTTP_202_ACCEPTED
+        _is_minor = request.POST.get('is_minor')
+        data_ = {
+            'profile_name': request.POST.get('profile_name'),
+            'profile_image': request.FILES.get('profile_image'),
+            'is_minor': is_string_true_or_false(_is_minor) if _is_minor is not None else _is_minor,
+            'account': request.user.pk
+        }
+        data_ = {key: data_[key] for key in data_ if data_[key] is not None}
+        form = ProfileCreateForm(data=data_)
+
+        if form.is_valid():
+            new_profile = form.save()
+            response.update({
+                'success': True,
+                'profile': ProfileSerializer(new_profile).data
+            })
+            response_status = status.HTTP_201_CREATED
+        else:
+            response['errors'] = form.errors
+
+    return Response(response, status=response_status)

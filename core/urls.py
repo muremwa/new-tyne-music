@@ -11,4 +11,7 @@ urlpatterns = [
 
     # login/
     path('login/', views.login, name='login'),
+
+    # profile/create/
+    path('profile/create/', views.profile_create, name='profile-create')
 ]
