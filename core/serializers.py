@@ -1,12 +1,14 @@
-from rest_framework.serializers import ModelSerializer, BooleanField, CharField
+from rest_framework.serializers import ModelSerializer, BooleanField, CharField, IntegerField
 
 from .models import User, Profile
 
 
 class ProfileSerializer(ModelSerializer):
+    id = IntegerField(source='pk')
+
     class Meta:
         model = Profile
-        fields = ('name', 'minor', 'main', 'avi', 'tier')
+        fields = ('id', 'name', 'minor', 'main', 'avi', 'tier')
 
 
 class UserSerializer(ModelSerializer):

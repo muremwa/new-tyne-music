@@ -26,6 +26,7 @@ class SerializersTestCase(TestCase):
 
     def test_profile_serializer_data(self):
         test_data = {
+            'id': 2,
             'name': 'profile2',
             'minor': False,
             'main': False,
@@ -44,6 +45,7 @@ class SerializersTestCase(TestCase):
             'profile_full': False,
             'profiles': [
                 {
+                    'id': 1,
                     'name': 'stest',
                     'minor': False,
                     'main': True,
@@ -51,6 +53,7 @@ class SerializersTestCase(TestCase):
                     'tier': FAMILY
                 },
                 {
+                    'id': 2,
                     'name': 'profile2',
                     'minor': False,
                     'main': False,
