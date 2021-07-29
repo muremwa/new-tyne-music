@@ -4,9 +4,9 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 
 from core.views import CREATE_USER, EDIT_USER, GET_USER
-from core.models import User
+from core.models import User, Profile
 from core.serializers import UserSerializer, ProfileSerializer
-from core.forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm
+from core.forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm, ProfileEditForm
 
 
 # noinspection PyPep8Naming
@@ -269,7 +269,7 @@ class LoginTestCase(APITestCase):
         self.assertDictEqual(response.json(), self.def_resp)
 
 
-@tag('core-v-pc')
+@tag('core-v-p')
 class ProfileActionTestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -279,7 +279,9 @@ class ProfileActionTestCase(APITestCase):
         )
         self.client = APIClient()
         self.create_url = reverse('core:profile-create')
+        self.edit_url = reverse('core:profile-edit', kwargs={'profile_pk': self.user.main_profile.pk})
 
+    @tag('core-v-p-cg')
     def test_create_get(self):
         # user not authenticated
         resp = {"detail": "Authentication credentials were not provided."}
@@ -341,3 +343,91 @@ class ProfileActionTestCase(APITestCase):
         }
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), resp)
+
+    @tag('core-v-p-eg')
+    def test_profile_edit_get(self):
+        # user not authenticated
+        resp = {"detail": "Authentication credentials were not provided."}
+        response = self.client.get(self.edit_url)
+        self.assertEqual(response.status_code, 401)
+        self.assertDictEqual(response.json(), resp)
+
+        self.client.force_login(user=self.user)
+
+        # user authenticated
+        _fields = ProfileEditForm(profile=None).fields_info()
+        resp = {
+            'url action': f'Profile id \'{self.user.main_profile.pk}\' edit',
+            'fields': _fields
+        }
+        response = self.client.get(self.edit_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(resp, response.json())
+
+    @tag('core-v-p-ep')
+    def test_profile_post(self):
+        # without being authenticated
+        response = self.client.post(self.edit_url, data={
+            'profile_name': 'test_profile_name'
+        })
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {"detail": "Authentication credentials were not provided."})
+
+        # authenticate user
+        self.client.force_login(self.user)
+
+        # profile does not belong to you
+        p = Profile(
+            name='jus_name',
+            user=User.objects.create_user(
+                username='e',
+                email='e@e.com',
+                password='pass@123',
+                tier='F'
+            )
+        )
+        p.save()
+
+        response = self.client.post(reverse('core:profile-edit', kwargs={'profile_pk': p.pk}))
+        self.assertEqual(response.status_code, 404)
+
+        # authenticated user correct details
+        profile = self.user.main_profile
+        data = {
+            'profile_name': 'new_profile_name',
+            'is_minor': True
+        }
+        def_resp = {
+            'url action': f'Profile id \'{self.user.main_profile.pk}\' edit',
+            'success': True,
+            'edited': data
+        }
+        keys_ = ProfileEditForm(profile=None).key_maps
+
+        # both details
+        response = self.client.post(self.edit_url, data=data)
+        profile.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(def_resp, response.json())
+        for key in data.keys():
+            self.assertEqual(getattr(profile, keys_[key]), data.get(key))
+        def_resp.pop('edited')
+
+        # each detail
+        data = {
+            'profile_name': 'ind_name',
+            'is_minor': False
+        }
+        for key in data.keys():
+            datum = {
+                key: data.get(key)
+            }
+            response = self.client.post(self.edit_url, data=datum)
+            def_resp.update({
+                'edited': datum
+            })
+            profile.refresh_from_db()
+            self.assertEqual(response.status_code, 200)
+            self.assertDictEqual(def_resp, response.json())
+            self.assertEqual(getattr(profile, keys_[key]), datum[key])
+            def_resp.pop('edited')

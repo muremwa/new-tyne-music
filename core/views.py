@@ -2,13 +2,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework import status
-from django.shortcuts import reverse
+from django.shortcuts import reverse, get_object_or_404
 from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 
-from .forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm
+from .forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm, ProfileEditForm
 from .serializers import UserSerializer, ProfileSerializer
-from .models import User
+from .models import User, Profile
 from tyne_utils.funcs import is_string_true_or_false
 
 
@@ -98,7 +99,7 @@ def account_action(request, action):
         elif request.method == 'POST':
             # create a user
             if action == CREATE_USER:
-                form = CoreUserCreationForm(data=request.POST)
+                form = CoreUserCreationForm(data=request.data)
 
                 if form.is_valid():
                     user_data = form.save()
@@ -126,8 +127,8 @@ def account_action(request, action):
                     }
                     resp_status = status.HTTP_400_BAD_REQUEST
                     data = {
-                        'username': request.POST.get('username'),
-                        'email': request.POST.get('email')
+                        'username': request.data.get('username'),
+                        'email': request.data.get('email')
                     }
                     data = {key: data[key] for key in data if data[key]}
 
@@ -184,18 +185,18 @@ def login(request):
         resp_status = status.HTTP_400_BAD_REQUEST
         authenticated_user = None
 
-        if request.POST.get('password'):
-            if request.POST.get('email'):
+        if request.data.get('password'):
+            if request.data.get('email'):
                 try:
-                    _user = User.objects.get(email=request.POST.get('email'))
-                    authenticated_user = authenticate(username=_user.username, password=request.POST.get('password'))
+                    _user = User.objects.get(email=request.data.get('email'))
+                    authenticated_user = authenticate(username=_user.username, password=request.data.get('password'))
                 except ObjectDoesNotExist:
                     pass
 
-            elif request.POST.get('username'):
+            elif request.data.get('username'):
                 authenticated_user = authenticate(
-                    username=request.POST.get('username'),
-                    password=request.POST.get('password')
+                    username=request.data.get('username'),
+                    password=request.data.get('password')
                 )
 
         if authenticated_user:
@@ -226,18 +227,20 @@ def profile_create(request):
     if request.method == 'GET':
         fields = ProfileCreateForm().fields_info()
         fields.pop('account')
-        response.update({
-            'fields': fields
-        })
+        response['fields'] = fields
 
     elif request.method == 'POST':
         response['success'] = False
         response_status = status.HTTP_202_ACCEPTED
-        _is_minor = request.POST.get('is_minor')
+        _is_minor = request.data.get('is_minor')
+
+        if type(_is_minor) == str:
+            _is_minor = is_string_true_or_false(_is_minor)
+
         data_ = {
-            'profile_name': request.POST.get('profile_name'),
-            'profile_image': request.FILES.get('profile_image'),
-            'is_minor': is_string_true_or_false(_is_minor) if _is_minor is not None else _is_minor,
+            'profile_name': request.data.get('profile_name'),
+            'profile_image': request.data.get('profile_image'),
+            'is_minor': _is_minor,
             'account': request.user.pk
         }
         data_ = {key: data_[key] for key in data_ if data_[key] is not None}
@@ -252,5 +255,50 @@ def profile_create(request):
             response_status = status.HTTP_201_CREATED
         else:
             response['errors'] = form.errors
+
+    return Response(response, status=response_status)
+
+
+@api_view(['GET', 'POST'])
+def profile_edit(request, profile_pk):
+    """
+        Edits an existing profile for the authenticated user-> core/profile/edit/3/
+        ['profile_name', 'is_minor', 'profile_image']
+    """
+    response = {'url action': f'Profile id \'{profile_pk}\' edit'}
+    response_status = status.HTTP_200_OK
+    profile = get_object_or_404(Profile, pk=profile_pk)
+
+    if request.user != profile.user:
+        raise Http404('Profile not found')
+
+    if request.method == 'GET':
+        response['fields'] = ProfileEditForm(profile=None).fields_info()
+
+    elif request.method == 'POST':
+        _is_minor = request.data.get('is_minor')
+        if type(_is_minor) == str:
+            _is_minor = is_string_true_or_false(_is_minor)
+
+        data_ = {
+            'profile_name': request.data.get('profile_name'),
+            'profile_image': request.data.get('profile_image'),
+            'is_minor': _is_minor
+        }
+        data_ = {key: data_[key] for key in data_ if data_[key] is not None}
+        form = ProfileEditForm(data=data_, profile=profile)
+
+        if form.is_valid():
+            form.save()
+            response.update({
+                'success': True,
+                'edited': data_
+            })
+
+        else:
+            response.update({
+                'success': False,
+                'errors': form.errors
+            })
 
     return Response(response, status=response_status)

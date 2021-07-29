@@ -13,5 +13,8 @@ urlpatterns = [
     path('login/', views.login, name='login'),
 
     # profile/create/
-    path('profile/create/', views.profile_create, name='profile-create')
+    path('profile/create/', views.profile_create, name='profile-create'),
+
+    # profile/edit/1/
+    path('profile/edit/<int:profile_pk>/', views.profile_edit, name='profile-edit'),
 ]
