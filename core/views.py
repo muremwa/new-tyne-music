@@ -302,3 +302,26 @@ def profile_edit(request, profile_pk):
             })
 
     return Response(response, status=response_status)
+
+
+@api_view(['DELETE', 'POST'])
+def profile_delete(request, profile_pk):
+    """Delete the profile - 1 -> /core/profile/delete/1/"""
+    profile = get_object_or_404(Profile, pk=profile_pk)
+    response = {
+        'success': False
+    }
+    response_status = status.HTTP_200_OK
+
+    if request.user != profile.user:
+        raise Http404('Profile not found')
+
+    if profile.main and request.user.main_profile == profile:
+        response['error'] = 'Cannot delete main profile'
+        response_status = status.HTTP_403_FORBIDDEN
+
+    else:
+        profile.delete()
+        response['success'] = True
+
+    return Response(response, status=response_status)

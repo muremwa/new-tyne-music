@@ -17,4 +17,7 @@ urlpatterns = [
 
     # profile/edit/1/
     path('profile/edit/<int:profile_pk>/', views.profile_edit, name='profile-edit'),
+
+    # profile/delete/1/
+    path('profile/delete/<int:profile_pk>/', views.profile_delete, name='profile-delete'),
 ]

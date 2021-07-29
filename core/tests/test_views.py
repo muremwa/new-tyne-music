@@ -431,3 +431,67 @@ class ProfileActionTestCase(APITestCase):
             self.assertDictEqual(def_resp, response.json())
             self.assertEqual(getattr(profile, keys_[key]), datum[key])
             def_resp.pop('edited')
+
+    @tag('core-v-p-d')
+    def test_profile_delete(self):
+        url = reverse('core:profile-delete', kwargs={'profile_pk': self.user.main_profile.pk})
+
+        # not authenticated
+        self.assertEqual(self.client.post(url).status_code, 401)
+        self.assertEqual(self.client.delete(url).status_code, 401)
+
+        self.client.force_login(self.user)
+
+        # get
+        self.assertEqual(self.client.get(url).status_code, 405)
+
+        # main profile
+        def_resp = {'error': 'Cannot delete main profile', 'success': False}
+        resp_1 = self.client.post(url)
+        resp_2 = self.client.delete(url)
+        self.assertEqual(resp_1.status_code, 403)
+        self.assertEqual(resp_1.json(), def_resp)
+        self.assertEqual(resp_2.status_code, 403)
+        self.assertEqual(resp_2.json(), def_resp)
+
+        # not user's profile
+        x_profile = Profile(
+            name='name',
+            user=User.objects.create_user(
+                username='name_x',
+                email='email@emailnew.com',
+                password='pass@123',
+                tier='F'
+            )
+        )
+        x_profile.save()
+        url = reverse('core:profile-delete', kwargs={'profile_pk': x_profile.pk})
+        self.assertEqual(self.client.post(url).status_code, 404)
+        self.assertEqual(self.client.delete(url).status_code, 404)
+
+        # normal profile
+        self.user.tier = 'F'
+        self.user.save()
+        def_resp = {'success': True}
+
+        new_profile = Profile(
+            name='new_profile',
+            user=self.user
+        )
+        new_profile.save()
+        url = reverse('core:profile-delete', kwargs={'profile_pk': new_profile.pk})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), def_resp)
+        self.assertEqual(Profile.objects.filter(pk=new_profile.pk).count(), 0)
+
+        new_profile = Profile(
+            name='new_profile',
+            user=self.user
+        )
+        new_profile.save()
+        url = reverse('core:profile-delete', kwargs={'profile_pk': new_profile.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), def_resp)
+        self.assertEqual(Profile.objects.filter(pk=new_profile.pk).count(), 0)
