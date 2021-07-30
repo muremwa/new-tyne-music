@@ -1,6 +1,6 @@
 from django.test import TestCase, tag
 
-from music.models import Artist, Creator
+from music.models import Artist, Creator, Genre
 from core.models import User
 
 
@@ -70,3 +70,17 @@ class CreatorTestCase(TestCase):
 
     def test_string_names(self):
         self.assertEqual('<TyneMusicContentCreator: \'Tyne Music Pop\'>', str(self.creator))
+
+
+@tag('music-m-genre')
+class GenreTestCase(TestCase):
+    def setUp(self):
+        self.genre = Genre.objects.create(
+            title='Pop'
+        )
+
+    def test_genre_exists(self):
+        self.assertEqual(Genre.objects.count(), 1)
+
+    def test_string_name(self):
+        self.assertEqual('<Genre: \'Pop\'>', str(self.genre))

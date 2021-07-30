@@ -10,6 +10,10 @@ def upload_creator_image(instance: 'Creator', filename: str):
     return f'dy/music/creators/{instance.pk}/{filename}'
 
 
+def upload_genre_image(instance: 'Genre', filename: str):
+    return f'dy/music/creators/{instance.pk}/{filename}'
+
+
 class Artist(models.Model):
     name = models.CharField(max_length=100)
     is_group = models.BooleanField(default=False)
@@ -43,3 +47,14 @@ class Creator(models.Model):
 
     def __str__(self):
         return f'<TyneMusicContentCreator: \'{self.name}\'>'
+
+
+class Genre(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    avi = models.ImageField(default='/defaults/genre.png', upload_to=upload_genre_image)
+    cover = models.ImageField(default='/defaults/genre_wide.png', upload_to=upload_genre_image)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f'<Genre: \'{self.title}\'>'
