@@ -31,6 +31,7 @@ INSTALLED_APPS = [
 
     'core.apps.CoreConfig',
     'staff.apps.StaffConfig',
+    'music.apps.MusicConfig',
 ]
 
 MIDDLEWARE = [
