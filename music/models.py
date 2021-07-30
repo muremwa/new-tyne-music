@@ -48,6 +48,9 @@ class Creator(models.Model):
     def __str__(self):
         return f'<TyneMusicContentCreator: \'{self.name}\'>'
 
+    def __repr__(self):
+        return self.__str__()
+
 
 class Genre(models.Model):
     title = models.CharField(max_length=100)
@@ -58,3 +61,6 @@ class Genre(models.Model):
 
     def __str__(self):
         return f'<Genre: \'{self.title}\'>'
+
+    def __repr__(self):
+        return self.__str__()
