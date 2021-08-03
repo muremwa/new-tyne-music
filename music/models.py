@@ -142,10 +142,10 @@ class Song(models.Model):
 
     @property
     def length_string(self):
-        l = '0:00'
+        length = '0:00'
         if self.pk and self.length:
-            l = f'{self.length // 60}:{self.length % 60}'
-        return l
+            length = f'{self.length // 60}:{self.length % 60}'
+        return length
 
     def add_additional_artist(self, artist):
         if self.pk and type(artist) == Artist and artist not in self.album.artists.all():
