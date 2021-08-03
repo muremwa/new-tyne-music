@@ -2,7 +2,7 @@ from typing import List
 
 from django.contrib import admin
 
-from .models import Artist, Creator, Genre, Album, Song, Playlist
+from .models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSection
 
 
 @admin.register(Artist)
@@ -41,12 +41,35 @@ class Artist(admin.ModelAdmin):
         return fieldsets
 
 
+@admin.register(CreatorSection)
+class CreatorSectionModelAdmin(admin.ModelAdmin):
+    list_display = ['name', 'creator']
+    fieldsets = [
+        (
+            None, {
+                'fields': ['name', 'creator']
+            }
+        ),
+        (
+            'Items', {
+                'fields': ['artists', 'albums', 'playlists']
+            }
+        )
+    ]
+
+
+class CreatorSectionInline(admin.StackedInline):
+    model = CreatorSection
+    extra = 1
+    show_change_link = True
+
+
 @admin.register(Creator)
 class CreatorModelAdmin(admin.ModelAdmin):
     fieldsets = [
         (
             None, {
-                'fields': ['name']
+                'fields': ['name', 'genres']
             }
         ),
         (
@@ -60,6 +83,7 @@ class CreatorModelAdmin(admin.ModelAdmin):
             }
         )
     ]
+    inlines = (CreatorSectionInline,)
     list_display = ['name']
     readonly_fields = ['users']
 

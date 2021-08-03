@@ -2,7 +2,7 @@ from django.test import TestCase, tag, TransactionTestCase
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
-from music.models import Artist, Creator, Genre, Album, Song, Playlist
+from music.models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSection
 from core.models import User
 
 
@@ -317,3 +317,18 @@ class PlaylistTestCase(TestCase):
         )
         self.assertEqual(self.playlist_1.owner(), self.creator.name)
         self.assertEqual(self.playlist_2.owner(), 'pl')
+
+
+@tag('music-m-section')
+class CreatorSectionTestCase(TestCase):
+    def setUp(self):
+        self.creator = Creator.objects.create(
+            name='Tyne Music Pop'
+        )
+        self.section = CreatorSection.objects.create(
+            name='Favourite Artits',
+            creator=self.creator
+        )
+
+    def test_string_name(self):
+        self.assertEqual(str(self.section), f'<CreatorSection from \'{self.creator.name}\'>')

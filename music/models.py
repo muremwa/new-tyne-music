@@ -56,25 +56,6 @@ class Artist(models.Model):
         return f'<{_type_} \'{self.name}\'>'
 
 
-class Creator(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField(null=True, blank=True)
-    avi = models.ImageField(default='/defaults/creator.png', upload_to=upload_creator_image)
-    cover = models.ImageField(default='/defaults/creator_wide.png', upload_to=upload_creator_image)
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL)
-    objects = models.Manager()
-
-    def add_creator_user(self, user):
-        if hasattr(user, 'is_staff') and user.is_staff:
-            self.users.add(user)
-
-    def __str__(self):
-        return f'<TyneMusicContentCreator: \'{self.name}\'>'
-
-    def __repr__(self):
-        return self.__str__()
-
-
 class Genre(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
@@ -84,6 +65,26 @@ class Genre(models.Model):
 
     def __str__(self):
         return f'<Genre: \'{self.title}\'>'
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Creator(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    avi = models.ImageField(default='/defaults/creator.png', upload_to=upload_creator_image)
+    cover = models.ImageField(default='/defaults/creator_wide.png', upload_to=upload_creator_image)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    genres = models.ManyToManyField(Genre, blank=True)
+    objects = models.Manager()
+
+    def add_creator_user(self, user):
+        if hasattr(user, 'is_staff') and user.is_staff:
+            self.users.add(user)
+
+    def __str__(self):
+        return f'<TyneMusicContentCreator: \'{self.name}\'>'
 
     def __repr__(self):
         return self.__str__()
@@ -275,3 +276,15 @@ class Playlist(models.Model):
             name = 'CreatorPlaylist'
 
         return f'<{name} \'{self.title}\' by \'{self.owner()}\'>'
+
+
+class CreatorSection(models.Model):
+    name = models.CharField(max_length=2000)
+    creator = models.ForeignKey(Creator, on_delete=models.CASCADE)
+    artists = models.ManyToManyField(Artist, blank=True)
+    albums = models.ManyToManyField(Album, blank=True)
+    playlists = models.ManyToManyField(Playlist, blank=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f'<CreatorSection from \'{self.creator.name}\'>'
