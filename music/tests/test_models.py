@@ -1,7 +1,8 @@
-from django.test import TestCase, tag
-
-from music.models import Artist, Creator, Genre, Album
+from django.test import TestCase, tag, TransactionTestCase
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
+
+from music.models import Artist, Creator, Genre, Album, Song
 from core.models import User
 
 
@@ -137,7 +138,6 @@ class AlbumTestCase(TestCase):
 
         self.albums = [self.album_1, self.album_2, self.album_3]
 
-
     def test_other_versions(self):
         for album in self.albums:
             self.assertEqual(album.other_versions.count(), 2)
@@ -163,3 +163,77 @@ class AlbumTestCase(TestCase):
         self.album_5.save()
         self.album_5.refresh_from_db()
         self.assertEqual(self.album_5, Album.objects.get(pk=self.album_5.pk))
+
+    def test_album_artists(self):
+        self.assertListEqual(list(self.album_1.artists.all()), [self.artist_1])
+        self.album_1.artists.add(self.artist_2)
+        self.assertEqual(self.album_1.artists.count(), 2)
+        self.assertListEqual(list(self.album_1.artists.all()), [self.artist_1, self.artist_2])
+
+
+@tag('music-m-song')
+class SongTestCase(TransactionTestCase):
+    def setUp(self):
+        self.genre: Genre = Genre.objects.create(
+            title='Hip-Hop'
+        )
+        self.artist_1: Artist = Artist.objects.create(
+            name='Quavo',
+        )
+        self.artist_2: Artist = Artist.objects.create(
+            name='Takeoff'
+        )
+        self.album_1: Album = Album.objects.create(
+            title='WAX',
+            genre=self.genre,
+            date_of_release='2021-05-05'
+        )
+        self.album_1.artists.add(self.artist_1)
+        self.song_1: Song = Song.objects.create(
+            title='Timmy',
+            track_no=1,
+            album=self.album_1,
+            genre=self.genre,
+            length=285
+        )
+        self.song_1.additional_artists.add(self.artist_2)
+
+    def test_artists_auto_added(self):
+        self.assertEqual(self.song_1.additional_artists.count(), 1)
+        self.assertEqual(
+            list(self.song_1.additional_artists.all()) + (list(self.song_1.album.artists.all())),
+            [self.artist_2, self.artist_1]
+        )
+
+    def test_string_name(self):
+        self.assertEqual(str(self.song_1), f'<Song: \'{self.song_1.title}\' from \'{self.song_1.album.title}\'>')
+
+    def test_song_number_not_repeated(self):
+        song = Song(
+            title='Pig',
+            track_no=1,
+            album=self.album_1,
+            genre=self.genre,
+            length=285
+        )
+        with self.assertRaisesRegex(IntegrityError, 'UNIQUE constraint failed'):
+            song.save()
+
+        song.track_no = 2
+        song.save()
+        self.assertEqual(self.album_1.song_set.count(), 2)
+        self.assertListEqual(list(self.album_1.song_set.all()), [self.song_1, song])
+
+    def test_song_additional_artist(self):
+        song = Song.objects.create(
+            title='Pig',
+            track_no=3,
+            album=self.album_1,
+            genre=self.genre,
+            length=265
+        )
+        self.assertEqual(song.additional_artists.count(), 0)
+        song.add_additional_artist(self.artist_1)
+        self.assertEqual(song.additional_artists.count(), 0)
+        song.add_additional_artist(self.artist_2)
+        self.assertEqual(song.additional_artists.count(), 1)

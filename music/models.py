@@ -20,6 +20,10 @@ def upload_album_image(instance: 'Album', filename: str):
     return f'dy/music/albums/{instance.pk}/{filename}'
 
 
+def upload_song_file(instance: 'Song', filename: str):
+    return f'dy/music/albums/{instance.album.pk}/{instance.pk}/{filename}'
+
+
 class Artist(models.Model):
     name = models.CharField(max_length=100)
     is_group = models.BooleanField(default=False)
@@ -75,11 +79,11 @@ class Genre(models.Model):
 class Album(models.Model):
     title = models.CharField(max_length=200)
     notes = models.TextField(blank=True, null=True)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.PROTECT)
     date_of_release = models.DateField()
     is_single = models.BooleanField(default=False)
     is_ep = models.BooleanField(default=False)
-    cover = models.ImageField(default='/defaults/genre.png', upload_to=upload_album_image)
+    cover = models.ImageField(default='/defaults/album.png', upload_to=upload_album_image)
     likes = models.IntegerField(default=0, null=True, blank=True)
     copyright = models.TextField(blank=True, null=True)
     artists = models.ManyToManyField(Artist, blank=True)
@@ -118,3 +122,34 @@ class Album(models.Model):
             name = 'Single'
 
         return f'<{name}: \'{self.title}\'>'
+
+
+class Song(models.Model):
+    album = models.ForeignKey(Album, on_delete=models.CASCADE)
+    track_no = models.IntegerField()
+    title = models.CharField(max_length=200)
+    genre = models.ForeignKey(Genre, on_delete=models.PROTECT)
+    explicit = models.BooleanField(default=False)
+    length = models.IntegerField(default=0, help_text='Length of the song in seconds')
+    file = models.FileField(blank=True, null=True, upload_to=upload_song_file)
+    likes = models.IntegerField(default=0, blank=True, null=True)
+    additional_artists = models.ManyToManyField(Artist, blank=True)
+    streams = models.IntegerField(default=0, blank=True, null=True)
+    objects = models.Manager()
+
+    class Meta:
+        unique_together = (('album', 'track_no'),)
+
+    @property
+    def length_string(self):
+        l = '0:00'
+        if self.pk and self.length:
+            l = f'{self.length // 60}:{self.length % 60}'
+        return l
+
+    def add_additional_artist(self, artist):
+        if self.pk and type(artist) == Artist and artist not in self.album.artists.all():
+            self.additional_artists.add(artist)
+
+    def __str__(self):
+        return f'<Song: \'{self.title}\' from \'{self.album.title}\'>'

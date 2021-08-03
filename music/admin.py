@@ -2,7 +2,7 @@ from typing import List
 
 from django.contrib import admin
 
-from .models import Artist, Creator, Genre, Album
+from .models import Artist, Creator, Genre, Album, Song
 
 
 @admin.register(Artist)
@@ -69,10 +69,19 @@ class GenreModelAdmin(admin.ModelAdmin):
     list_display = ['title']
 
 
+class SongInline(admin.TabularInline):
+    model = Song
+    fields = ['track_no', 'title', 'genre', 'explicit']
+    extra = 1
+    show_change_link = True
+    ordering = ('track_no',)
+
+
 @admin.register(Album)
 class AlbumModelAdmin(admin.ModelAdmin):
     list_display = ['title', 'date_of_release', 'album_type', 'genre', 'likes']
     readonly_fields = ['other_versions', 'likes']
+    inlines = (SongInline,)
     fieldsets = [
         (
             None, {
@@ -98,4 +107,44 @@ class AlbumModelAdmin(admin.ModelAdmin):
             if request.GET.get('v') == '1':
                 r_fields = [f for f in r_fields if f != 'other_versions']
 
+        return r_fields
+
+
+@admin.register(Song)
+class SongModelAdmin(admin.ModelAdmin):
+    list_display = ['title', 'album', 'length_string', 'likes', 'streams']
+    readonly_fields = ['additional_artists', 'likes', 'streams']
+    fieldsets = [
+        (
+            None, {
+                'fields': ['track_no', 'title', 'album']
+            }
+        ),
+        (
+            'Relations', {
+                'fields': ['genre', 'additional_artists']
+            }
+        ),
+        (
+            'File', {
+                'fields': ['file', 'length', 'explicit']
+            }
+        ),
+        (
+            'Information', {
+                'fields': ['likes', 'streams']
+            }
+        )
+    ]
+
+    def get_readonly_fields(self, request, obj=None):
+        r_fields: List = super().get_readonly_fields(request, obj)
+
+        if 'change' in request.path.split('/') and 'album' not in r_fields:
+            r_fields.append('album')
+
+        for g, field in [['aa', 'additional_artists'], ['al', 'album']]:
+            if request.user.is_superuser and request.GET.get(g):
+                if request.GET.get(g) == '1':
+                    r_fields = [f for f in r_fields if f != field]
         return r_fields
