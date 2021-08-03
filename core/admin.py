@@ -11,11 +11,11 @@ class ProfileInline(admin.StackedInline):
     readonly_fields = ['main', 'user']
 
     def get_max_num(self, request, obj=None, **kwargs):
-        return 1 if obj.tier == 'S' else 6
+        return 1 if obj and obj.tier == 'S' else 6
 
     def get_extra(self, request, obj=None, **kwargs):
         extra = 0
-        if not obj.profile_full:
+        if obj and not obj.profile_full:
             extra = 6 - obj.profile_count
 
         return extra
