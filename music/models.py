@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as __
+from django.core.exceptions import ValidationError
 
 
 def upload_artist_image(instance: 'Artist', filename: str):
@@ -12,6 +14,10 @@ def upload_creator_image(instance: 'Creator', filename: str):
 
 def upload_genre_image(instance: 'Genre', filename: str):
     return f'dy/music/creators/{instance.pk}/{filename}'
+
+
+def upload_album_image(instance: 'Album', filename: str):
+    return f'dy/music/albums/{instance.pk}/{filename}'
 
 
 class Artist(models.Model):
@@ -64,3 +70,51 @@ class Genre(models.Model):
 
     def __repr__(self):
         return self.__str__()
+
+
+class Album(models.Model):
+    title = models.CharField(max_length=200)
+    notes = models.TextField(blank=True, null=True)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    date_of_release = models.DateField()
+    is_single = models.BooleanField(default=False)
+    is_ep = models.BooleanField(default=False)
+    cover = models.ImageField(default='/defaults/genre.png', upload_to=upload_album_image)
+    likes = models.IntegerField(default=0, null=True, blank=True)
+    copyright = models.TextField(blank=True, null=True)
+    artists = models.ManyToManyField(Artist, blank=True)
+    other_versions = models.ManyToManyField('self', blank=True)
+    objects = models.Manager()
+
+    @property
+    def album_type(self):
+        t = 'Long Play'
+        if self.is_ep:
+            t = 'Extended Play'
+        elif self.is_single:
+            t = 'Single'
+
+        return t
+
+    def add_sister_album(self, album):
+        if type(album) == type(self) and self.pk:
+            self.other_versions.add(album)
+
+    def clean(self):
+        if self.is_single and self.is_ep:
+            raise ValidationError(__('EP or Single not both'))
+
+        return super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        name = 'Album'
+        if self.is_ep:
+            name = 'EP'
+        elif self.is_single:
+            name = 'Single'
+
+        return f'<{name}: \'{self.title}\'>'

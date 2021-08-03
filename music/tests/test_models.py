@@ -1,6 +1,7 @@
 from django.test import TestCase, tag
 
-from music.models import Artist, Creator, Genre
+from music.models import Artist, Creator, Genre, Album
+from django.core.exceptions import ValidationError
 from core.models import User
 
 
@@ -84,3 +85,81 @@ class GenreTestCase(TestCase):
 
     def test_string_name(self):
         self.assertEqual('<Genre: \'Pop\'>', str(self.genre))
+
+
+@tag('music-m-album')
+class AlbumTestCase(TestCase):
+    def setUp(self):
+        self.genre: Genre = Genre.objects.create(
+            title='Hip-Hop'
+        )
+        self.artist_1: Artist = Artist.objects.create(
+            name='Quavo',
+        )
+        self.artist_2: Artist = Artist.objects.create(
+            name='Takeoff'
+        )
+        self.album_1: Album = Album.objects.create(
+            title='WAX',
+            genre=self.genre,
+            date_of_release='2021-05-05'
+        )
+        self.album_1.artists.add(self.artist_1)
+        self.album_2: Album = Album.objects.create(
+            title='WAX (Deluxe)',
+            genre=self.genre,
+            date_of_release='2021-05-12'
+        )
+        self.album_2.artists.add(self.artist_1)
+        self.album_2.add_sister_album(self.album_1)
+        self.album_3: Album = Album.objects.create(
+            title='WAX (Tyne Music Edition)',
+            genre=self.genre,
+            date_of_release='2021-05-12'
+        )
+        self.album_3.artists.add(self.artist_1)
+        self.album_3.add_sister_album(self.album_1)
+        self.album_3.add_sister_album(self.album_2)
+
+        self.album_4: Album = Album(
+            title='ENOCH',
+            genre=self.genre,
+            date_of_release='2021-05-21',
+            is_ep=True
+        )
+
+        self.album_5: Album = Album(
+            title='KEN',
+            genre=self.genre,
+            date_of_release='2021-05-21',
+            is_single=True
+        )
+
+        self.albums = [self.album_1, self.album_2, self.album_3]
+
+
+    def test_other_versions(self):
+        for album in self.albums:
+            self.assertEqual(album.other_versions.count(), 2)
+            self.assertListEqual(list(album.other_versions.all()), [al for al in self.albums if al is not album])
+
+    def test_string_name(self):
+        self.album_4.save()
+        self.assertEqual(str(self.album_4), f'<EP: \'{self.album_4.title}\'>')
+        self.album_5.save()
+        self.assertEqual(str(self.album_5), f'<Single: \'{self.album_5.title}\'>')
+        self.assertEqual(str(self.album_1), f'<Album: \'{self.album_1.title}\'>')
+
+    def test_saving_ep_and_single(self):
+        self.album_4.is_single = True
+        with self.assertRaisesRegex(ValidationError, 'EP or Single not both'):
+            self.album_4.save()
+
+        self.album_5.is_ep = True
+        with self.assertRaisesRegex(ValidationError, 'EP or Single not both'):
+            self.album_5.save()
+
+        self.album_5.is_ep = False
+        self.album_5.save()
+        self.album_5.refresh_from_db()
+        self.assertEqual(self.album_5, Album.objects.get(pk=self.album_5.pk))
