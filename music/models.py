@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as __
 from django.core.exceptions import ValidationError
 
+from core.models import Profile
+
 
 def upload_artist_image(instance: 'Artist', filename: str):
     return f'dy/music/artists/{instance.pk}/{filename}'
@@ -22,6 +24,17 @@ def upload_album_image(instance: 'Album', filename: str):
 
 def upload_song_file(instance: 'Song', filename: str):
     return f'dy/music/albums/{instance.album.pk}/{instance.pk}/{filename}'
+
+
+def upload_playlist_image(instance: 'Playlist', filename: str):
+    if instance.profile:
+        abs_path = f'users/{instance.profile.user.pk}/{instance.profile.pk}/{instance.pk}/{filename}'
+    elif instance.creator:
+        abs_path = f'creator/{instance.creator.pk}/{instance.pk}/{filename}'
+    else:
+        abs_path = f'blank/{instance.pk}/{filename}'
+
+    return f'dy/music/playlists/{abs_path}'
 
 
 class Artist(models.Model):
@@ -153,3 +166,112 @@ class Song(models.Model):
 
     def __str__(self):
         return f'<Song: \'{self.title}\' from \'{self.album.title}\'>'
+
+
+class Playlist(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    creator = models.ForeignKey(Creator, on_delete=models.CASCADE, blank=True, null=True)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True)
+    songs = models.ManyToManyField(Song, blank=True)
+    songs_order = models.TextField(
+        help_text='Comma separated digits indicating a pk for each song',
+        blank=True,
+        null=True,
+        default=''
+    )
+    likes = models.IntegerField(default=0)
+    cover = models.ImageField(default='/defaults/playlist.png', upload_to=upload_playlist_image)
+    cover_wide = models.ImageField(default='/defaults/playlist_wide.png', upload_to=upload_playlist_image)
+    timely_cover = models.ImageField(upload_to=upload_playlist_image, blank=True, null=True)
+    timely_cover_wide = models.ImageField(upload_to=upload_playlist_image, blank=True, null=True)
+    objects = models.Manager()
+
+    @property
+    def songs_order_pk(self):
+        order = []
+        if self.pk:
+            if self.songs_order:
+                order = self.songs_order.split(',')
+        return [int(pk) for pk in order if pk.isdigit()]
+
+    def og_order(self):
+        for song in self.songs.all():
+            self.set_song_order(song.pk, position=-1)
+
+    def verify_songs_and_songs_order(self):
+        verification = True
+        songs = [song.pk for song in self.songs.all()]
+        songs_order = self.songs_order_pk
+
+        if len(songs) != len(songs_order):
+            verification = False
+        else:
+            if sorted(songs) != sorted(songs_order):
+                verification = False
+
+        return verification
+
+    def songs_by_order(self):
+        order = self.songs_order_pk
+        all_songs = self.songs.all()
+        songs = list(range(len(order)))
+
+        if self.verify_songs_and_songs_order():
+            songs = [all_songs.get(pk=pk) for pk in order]
+
+        return songs
+
+    def set_song_order(self, pk: int, position: int):
+        if self.pk:
+            order_x = self.songs_order_pk
+
+            if position < 0:
+                position = len(order_x)
+
+            if position > len(order_x):
+                position = len(order_x)
+
+            if pk in order_x:
+                order_x.remove(pk)
+
+            order_x.insert(position, pk)
+            self.songs_order = ','.join([str(pk) for pk in order_x])
+            self.save()
+
+    def clean(self):
+        if self.creator and self.profile:
+            raise ValidationError(__('Playlist is by either Profile or Creator'))
+        return super().clean()
+
+    def add_song_to_playlist(self, song, position=-1):
+        if self.pk and type(song) == Song and type(position) == int:
+            if song not in self.songs.all():
+                self.songs.add(song)
+                self.set_song_order(song.pk, position)
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        return super().save()
+
+    def owner(self):
+        owner = ''
+
+        if self.profile:
+            owner = self.profile.name
+
+        if self.creator:
+            owner = self.creator.name
+
+        return owner
+
+    def __str__(self):
+        name = 'Playlist'
+
+        if self.profile:
+            name = 'UserPlaylist'
+
+        if self.creator:
+            name = 'CreatorPlaylist'
+
+        return f'<{name} \'{self.title}\' by \'{self.owner()}\'>'

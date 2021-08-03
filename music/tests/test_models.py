@@ -2,7 +2,7 @@ from django.test import TestCase, tag, TransactionTestCase
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
-from music.models import Artist, Creator, Genre, Album, Song
+from music.models import Artist, Creator, Genre, Album, Song, Playlist
 from core.models import User
 
 
@@ -237,3 +237,83 @@ class SongTestCase(TransactionTestCase):
         self.assertEqual(song.additional_artists.count(), 0)
         song.add_additional_artist(self.artist_2)
         self.assertEqual(song.additional_artists.count(), 1)
+
+
+@tag('music-m-playlist')
+class PlaylistTestCase(TestCase):
+    def setUp(self):
+        self.genre: Genre = Genre.objects.create(
+            title='Hip-Hop'
+        )
+        self.artist_1: Artist = Artist.objects.create(
+            name='Quavo',
+        )
+        self.artist_2: Artist = Artist.objects.create(
+            name='Takeoff'
+        )
+        self.album_1: Album = Album.objects.create(
+            title='WAX',
+            genre=self.genre,
+            date_of_release='2021-05-05'
+        )
+        self.album_1.artists.add(self.artist_1)
+        self.song_1: Song = Song.objects.create(
+            title='Timmy',
+            track_no=1,
+            album=self.album_1,
+            genre=self.genre,
+            length=285
+        )
+        self.song_1.additional_artists.add(self.artist_2)
+        self.song_2 = Song.objects.create(
+            title='Pig',
+            track_no=3,
+            album=self.album_1,
+            genre=self.genre,
+            length=265
+        )
+        self.creator = Creator.objects.create(
+            name='Tyne Music Pop'
+        )
+        self.playlist_1: Playlist = Playlist.objects.create(
+            title='All Time Pop',
+            creator=self.creator
+        )
+        self.playlist_2: Playlist = Playlist.objects.create(
+            title='Home work',
+            profile=User.objects.create_user(
+                username='pl',
+                email='pl@tyne.com',
+                password='pass@123'
+            ).main_profile
+        )
+
+    def test_playlist_only_user_or_creator(self):
+        self.playlist_2.creator = self.creator
+        with self.assertRaisesRegex(ValidationError, 'Playlist is by either Profile or Creator'):
+            self.playlist_2.save()
+
+    def test_playlist_songs(self):
+        self.playlist_1.add_song_to_playlist(self.song_1)
+        self.playlist_1.add_song_to_playlist(self.song_2)
+        self.playlist_1.add_song_to_playlist(self.song_2)
+        self.assertEqual(self.playlist_1.songs.count(), 2)
+        self.assertEqual(self.playlist_1.songs_order, f'{self.song_1.pk},{self.song_2.pk}')
+        self.assertListEqual(self.playlist_1.songs_order_pk, [self.song_1.pk, self.song_2.pk])
+        self.playlist_1.set_song_order(self.song_1.pk, 1)
+        self.assertListEqual(self.playlist_1.songs_order_pk, [self.song_2.pk, self.song_1.pk])
+        self.playlist_1.set_song_order(self.song_2.pk, 8)
+        self.assertListEqual(self.playlist_1.songs_order_pk, [self.song_1.pk, self.song_2.pk])
+        self.assertListEqual(self.playlist_1.songs_by_order(), [self.song_1, self.song_2])
+
+    def test_string_name(self):
+        self.assertEqual(
+            str(self.playlist_1),
+            f'<CreatorPlaylist \'{self.playlist_1.title}\' by \'{self.playlist_1.creator.name}\'>'
+        )
+        self.assertEqual(
+            str(self.playlist_2),
+            f'<UserPlaylist \'{self.playlist_2.title}\' by \'{self.playlist_2.profile.name}\'>'
+        )
+        self.assertEqual(self.playlist_1.owner(), self.creator.name)
+        self.assertEqual(self.playlist_2.owner(), 'pl')

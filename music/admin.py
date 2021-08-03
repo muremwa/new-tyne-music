@@ -2,7 +2,7 @@ from typing import List
 
 from django.contrib import admin
 
-from .models import Artist, Creator, Genre, Album, Song
+from .models import Artist, Creator, Genre, Album, Song, Playlist
 
 
 @admin.register(Artist)
@@ -147,4 +147,49 @@ class SongModelAdmin(admin.ModelAdmin):
             if request.user.is_superuser and request.GET.get(g):
                 if request.GET.get(g) == '1':
                     r_fields = [f for f in r_fields if f != field]
+        return r_fields
+
+
+@admin.register(Playlist)
+class PlaylistModelAdmin(admin.ModelAdmin):
+    list_display = ['title', 'owner', 'likes']
+    readonly_fields = ['creator', 'profile', 'songs', 'songs_order', 'likes']
+    actions = ['order_songs_og']
+    fieldsets = [
+        (
+            None, {
+                'fields': ['title', 'creator', 'profile']
+            }
+        ),
+        (
+            'Information', {
+                'fields': ['description', 'likes', 'songs', 'songs_order'],
+            }
+        ),
+        (
+            'Art', {
+                'fields': ['cover', 'cover_wide', 'timely_cover', 'timely_cover_wide']
+            }
+        )
+    ]
+
+    def order_songs_og(self, request, queryset: List[Playlist]):
+        m = 'Only superusers can OG playlists'
+        if request.user.is_superuser:
+            m = 'OG order achieved'
+            for playlist in queryset:
+                playlist.og_order()
+        self.message_user(request, message=m)
+
+    def get_readonly_fields(self, request, obj=None):
+        r_fields: List = super().get_readonly_fields(request, obj)
+
+        for g, field in [['s', 'songs'], ['c', 'creator'], ['p', 'profile'], ['so', 'songs_order']]:
+            if request.user.is_superuser and request.GET.get(g):
+                if request.GET.get(g) == '1':
+                    r_fields = [f for f in r_fields if f != field]
+
+        if 'add' in request.path.split('/'):
+            r_fields = ['likes']
+
         return r_fields
