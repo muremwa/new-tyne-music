@@ -14,6 +14,9 @@ urlpatterns = [
     # core/
     path('core/', include('core.urls')),
 
+    # music/
+    path('music/', include('music.urls')),
+
     # docs/
     path('docs/', include_docs_urls(title='Tyne Music API docs', description=docs_description))
 ]

@@ -139,8 +139,8 @@ class Library(Serializer):
         if hasattr(obj, 'playlist_set') and hasattr(obj, 'libraryalbum_set'):
             playlists = obj.playlist_set.order_by('-created')
             lib_albums = obj.libraryalbum_set.order_by('-added')
-            PLAYLIST = 'PL'
-            LIB_ALBUM = 'LB'
+            PLAYLIST = 'PLAYLIST'
+            LIB_ALBUM = 'LIBRARY_ALBUM'
 
             def get_item_timestamp(pk, type_):
                 stamp = datetime(1970, 1, 1, 0, 0, 0, 0, UTC)
@@ -153,10 +153,10 @@ class Library(Serializer):
                 return stamp
 
             # all items
-            items = chain(
+            items = list(chain(
                 PlaylistSerializer(playlists, many=True).data,
                 LibraryAlbumSerializer(lib_albums, many=True).data
-            )
+            ))
 
             # label each as playlist or album
             for item_ in items:
