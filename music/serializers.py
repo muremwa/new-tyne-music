@@ -2,6 +2,7 @@ from itertools import chain
 from datetime import datetime
 from pytz import UTC
 
+
 from rest_framework.serializers import ModelSerializer, SerializerMethodField, CharField, Serializer
 
 from .models import Artist, Genre, Album, Disc, Song, Playlist, Creator, CreatorSection, LibraryAlbum
@@ -151,14 +152,21 @@ class Library(Serializer):
 
                 return stamp
 
+            # all items
+            items = chain(
+                PlaylistSerializer(playlists, many=True).data,
+                LibraryAlbumSerializer(lib_albums, many=True).data
+            )
+
+            # label each as playlist or album
+            for item_ in items:
+                item_['item_type'] = PLAYLIST if item_.get('title') else LIB_ALBUM
+
             # arrange them by time stamp
             items = sorted(
-                chain(
-                    PlaylistSerializer(playlists, many=True).data,
-                    LibraryAlbumSerializer(lib_albums, many=True).data
-                ),
+                items,
                 reverse=True,
-                key=lambda item: get_item_timestamp(item.get('id'), PLAYLIST if item.get('title') else LIB_ALBUM)
+                key=lambda item: get_item_timestamp(item.get('id'), item.get('item_type'))
             )
 
             return items
