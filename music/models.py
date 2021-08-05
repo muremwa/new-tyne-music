@@ -51,9 +51,14 @@ class Artist(models.Model):
         if self.is_group and type(artist) == type(self) and not artist.is_group:
             self.group_members.add(artist)
 
+    def a_type(self):
+        return 'Group' if self.is_group else 'Artist'
+
+    def __repr__(self):
+        return f'<{self.a_type()} \'{self.name}\'>'
+
     def __str__(self):
-        _type_ = 'Group' if self.is_group else 'Artist'
-        return f'<{_type_} \'{self.name}\'>'
+        return f'{self.name} ({self.a_type()})'
 
 
 class Genre(models.Model):
@@ -64,10 +69,10 @@ class Genre(models.Model):
     objects = models.Manager()
 
     def __str__(self):
-        return f'<Genre: \'{self.title}\'>'
+        return f'{self.title} (genre)'
 
     def __repr__(self):
-        return self.__str__()
+        return f'<Genre: \'{self.title}\'>'
 
 
 class Creator(models.Model):
@@ -84,10 +89,10 @@ class Creator(models.Model):
             self.users.add(user)
 
     def __str__(self):
-        return f'<TyneMusicContentCreator: \'{self.name}\'>'
+        return f'{self.name} (curator)'
 
     def __repr__(self):
-        return self.__str__()
+        return f'<TyneMusicContentCreator: \'{self.name}\'>'
 
 
 class Album(models.Model):
@@ -114,6 +119,10 @@ class Album(models.Model):
 
         return t
 
+    @property
+    def year(self):
+        return self.date_of_release.year
+
     def add_sister_album(self, album):
         if type(album) == type(self) and self.pk:
             self.other_versions.add(album)
@@ -128,7 +137,7 @@ class Album(models.Model):
         self.clean()
         return super().save(*args, **kwargs)
 
-    def __str__(self):
+    def __repr__(self):
         name = 'Album'
         if self.is_ep:
             name = 'EP'
@@ -136,6 +145,9 @@ class Album(models.Model):
             name = 'Single'
 
         return f'<{name}: \'{self.title}\'>'
+
+    def __str__(self):
+        return f'{self.title} ({self.year})'
 
 
 class Song(models.Model):
@@ -165,8 +177,11 @@ class Song(models.Model):
         if self.pk and type(artist) == Artist and artist not in self.album.artists.all():
             self.additional_artists.add(artist)
 
-    def __str__(self):
+    def __repr__(self):
         return f'<Song: \'{self.title}\' from \'{self.album.title}\'>'
+
+    def __str__(self):
+        return f'\'{self.title}\' from the album \'{self.album}\''
 
 
 class Playlist(models.Model):
@@ -267,7 +282,7 @@ class Playlist(models.Model):
 
         return owner
 
-    def __str__(self):
+    def __repr__(self):
         name = 'Playlist'
 
         if self.profile:
@@ -277,6 +292,9 @@ class Playlist(models.Model):
             name = 'CreatorPlaylist'
 
         return f'<{name} \'{self.title}\' by \'{self.owner()}\'>'
+
+    def __str__(self):
+        return f'Playlist \'{self.title}\' by \'{self.owner()}\''
 
 
 class CreatorSection(models.Model):
@@ -288,6 +306,9 @@ class CreatorSection(models.Model):
     objects = models.Manager()
 
     def __str__(self):
+        return f'\'{self.name}\' section from \'{self.creator.name}\''
+
+    def __repr__(self):
         return f'<CreatorSection from \'{self.creator.name}\'>'
 
 

@@ -36,6 +36,12 @@ class Artist(admin.ModelAdmin):
     list_filter = ['is_group']
     list_display = ['name', 'is_group']
 
+    def get_readonly_fields(self, request, obj=None):
+        r_fields = super().get_readonly_fields(request, obj)
+        if 'add' in request.path.split('/'):
+            r_fields = []
+        return r_fields
+
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
         if obj and not obj.is_group:
@@ -46,6 +52,8 @@ class Artist(admin.ModelAdmin):
 @admin.register(CreatorSection)
 class CreatorSectionModelAdmin(admin.ModelAdmin):
     list_display = ['name', 'creator']
+    list_filter = ['creator']
+    search_fields = ['name', 'creator']
     fieldsets = [
         (
             None, {
@@ -87,6 +95,7 @@ class CreatorModelAdmin(admin.ModelAdmin):
     ]
     inlines = (CreatorSectionInline,)
     list_display = ['name']
+    list_filter = ['genres']
     readonly_fields = ['users']
 
 
@@ -105,7 +114,7 @@ class SongInline(admin.TabularInline):
 
 @admin.register(Album)
 class AlbumModelAdmin(admin.ModelAdmin):
-    list_display = ['title', 'date_of_release', 'album_type', 'genre', 'likes']
+    list_display = ['title', 'date_of_release', 'album_type', 'genre', 'likes', 'year']
     readonly_fields = ['other_versions', 'likes']
     search_fields = ['title', 'artists__name']
     list_filter = ['genre', 'is_single', 'is_ep', 'date_of_release']

@@ -42,8 +42,8 @@ class ArtistTestCase(TestCase):
         self.assertListEqual(list(self.artist_1.group_members.all()), [self.artist_4])
 
     def test_string_names(self):
-        self.assertEqual('<Artist \'Quavo\'>', str(self.artist_1))
-        self.assertEqual('<Group \'The Fugees\'>', str(self.artist_5))
+        self.assertEqual('<Artist \'Quavo\'>', repr(self.artist_1))
+        self.assertEqual('<Group \'The Fugees\'>', repr(self.artist_5))
 
 
 @tag('music-m-creator')
@@ -71,7 +71,7 @@ class CreatorTestCase(TestCase):
         self.assertListEqual(list(self.creator.users.all()), [self.user])
 
     def test_string_names(self):
-        self.assertEqual('<TyneMusicContentCreator: \'Tyne Music Pop\'>', str(self.creator))
+        self.assertEqual('<TyneMusicContentCreator: \'Tyne Music Pop\'>', repr(self.creator))
 
 
 @tag('music-m-genre')
@@ -85,7 +85,7 @@ class GenreTestCase(TestCase):
         self.assertEqual(Genre.objects.count(), 1)
 
     def test_string_name(self):
-        self.assertEqual('<Genre: \'Pop\'>', str(self.genre))
+        self.assertEqual('<Genre: \'Pop\'>', repr(self.genre))
 
 
 @tag('music-m-album')
@@ -150,10 +150,10 @@ class AlbumTestCase(TestCase):
 
     def test_string_name(self):
         self.album_4.save()
-        self.assertEqual(str(self.album_4), f'<EP: \'{self.album_4.title}\'>')
+        self.assertEqual(repr(self.album_4), f'<EP: \'{self.album_4.title}\'>')
         self.album_5.save()
-        self.assertEqual(str(self.album_5), f'<Single: \'{self.album_5.title}\'>')
-        self.assertEqual(str(self.album_1), f'<Album: \'{self.album_1.title}\'>')
+        self.assertEqual(repr(self.album_5), f'<Single: \'{self.album_5.title}\'>')
+        self.assertEqual(repr(self.album_1), f'<Album: \'{self.album_1.title}\'>')
 
     def test_saving_ep_and_single(self):
         self.album_4.is_single = True
@@ -175,7 +175,7 @@ class AlbumTestCase(TestCase):
         self.assertEqual(self.album_1.artists.count(), 2)
         self.assertListEqual(list(self.album_1.artists.all()), [self.artist_1, self.artist_2])
 
-    def test_libray_album(self):
+    def test_library_album(self):
         LibraryAlbum.objects.create(
             profile=self.user.main_profile,
             album=self.album_1
@@ -222,7 +222,7 @@ class SongTestCase(TransactionTestCase):
         )
 
     def test_string_name(self):
-        self.assertEqual(str(self.song_1), f'<Song: \'{self.song_1.title}\' from \'{self.song_1.album.title}\'>')
+        self.assertEqual(repr(self.song_1), f'<Song: \'{self.song_1.title}\' from \'{self.song_1.album.title}\'>')
 
     def test_song_number_not_repeated(self):
         song = Song(
@@ -324,11 +324,11 @@ class PlaylistTestCase(TestCase):
 
     def test_string_name(self):
         self.assertEqual(
-            str(self.playlist_1),
+            repr(self.playlist_1),
             f'<CreatorPlaylist \'{self.playlist_1.title}\' by \'{self.playlist_1.creator.name}\'>'
         )
         self.assertEqual(
-            str(self.playlist_2),
+            repr(self.playlist_2),
             f'<UserPlaylist \'{self.playlist_2.title}\' by \'{self.playlist_2.profile.name}\'>'
         )
         self.assertEqual(self.playlist_1.owner(), self.creator.name)
@@ -347,4 +347,4 @@ class CreatorSectionTestCase(TestCase):
         )
 
     def test_string_name(self):
-        self.assertEqual(str(self.section), f'<CreatorSection from \'{self.creator.name}\'>')
+        self.assertEqual(repr(self.section), f'<CreatorSection from \'{self.creator.name}\'>')
