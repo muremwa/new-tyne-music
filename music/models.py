@@ -170,7 +170,9 @@ class Song(models.Model):
     def length_string(self):
         length = '0:00'
         if self.pk and self.length:
-            length = f'{self.length // 60}:{self.length % 60}'
+            minutes = self.length % 60
+            minutes_ = minutes if minutes > 9 else f'0{minutes}'
+            length = f'{self.length // 60}:{minutes_}'
         return length
 
     def add_additional_artist(self, artist):
