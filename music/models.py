@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as __
 from django.core.exceptions import ValidationError
-from django.utils.timezone import datetime
 
 from core.models import Profile
 
