@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as __
 from django.core.exceptions import ValidationError
+from django.utils.timezone import datetime
 
 from core.models import Profile
 
@@ -23,7 +24,7 @@ def upload_album_image(instance: 'Album', filename: str):
 
 
 def upload_song_file(instance: 'Song', filename: str):
-    return f'dy/music/albums/{instance.album.pk}/{instance.pk}/{filename}'
+    return f'dy/music/albums/{instance.disc.album.pk}/{instance.disc.pk}/{instance.pk}/{filename}'
 
 
 def upload_playlist_image(instance: 'Playlist', filename: str):
@@ -40,7 +41,7 @@ def upload_playlist_image(instance: 'Playlist', filename: str):
 class Artist(models.Model):
     name = models.CharField(max_length=100)
     is_group = models.BooleanField(default=False)
-    group_members = models.ManyToManyField('self')
+    group_members = models.ManyToManyField('self', blank=True)
     avi = models.ImageField(default='/defaults/artist.png', upload_to=upload_artist_image)
     cover = models.ImageField(default='/defaults/artist_large.png', upload_to=upload_artist_image)
     bio = models.TextField(blank=True, null=True)
@@ -98,6 +99,15 @@ class Creator(models.Model):
         return f'<TyneMusicContentCreator: \'{self.name}\'>'
 
 
+class Disc(models.Model):
+    album = models.ForeignKey('Album', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200, blank=True, null=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f'{self.name if self.name else "Disc"} from \'{self.album}\''
+
+
 class Album(models.Model):
     title = models.CharField(max_length=200)
     notes = models.TextField(blank=True, null=True)
@@ -124,8 +134,13 @@ class Album(models.Model):
         return t
 
     @property
-    def year(self):
-        return self.date_of_release.year
+    def disc_one(self):
+        if self.pk and self.disc_set.count() > 0:
+            return self.disc_set.all()[0]
+
+    def all_songs(self):
+        if self.pk:
+            return Song.objects.filter(disc__album__pk=self.pk)
 
     def add_sister_album(self, album):
         if type(album) == type(self) and self.pk:
@@ -139,7 +154,13 @@ class Album(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
-        return super().save(*args, **kwargs)
+        pk = self.pk
+        super().save(*args, **kwargs)
+        if not pk:
+            return Disc.objects.create(
+                name='Disc 1',
+                album=self
+            )
 
     def __repr__(self):
         name = 'Album'
@@ -151,11 +172,11 @@ class Album(models.Model):
         return f'<{name}: \'{self.title}\'>'
 
     def __str__(self):
-        return f'{self.title} ({self.year})'
+        return f'{self.title} ({self.date_of_release})'
 
 
 class Song(models.Model):
-    album = models.ForeignKey(Album, on_delete=models.CASCADE)
+    disc = models.ForeignKey(Disc, on_delete=models.CASCADE, blank=False, null=False)
     track_no = models.IntegerField()
     title = models.CharField(max_length=200)
     genre = models.ForeignKey(Genre, on_delete=models.PROTECT)
@@ -168,7 +189,7 @@ class Song(models.Model):
     objects = models.Manager()
 
     class Meta:
-        unique_together = (('album', 'track_no'),)
+        unique_together = (('disc', 'track_no'),)
 
     @property
     def length_string(self):
@@ -180,14 +201,14 @@ class Song(models.Model):
         return length
 
     def add_additional_artist(self, artist):
-        if self.pk and type(artist) == Artist and artist not in self.album.artists.all():
+        if self.pk and type(artist) == Artist and artist not in self.disc.album.artists.all():
             self.additional_artists.add(artist)
 
     def __repr__(self):
-        return f'<Song: \'{self.title}\' from \'{self.album.title}\'>'
+        return f'<Song: \'{self.title}\' from \'{self.disc.album}\'>'
 
     def __str__(self):
-        return f'\'{self.title}\' from the album \'{self.album}\''
+        return f'\'{self.title}\' from the album \'{self.disc.album}\''
 
 
 class Playlist(models.Model):

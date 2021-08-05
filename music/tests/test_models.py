@@ -143,6 +143,13 @@ class AlbumTestCase(TestCase):
 
         self.albums = [self.album_1, self.album_2, self.album_3]
 
+    @tag('music-m-album-disc')
+    def test_disc(self):
+        self.assertEqual(1, self.album_1.disc_set.count())
+        self.assertEqual('Disc 1', self.album_1.disc_set.all()[0].name)
+        self.album_1.save()
+        self.assertEqual(1, self.album_1.disc_set.count())
+
     def test_other_versions(self):
         for album in self.albums:
             self.assertEqual(album.other_versions.count(), 2)
@@ -208,7 +215,7 @@ class SongTestCase(TransactionTestCase):
         self.song_1: Song = Song.objects.create(
             title='Timmy',
             track_no=1,
-            album=self.album_1,
+            disc=self.album_1.disc_one,
             genre=self.genre,
             length=285
         )
@@ -217,18 +224,18 @@ class SongTestCase(TransactionTestCase):
     def test_artists_auto_added(self):
         self.assertEqual(self.song_1.additional_artists.count(), 1)
         self.assertEqual(
-            list(self.song_1.additional_artists.all()) + (list(self.song_1.album.artists.all())),
+            list(self.song_1.additional_artists.all()) + (list(self.song_1.disc.album.artists.all())),
             [self.artist_2, self.artist_1]
         )
 
     def test_string_name(self):
-        self.assertEqual(repr(self.song_1), f'<Song: \'{self.song_1.title}\' from \'{self.song_1.album.title}\'>')
+        self.assertEqual(repr(self.song_1), f'<Song: \'{self.song_1.title}\' from \'{self.song_1.disc.album}\'>')
 
     def test_song_number_not_repeated(self):
         song = Song(
             title='Pig',
             track_no=1,
-            album=self.album_1,
+            disc=self.album_1.disc_one,
             genre=self.genre,
             length=285
         )
@@ -237,14 +244,14 @@ class SongTestCase(TransactionTestCase):
 
         song.track_no = 2
         song.save()
-        self.assertEqual(self.album_1.song_set.count(), 2)
-        self.assertListEqual(list(self.album_1.song_set.all()), [self.song_1, song])
+        self.assertEqual(self.album_1.all_songs().count(), 2)
+        self.assertListEqual(list(self.album_1.all_songs()), [self.song_1, song])
 
     def test_song_additional_artist(self):
         song = Song.objects.create(
             title='Pig',
             track_no=3,
-            album=self.album_1,
+            disc=self.album_1.disc_one,
             genre=self.genre,
             length=265
         )
@@ -276,7 +283,7 @@ class PlaylistTestCase(TestCase):
         self.song_1: Song = Song.objects.create(
             title='Timmy',
             track_no=1,
-            album=self.album_1,
+            disc=self.album_1.disc_one,
             genre=self.genre,
             length=285
         )
@@ -284,7 +291,7 @@ class PlaylistTestCase(TestCase):
         self.song_2 = Song.objects.create(
             title='Pig',
             track_no=3,
-            album=self.album_1,
+            disc=self.album_1.disc_one,
             genre=self.genre,
             length=265
         )

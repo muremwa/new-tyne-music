@@ -4,7 +4,7 @@ from re import findall
 from django.contrib import admin, messages
 from django.shortcuts import get_object_or_404, reverse, redirect
 
-from .models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSection, LibraryAlbum
+from .models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSection, LibraryAlbum, Disc
 
 
 @admin.register(Artist)
@@ -112,13 +112,19 @@ class SongInline(admin.TabularInline):
     ordering = ('track_no',)
 
 
+class DiscInline(admin.TabularInline):
+    model = Disc
+    show_change_link = True
+    extra = 1
+
+
 @admin.register(Album)
 class AlbumModelAdmin(admin.ModelAdmin):
-    list_display = ['title', 'date_of_release', 'album_type', 'genre', 'likes', 'year', 'published']
+    list_display = ['title', 'date_of_release', 'album_type', 'genre', 'likes', 'published']
     readonly_fields = ['other_versions', 'likes']
     search_fields = ['title', 'artists__name']
     list_filter = ['genre', 'is_single', 'is_ep', 'date_of_release', 'published']
-    inlines = (SongInline,)
+    inlines = (DiscInline,)
     actions = ['publish_albums', 'un_publish_albums']
     fieldsets = [
         (
@@ -161,15 +167,21 @@ class AlbumModelAdmin(admin.ModelAdmin):
         self.message_user(request, f"{self.pluralize(updated)} un published", level=messages.WARNING)
 
 
+@admin.register(Disc)
+class DiscModelAdmin(admin.ModelAdmin):
+    list_display = ['name', 'album']
+    inlines = (SongInline,)
+
+
 @admin.register(Song)
 class SongModelAdmin(admin.ModelAdmin):
-    list_display = ['title', 'album', 'length_string', 'likes', 'streams']
+    list_display = ['track_no', 'title', 'disc', 'length_string', 'likes', 'streams']
     readonly_fields = ['additional_artists', 'likes', 'streams']
-    search_fields = ['title', 'album__title', 'album__artists__name', 'additional_artists__name']
+    search_fields = ['title', 'disc__album__title', 'disc__album__artists__name', 'additional_artists__name']
     fieldsets = [
         (
             None, {
-                'fields': ['track_no', 'title', 'album']
+                'fields': ['track_no', 'title', 'disc']
             }
         ),
         (
@@ -192,10 +204,10 @@ class SongModelAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         r_fields: List = super().get_readonly_fields(request, obj)
 
-        if 'change' in request.path.split('/') and 'album' not in r_fields:
-            r_fields.append('album')
+        if 'change' in request.path.split('/') and 'disc' not in r_fields:
+            r_fields.append('disc')
 
-        for g, field in [['aa', 'additional_artists'], ['al', 'album']]:
+        for g, field in [['aa', 'additional_artists'], ['ds', 'disc']]:
             if request.user.is_superuser and request.GET.get(g):
                 if request.GET.get(g) == '1':
                     r_fields = [f for f in r_fields if f != field]
