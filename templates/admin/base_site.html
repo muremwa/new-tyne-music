@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | myHostelKenya{% endblock %}
+
+{% block branding %}
+<style type="text/css">
+    #site-name {
+        font-family: Tahoma;
+    }
+</style>
+<h1 id="site-name"><a href="{% url 'admin:index' %}">tyne music administration</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
