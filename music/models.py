@@ -51,6 +51,9 @@ class Artist(models.Model):
         if self.is_group and type(artist) == type(self) and not artist.is_group:
             self.group_members.add(artist)
 
+    def all_nicknames(self):
+        return [name.strip() for name in self.nicknames.split(',')]
+
     def a_type(self):
         return 'Group' if self.is_group else 'Artist'
 
@@ -107,6 +110,7 @@ class Album(models.Model):
     copyright = models.TextField(blank=True, null=True)
     artists = models.ManyToManyField(Artist, blank=True)
     other_versions = models.ManyToManyField('self', blank=True)
+    published = models.BooleanField(default=False)
     objects = models.Manager()
 
     @property

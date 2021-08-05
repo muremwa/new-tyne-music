@@ -1,7 +1,7 @@
 from typing import List
 from re import findall
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.shortcuts import get_object_or_404, reverse, redirect
 
 from .models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSection, LibraryAlbum
@@ -114,15 +114,16 @@ class SongInline(admin.TabularInline):
 
 @admin.register(Album)
 class AlbumModelAdmin(admin.ModelAdmin):
-    list_display = ['title', 'date_of_release', 'album_type', 'genre', 'likes', 'year']
+    list_display = ['title', 'date_of_release', 'album_type', 'genre', 'likes', 'year', 'published']
     readonly_fields = ['other_versions', 'likes']
     search_fields = ['title', 'artists__name']
-    list_filter = ['genre', 'is_single', 'is_ep', 'date_of_release']
+    list_filter = ['genre', 'is_single', 'is_ep', 'date_of_release', 'published']
     inlines = (SongInline,)
+    actions = ['publish_albums', 'un_publish_albums']
     fieldsets = [
         (
             None, {
-                'fields': ['title', 'date_of_release', 'is_single', 'is_ep']
+                'fields': ['title', 'date_of_release', 'is_single', 'is_ep', 'published']
             }
         ),
         (
@@ -145,6 +146,19 @@ class AlbumModelAdmin(admin.ModelAdmin):
                 r_fields = [f for f in r_fields if f != 'other_versions']
 
         return r_fields
+
+    @staticmethod
+    def pluralize(upd):
+        al = 'album' if upd == 1 else 'albums'
+        return f'{upd} {al}'
+
+    def publish_albums(self, request, queryset):
+        updated = queryset.update(published=True)
+        self.message_user(request, f"{self.pluralize(updated)} published")
+
+    def un_publish_albums(self, request, queryset):
+        updated = queryset.update(published=False)
+        self.message_user(request, f"{self.pluralize(updated)} un published", level=messages.WARNING)
 
 
 @admin.register(Song)
