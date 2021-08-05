@@ -276,6 +276,8 @@ class LibraryAlbumModelAdmin(admin.ModelAdmin):
             if len(library_album_ids) > 0:
                 library_album_id = int(library_album_ids[0])
                 library_album: LibraryAlbum = get_object_or_404(LibraryAlbum, pk=library_album_id)
-                kwargs['queryset'] = Song.objects.filter(album=library_album.album)
+                kwargs['queryset'] = Song.objects.filter(
+                    disc__pk__in=[disc.pk for disc in library_album.album.disc_set.all()]
+                )
 
         return super().formfield_for_manytomany(db_field, request, **kwargs)

@@ -124,18 +124,24 @@ class Album(models.Model):
 
     @property
     def album_type(self):
-        t = 'Long Play'
-        if self.is_ep:
-            t = 'Extended Play'
-        elif self.is_single:
-            t = 'Single'
-
-        return t
+        return {
+            'LP': 'Long Play',
+            'EP': 'Extended Play',
+            'S': 'Single'
+        }.get(self.al_code(), 'UNKNOWN')
 
     @property
     def disc_one(self):
         if self.pk and self.disc_set.count() > 0:
             return self.disc_set.all()[0]
+
+    def al_code(self):
+        t = 'LP'
+        if self.is_ep:
+            t = 'EP'
+        elif self.is_single:
+            t = 'S'
+        return t
 
     def all_songs(self):
         if self.pk:
