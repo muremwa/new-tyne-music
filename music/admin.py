@@ -1,8 +1,10 @@
 from typing import List
+from re import findall
 
 from django.contrib import admin
+from django.shortcuts import get_object_or_404, reverse, redirect
 
-from .models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSection
+from .models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSection, LibraryAlbum
 
 
 @admin.register(Artist)
@@ -105,6 +107,8 @@ class SongInline(admin.TabularInline):
 class AlbumModelAdmin(admin.ModelAdmin):
     list_display = ['title', 'date_of_release', 'album_type', 'genre', 'likes']
     readonly_fields = ['other_versions', 'likes']
+    search_fields = ['title', 'artists__name']
+    list_filter = ['genre', 'is_single', 'is_ep', 'date_of_release']
     inlines = (SongInline,)
     fieldsets = [
         (
@@ -138,6 +142,7 @@ class AlbumModelAdmin(admin.ModelAdmin):
 class SongModelAdmin(admin.ModelAdmin):
     list_display = ['title', 'album', 'length_string', 'likes', 'streams']
     readonly_fields = ['additional_artists', 'likes', 'streams']
+    search_fields = ['title', 'album__title', 'album__artists__name', 'additional_artists__name']
     fieldsets = [
         (
             None, {
@@ -217,3 +222,25 @@ class PlaylistModelAdmin(admin.ModelAdmin):
             r_fields = ['likes']
 
         return r_fields
+
+
+@admin.register(LibraryAlbum)
+class LibraryAlbumModelAdmin(admin.ModelAdmin):
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect(reverse('admin:music_libraryalbum_change', kwargs={'object_id': obj.pk}))
+
+    def get_readonly_fields(self, request, obj=None):
+        r_fields = list(super().get_readonly_fields(request, obj))
+        if 'add' in request.path.split('/') and 'songs' not in r_fields:
+            r_fields.append('songs')
+        return tuple(r_fields)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == 'songs' and 'change' in request.path.split('/'):
+            library_album_ids = findall(r'libraryalbum/(\d+)/change', request.path)
+            if len(library_album_ids) > 0:
+                library_album_id = int(library_album_ids[0])
+                library_album: LibraryAlbum = get_object_or_404(LibraryAlbum, pk=library_album_id)
+                kwargs['queryset'] = Song.objects.filter(album=library_album.album)
+
+        return super().formfield_for_manytomany(db_field, request, **kwargs)

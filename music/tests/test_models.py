@@ -2,7 +2,7 @@ from django.test import TestCase, tag, TransactionTestCase
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
-from music.models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSection
+from music.models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSection, LibraryAlbum
 from core.models import User
 
 
@@ -135,6 +135,11 @@ class AlbumTestCase(TestCase):
             date_of_release='2021-05-21',
             is_single=True
         )
+        self.user = User.objects.create_user(
+            username='creator_user',
+            email='creator@tyne.com',
+            password='pass@123'
+        )
 
         self.albums = [self.album_1, self.album_2, self.album_3]
 
@@ -169,6 +174,17 @@ class AlbumTestCase(TestCase):
         self.album_1.artists.add(self.artist_2)
         self.assertEqual(self.album_1.artists.count(), 2)
         self.assertListEqual(list(self.album_1.artists.all()), [self.artist_1, self.artist_2])
+
+    def test_libray_album(self):
+        LibraryAlbum.objects.create(
+            profile=self.user.main_profile,
+            album=self.album_1
+        )
+        with self.assertRaisesRegex(IntegrityError, 'UNIQUE constraint failed'):
+            LibraryAlbum.objects.create(
+                profile=self.user.main_profile,
+                album=self.album_1
+            )
 
 
 @tag('music-m-song')

@@ -186,6 +186,7 @@ class Playlist(models.Model):
     cover_wide = models.ImageField(default='/defaults/playlist_wide.png', upload_to=upload_playlist_image)
     timely_cover = models.ImageField(upload_to=upload_playlist_image, blank=True, null=True)
     timely_cover_wide = models.ImageField(upload_to=upload_playlist_image, blank=True, null=True)
+    modified = models.DateTimeField(auto_now=True)
     objects = models.Manager()
 
     @property
@@ -288,3 +289,18 @@ class CreatorSection(models.Model):
 
     def __str__(self):
         return f'<CreatorSection from \'{self.creator.name}\'>'
+
+
+class LibraryAlbum(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    album = models.ForeignKey(Album, on_delete=models.CASCADE)
+    songs = models.ManyToManyField(Song, blank=True)
+    objects = models.Manager()
+
+    class Meta:
+        unique_together = (('profile', 'album'),)
+
+    def __str__(self):
+        return f'{self.album.title} in {self.profile.name}\'s library'
