@@ -217,12 +217,12 @@ class SongModelAdmin(admin.ModelAdmin):
 @admin.register(Playlist)
 class PlaylistModelAdmin(admin.ModelAdmin):
     list_display = ['title', 'owner', 'likes']
-    readonly_fields = ['creator', 'profile', 'songs', 'songs_order', 'likes']
+    readonly_fields = ['creator', 'profile', 'songs', 'songs_order', 'likes', 'created']
     actions = ['order_songs_og']
     fieldsets = [
         (
             None, {
-                'fields': ['title', 'creator', 'profile']
+                'fields': ['title', 'creator', 'profile', 'created']
             }
         ),
         (
@@ -254,7 +254,7 @@ class PlaylistModelAdmin(admin.ModelAdmin):
                     r_fields = [f for f in r_fields if f != field]
 
         if 'add' in request.path.split('/'):
-            r_fields = ['likes']
+            r_fields = ['likes', 'created']
 
         return r_fields
 

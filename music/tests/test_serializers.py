@@ -177,6 +177,11 @@ class MusicSerializerTestCase(TestCase):
         for song in self.album_2.all_songs():
             self.lib_album.songs.add(song)
 
+        self.playlist_3: Playlist = Playlist.objects.create(
+            title='Home work 2',
+            profile=self.user.main_profile
+        )
+
     def test_song_data(self):
         ss = m_serializers.SongSerializer(self.song_1)
         self.assertDictEqual(
@@ -244,7 +249,7 @@ class MusicSerializerTestCase(TestCase):
                 'cover_wide': '/media/defaults/playlist_wide.png',
                 'timely_cover': None,
                 'timely_cover_wide': None,
-                'modified': self.playlist_1.modified.strftime('%Y-%m-%d')
+                'modified': self.playlist_1.modified.strftime('%Y-%m-%d'),
             }
         )
 
@@ -297,3 +302,7 @@ class MusicSerializerTestCase(TestCase):
             'album': m_serializers.AlbumSerializer(self.lib_album.album, no_discs=True, read_only=True).data,
             'songs': m_serializers.SongSerializer(self.lib_album.songs.all(), many=True, read_only=True).data
         })
+
+    def test_library_data(self):
+        lib = m_serializers.Library(self.user.main_profile)
+        self.assertListEqual(list(lib.data.keys()), ['library_profile', 'library_items'])

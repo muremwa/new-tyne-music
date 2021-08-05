@@ -1,7 +1,12 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, CharField
+from itertools import chain
+from datetime import datetime
+from pytz import UTC
+
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, CharField, Serializer
 
 from .models import Artist, Genre, Album, Disc, Song, Playlist, Creator, CreatorSection, LibraryAlbum
-from core.serializers import UserSerializer
+from core.serializers import UserSerializer, ProfileSerializer
+from core.models import Profile
 
 
 class ArtistSerializer(ModelSerializer):
@@ -117,3 +122,43 @@ class LibraryAlbumSerializer(ModelSerializer):
     def get_added(obj):
         if hasattr(obj, 'added') and obj.added:
             return obj.added.strftime('%Y-%m-%d')
+
+
+class Library(Serializer):
+    library_profile = SerializerMethodField()
+    library_items = SerializerMethodField()
+
+    @staticmethod
+    def get_library_profile(obj):
+        if type(obj) == Profile:
+            return ProfileSerializer(obj).data
+
+    @staticmethod
+    def get_library_items(obj):
+        if hasattr(obj, 'playlist_set') and hasattr(obj, 'libraryalbum_set'):
+            playlists = obj.playlist_set.order_by('-created')
+            lib_albums = obj.libraryalbum_set.order_by('-added')
+            PLAYLIST = 'PL'
+            LIB_ALBUM = 'LB'
+
+            def get_item_timestamp(pk, type_):
+                stamp = datetime(1970, 1, 1, 0, 0, 0, 0, UTC)
+
+                if type_ == PLAYLIST:
+                    stamp = playlists.get(pk=pk).created
+                elif type_ == LIB_ALBUM:
+                    stamp = lib_albums.get(pk=pk).added
+
+                return stamp
+
+            # arrange them by time stamp
+            items = sorted(
+                chain(
+                    PlaylistSerializer(playlists, many=True).data,
+                    LibraryAlbumSerializer(lib_albums, many=True).data
+                ),
+                reverse=True,
+                key=lambda item: get_item_timestamp(item.get('id'), PLAYLIST if item.get('title') else LIB_ALBUM)
+            )
+
+            return items

@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as __
 from django.core.exceptions import ValidationError
+from django.utils.timezone import datetime
 
 from core.models import Profile
 
@@ -234,6 +235,7 @@ class Playlist(models.Model):
     timely_cover = models.ImageField(upload_to=upload_playlist_image, blank=True, null=True)
     timely_cover_wide = models.ImageField(upload_to=upload_playlist_image, blank=True, null=True)
     modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()
 
     @property
