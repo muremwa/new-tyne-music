@@ -12,7 +12,7 @@ from .serializers import Library
 def profile_library(request):
     profile_pk = request.GET.get('p')
 
-    if profile_pk and profile_pk.is_digit() and request.user.tier == 'F':
+    if profile_pk and profile_pk.isdigit() and request.user.tier == 'F':
         try:
             profile = request.user.profile_set.get(pk=int(profile_pk))
         except ObjectDoesNotExist:
