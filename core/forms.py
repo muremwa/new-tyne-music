@@ -11,7 +11,9 @@ from rest_framework.authtoken.models import Token
 from .models import User, Profile
 
 
-class SmartForm(forms.Form):
+class SmartForm:
+    fields = {}
+
     """Add field information retrieval sugar"""
     def fields_info(self):
         """Get all fields with help_text and whether they are required"""
@@ -30,7 +32,7 @@ class SmartForm(forms.Form):
         return fields_
 
 
-class CoreUserCreationForm(SmartForm):
+class CoreUserCreationForm(SmartForm, forms.Form):
     """
         If the form is valid returns a dict with:\n
         The new created user. -> 'new_user'\n
@@ -155,7 +157,7 @@ class CoreUserEditForm(CoreUserCreationForm):
             self.user.save()
 
 
-class ProfileCreateForm(SmartForm):
+class ProfileCreateForm(SmartForm, forms.Form):
     """If the form is valid returns the new created profile"""
     profile_name = forms.CharField(required=True, help_text='A name for your profile')
     is_minor = forms.BooleanField(required=False, help_text='Is the profile for a child')
