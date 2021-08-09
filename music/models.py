@@ -38,12 +38,12 @@ def upload_playlist_image(instance: 'Playlist', filename: str):
 
 
 class Artist(models.Model):
-    name = models.CharField(max_length=100)
-    is_group = models.BooleanField(default=False)
+    name = models.CharField(max_length=100, help_text='Artist\'s name')
+    is_group = models.BooleanField(default=False, help_text='Is the artist a group')
     group_members = models.ManyToManyField('self', blank=True)
-    avi = models.ImageField(default='/defaults/artist.png', upload_to=upload_artist_image)
-    cover = models.ImageField(default='/defaults/artist_large.png', upload_to=upload_artist_image)
-    bio = models.TextField(blank=True, null=True)
+    avi = models.ImageField(default='/defaults/artist.png', upload_to=upload_artist_image, help_text='A 1x1 pic')
+    cover = models.ImageField(default='/defaults/artist_large.png', upload_to=upload_artist_image, help_text='16x16')
+    bio = models.TextField(blank=True, null=True, help_text='Info about the artist')
     nicknames = models.TextField(blank=True, null=True, help_text='Comma separated names the artist goes by')
     objects = models.Manager()
 
