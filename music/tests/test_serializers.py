@@ -268,7 +268,8 @@ class MusicSerializerTestCase(TestCase):
                 'albums': m_serializers.AlbumSerializer(
                     self.section.albums.all(),
                     many=True,
-                    read_only=True
+                    read_only=True,
+                    no_discs=True
                 ).data,
                 'playlists': m_serializers.PlaylistSerializer(
                     self.section.playlists.all(),
@@ -288,7 +289,6 @@ class MusicSerializerTestCase(TestCase):
                 'description': None,
                 'avi': '/media/defaults/creator.png',
                 'cover': '/media/defaults/creator_wide.png',
-                'users': m_serializers.UserSerializer(self.creator.users.all(), many=True, read_only=True).data,
                 'genres': m_serializers.GenreSerializer(self.creator.genres.all(), many=True, read_only=True).data
             }
         )

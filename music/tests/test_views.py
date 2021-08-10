@@ -11,19 +11,40 @@ class MusicViewsTestCase(APITestCase):
     def setUp(self):
         self.maxDiff = None
         self.client = APIClient()
+        # users
         self.user = User.objects.create_user(
             username='creator_user',
             email='creator@tyne.com',
             password='pass@123',
             tier='F'
         )
+        self.user_2 = User.objects.create_user(
+            username='pl',
+            email='pl@tyne.com',
+            password='pass@123'
+        )
         self.client.force_login(self.user)
+
+        # creators and sections
         self.creator = ms_models.Creator.objects.create(
             name='Tyne Music Pop'
         )
-        self.genre: ms_models.Genre = ms_models.Genre.objects.create(
-            title='Hip-Hop'
+        self.creator_2 = ms_models.Creator.objects.create(
+            name='Tyne Music Hip-Hop'
         )
+        self.section: ms_models.CreatorSection = ms_models.CreatorSection.objects.create(
+            name='Top Albums',
+            creator=self.creator
+        )
+
+        # genre
+        self.genre: ms_models.Genre = ms_models.Genre.objects.create(
+            title='Hip-Hop',
+            main_curator=self.creator_2
+        )
+        self.creator.genres.add(self.genre)
+
+        # artists
         self.artist_1: ms_models.Artist = ms_models.Artist.objects.create(
             name='Quavo',
         )
@@ -37,23 +58,13 @@ class MusicViewsTestCase(APITestCase):
             name='Migos',
             is_group=True
         )
+
+        # album 1 and songs
         self.album_1: ms_models.Album = ms_models.Album.objects.create(
             title='WAX (Deluxe)',
             genre=self.genre,
             date_of_release='2021-05-12',
             published=True
-        )
-        self.album_2: ms_models.Album = ms_models.Album.objects.create(
-            title='WAX',
-            genre=self.genre,
-            date_of_release='2021-05-12',
-            published=True
-        )
-        self.album_1.add_sister_album(self.album_2)
-        self.album_3: ms_models.Album = ms_models.Album.objects.create(
-            title='WAX Platinum Edition',
-            genre=self.genre,
-            date_of_release='2021-05-12'
         )
         self.album_1.artists.add(self.artist_1)
         self.song_1: ms_models.Song = ms_models.Song.objects.create(
@@ -64,24 +75,40 @@ class MusicViewsTestCase(APITestCase):
             length=285
         )
         self.song_1.additional_artists.add(self.artist_2)
+
+        # album 2
+        self.album_2: ms_models.Album = ms_models.Album.objects.create(
+            title='WAX',
+            genre=self.genre,
+            date_of_release='2021-05-12',
+            published=True
+        )
+        self.album_2.add_sister_album(self.album_1)
+
+        # album 3
+        self.album_3: ms_models.Album = ms_models.Album.objects.create(
+            title='WAX Platinum Edition',
+            genre=self.genre,
+            date_of_release='2021-05-12'
+        )
+
+        # playlists
         self.playlist_1: ms_models.Playlist = ms_models.Playlist.objects.create(
             title='All Time Pop',
             creator=self.creator
-        )
-        self.playlist_3: ms_models.Playlist = ms_models.Playlist.objects.create(
-            title=f'{self.artist_1} Must Listens',
-            creator=self.creator
-        )
-        self.artist_1.playlists.add(self.playlist_3)
-        self.user_2 = User.objects.create_user(
-            username='pl',
-            email='pl@tyne.com',
-            password='pass@123'
         )
         self.playlist_2: ms_models.Playlist = ms_models.Playlist.objects.create(
             title='Home work',
             profile=self.user_2.main_profile
         )
+        self.playlist_3: ms_models.Playlist = ms_models.Playlist.objects.create(
+            title=f'{self.artist_1} Must Listens',
+            creator=self.creator_2
+        )
+        self.artist_1.playlists.add(self.playlist_3)
+        self.section.albums.add(self.album_1)
+
+        # library
         self.library: ms_models.LibraryAlbum = ms_models.LibraryAlbum.objects.create(
             profile=self.user.main_profile,
             album=self.album_1
@@ -144,17 +171,47 @@ class MusicViewsTestCase(APITestCase):
         singles = album_set.filter(is_single=True)
 
         artist_info.update({
-            'top_songs': ms_s.SongSerializer(songs, many=True, read_only=True).data,
+            'top_songs': ms_s.SongSerializer(songs, many=True, read_only=True, album_info=True).data,
             'albums': ms_s.AlbumSerializer(albums, many=True, read_only=True, no_discs=True).data,
             'singles': ms_s.AlbumSerializer(singles, many=True, read_only=True, no_discs=True).data,
             'eps': ms_s.AlbumSerializer(eps, many=True, read_only=True, no_discs=True).data,
             'playlists': ms_s.PlaylistSerializer(self.artist_1.playlists.all(), many=True, read_only=True).data
         })
+
         self.assertDictEqual(
             response.json(),
             artist_info
         )
 
         # no such artist
+        response = self.client.get(f'{url}?id=800')
+        self.assertEqual(response.status_code, 404)
+
+    def test_genres(self):
+        url = reverse('music:genres')
+
+        # list
+        response = self.client.get(url)
+        self.assertEqual(
+            response.json(),
+            ms_s.GenreSerializer(ms_models.Genre.objects.all(), many=True, read_only=True).data
+        )
+
+        # specific genre
+        response = self.client.get(f'{url}?id={self.genre.pk}')
+        genre_info = ms_s.GenreSerializer(self.genre).data
+        curators = list(self.genre.creator_set.all()) + [self.genre.main_curator]
+        genre_info.update({
+            'curators': ms_s.CreatorSerializer(set(curators), many=True).data,
+            'sections': ms_s.CreatorSectionSerializer(self.genre.main_curator.creatorsection_set.all(), many=True).data,
+            'playlists': ms_s.PlaylistSerializer(
+                self.genre.main_curator.playlist_set.all(),
+                many=True,
+                read_only=True
+            ).data
+        })
+        self.assertEqual(response.json(), genre_info)
+
+        # no such genre
         response = self.client.get(f'{url}?id=800')
         self.assertEqual(response.status_code, 404)

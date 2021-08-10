@@ -1,4 +1,5 @@
 from re import findall
+from itertools import chain
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -50,7 +51,10 @@ def albums(request):
     album_pk = request.GET.get('id')
 
     # looking for a single album
-    if album_pk and album_pk.isdigit():
+    if album_pk:
+        if not album_pk.isdigit():
+            raise Http404
+
         try:
             album = published_albums.get(pk=int(album_pk))
             response = ms_serializers.AlbumSerializer(album, read_only=True).data
@@ -109,15 +113,25 @@ def artists(request):
     """
     artist_pk = request.GET.get('id')
 
-    if artist_pk and artist_pk.isdigit():
+    if artist_pk:
+        if not artist_pk.isdigit():
+            raise Http404
+
         artist = get_object_or_404(ms_models.Artist, pk=artist_pk)
         response = ms_serializers.ArtistSerializer(artist, read_only=True).data
         album_set = artist.album_set.filter(published=True)
 
         # top songs
-        top_songs = [song for album in album_set for song in album.all_songs()]
-        top_songs.sort(key=lambda song: song.streams, reverse=True)
-        top_songs = ms_serializers.SongSerializer(top_songs, many=True, read_only=True)
+        songs = [song for album in album_set for song in album.all_songs()]
+        additional_artist_songs = artist.additions.filter(disc__album__published=True)
+        features = artist.features.filter(disc__album__published=True)
+
+        top_songs = ms_serializers.SongSerializer(
+            sorted(chain(songs, additional_artist_songs, features), key=lambda song: song.streams, reverse=True)[:10],
+            many=True,
+            read_only=True,
+            album_info=True
+        )
 
         # albums, Singles, EPs
         artist_albums = ms_serializers.AlbumSerializer(
@@ -161,5 +175,41 @@ def artists(request):
             read_only=True
         )
         response = all_artists.data
+
+    return Response(response)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def genres(request):
+    """
+    Retrieve Genres or a specific genre
+    1. Returns a list of genres
+    2. A specific Genre that includes related Creators/Curators
+        Use parameter '?id=genre_id'
+    """
+    genre_pk = request.GET.get('id')
+
+    if genre_pk:
+        if not genre_pk.isdigit():
+            raise Http404
+
+        genre = get_object_or_404(ms_models.Genre, pk=genre_pk)
+        response = ms_serializers.GenreSerializer(genre, read_only=True).data
+        curators = set(list(genre.creator_set.all()) + [genre.main_curator])
+        sections = genre.main_curator.creatorsection_set.all()
+        response.update({
+            'curators': ms_serializers.CreatorSerializer(curators, many=True, read_only=True).data,
+            'sections': ms_serializers.CreatorSectionSerializer(sections, many=True, read_only=True).data,
+            'playlists': ms_serializers.PlaylistSerializer(
+                genre.main_curator.playlist_set.all(),
+                many=True,
+                read_only=True
+            ).data
+        })
+
+    else:
+        all_genres = ms_models.Genre.objects.all()
+        response = ms_serializers.GenreSerializer(all_genres, many=True, read_only=True).data
 
     return Response(response)

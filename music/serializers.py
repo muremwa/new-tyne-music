@@ -6,7 +6,7 @@ from pytz import UTC
 from rest_framework.serializers import ModelSerializer, SerializerMethodField, CharField, Serializer
 
 from .models import Artist, Genre, Album, Disc, Song, Playlist, Creator, CreatorSection, LibraryAlbum
-from core.serializers import UserSerializer, ProfileSerializer
+from core.serializers import ProfileSerializer
 from core.models import Profile
 
 
@@ -100,7 +100,7 @@ class PlaylistSerializer(ModelSerializer):
 
 class CreatorSectionSerializer(ModelSerializer):
     artists = ArtistSerializer(many=True)
-    albums = AlbumSerializer(many=True)
+    albums = AlbumSerializer(many=True, no_discs=True)
     playlists = PlaylistSerializer(many=True)
 
     class Meta:
@@ -109,12 +109,11 @@ class CreatorSectionSerializer(ModelSerializer):
 
 
 class CreatorSerializer(ModelSerializer):
-    users = UserSerializer(many=True)
     genres = GenreSerializer(many=True)
 
     class Meta:
         model = Creator
-        fields = ('id', 'name', 'description', 'avi', 'cover', 'users', 'genres')
+        fields = ('id', 'name', 'description', 'avi', 'cover', 'genres')
 
 
 class LibraryAlbumSerializer(ModelSerializer):
