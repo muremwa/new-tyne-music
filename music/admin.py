@@ -8,7 +8,7 @@ from .models import Artist, Creator, Genre, Album, Song, Playlist, CreatorSectio
 
 
 @admin.register(Artist)
-class Artist(admin.ModelAdmin):
+class ArtistModelAdmin(admin.ModelAdmin):
     GRP_INFO_NAME = 'Group Info'
     fieldsets = [
         (
@@ -28,7 +28,7 @@ class Artist(admin.ModelAdmin):
         ),
         (
             'Misc', {
-                'fields': ['nicknames']
+                'fields': ['nicknames', 'playlists']
             }
         )
     ]
@@ -36,10 +36,19 @@ class Artist(admin.ModelAdmin):
     list_filter = ['is_group']
     list_display = ['name', 'is_group']
 
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == 'playlists' and 'change' in request.path.split('/'):
+            artist_ids = findall(r'artist/(\d+)/change', request.path)
+            if len(artist_ids) > 0:
+                artist_id = int(artist_ids[0])
+                artist: Artist = get_object_or_404(Artist, pk=artist_id)
+                kwargs['queryset'] = Playlist.objects.filter(title__contains=artist.name, profile__isnull=True)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
     def get_readonly_fields(self, request, obj=None):
         r_fields = super().get_readonly_fields(request, obj)
         if 'add' in request.path.split('/'):
-            r_fields = []
+            r_fields = ['playlists']
         return r_fields
 
     def get_fieldsets(self, request, obj=None):

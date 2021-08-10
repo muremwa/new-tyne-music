@@ -35,7 +35,10 @@ class SongSerializer(ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ('id', 'track_no', 'title', 'explicit', 'length', 'file', 'likes', 'streams', 'additional_artists')
+        fields = (
+            'id', 'track_no', 'title', 'explicit', 'length', 'file', 'likes', 'streams', 'additional_artists',
+            'album_art'
+        )
 
 
 class DiscSerializer(ModelSerializer):

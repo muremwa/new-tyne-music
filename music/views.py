@@ -1,9 +1,11 @@
 from re import findall
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 
 from . import models as ms_models, serializers as ms_serializers
 
@@ -63,11 +65,7 @@ def albums(request):
         # by artist
         if 'a' in filters.keys():
             if filters['a'].isdigit():
-                try:
-                    artist = ms_models.Artist.objects.get(pk=int(filters['a']))
-                    published_albums = published_albums.filter(artists__name=artist.name)
-                except ObjectDoesNotExist:
-                    pass
+                published_albums = published_albums.filter(artists__pk=filters['a'])
 
         # by genre
         if 'g' in filters.keys():
@@ -96,5 +94,72 @@ def albums(request):
                     published_albums = published_albums.filter(date_of_release__year=years[0])
 
         response = ms_serializers.AlbumSerializer(published_albums, many=True, read_only=True, no_discs=True).data
+
+    return Response(response)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def artists(request):
+    """
+    Retrieve artists or a specific artist
+    1. List artists - returns an array of artists with basic info => name, covers, etc.
+    2. Specific artist - returns basic info plus, Top songs, Albums, EPs and Singles, Tyne Music Playlists of the artist
+        Use '?id=artist_id' for a specific artist
+    """
+    artist_pk = request.GET.get('id')
+
+    if artist_pk and artist_pk.isdigit():
+        artist = get_object_or_404(ms_models.Artist, pk=artist_pk)
+        response = ms_serializers.ArtistSerializer(artist, read_only=True).data
+        album_set = artist.album_set.filter(published=True)
+
+        # top songs
+        top_songs = [song for album in album_set for song in album.all_songs()]
+        top_songs.sort(key=lambda song: song.streams, reverse=True)
+        top_songs = ms_serializers.SongSerializer(top_songs, many=True, read_only=True)
+
+        # albums, Singles, EPs
+        artist_albums = ms_serializers.AlbumSerializer(
+            album_set.filter(is_ep=False, is_single=False),
+            many=True,
+            read_only=True,
+            no_discs=True
+        )
+        singles = ms_serializers.AlbumSerializer(
+            album_set.filter(is_single=True),
+            many=True,
+            read_only=True,
+            no_discs=True
+        )
+        eps = ms_serializers.AlbumSerializer(
+            album_set.filter(is_ep=True),
+            many=True,
+            read_only=True,
+            no_discs=True
+        )
+
+        # playlists
+        playlists = ms_serializers.PlaylistSerializer(
+            artist.playlists.all(),
+            many=True,
+            read_only=True
+        )
+
+        response.update({
+            'top_songs': top_songs.data,
+            'albums': artist_albums.data,
+            'singles': singles.data,
+            'eps': eps.data,
+            'playlists': playlists.data
+        })
+
+    else:
+        all_artists = ms_serializers.ArtistSerializer(
+            ms_models.Artist.objects.order_by('name'),
+            many=True,
+            read_only=True
+        )
+        response = all_artists.data
 
     return Response(response)

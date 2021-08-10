@@ -2,13 +2,14 @@ from rest_framework.test import APIClient, APITestCase
 from django.test import tag
 from django.urls import reverse
 
-from music import views as ms_views, models as ms_models, serializers as ms_s
+from music import models as ms_models, serializers as ms_s
 from core.models import User
 
 
 @tag('music-v')
 class MusicViewsTestCase(APITestCase):
     def setUp(self):
+        self.maxDiff = None
         self.client = APIClient()
         self.user = User.objects.create_user(
             username='creator_user',
@@ -16,6 +17,7 @@ class MusicViewsTestCase(APITestCase):
             password='pass@123',
             tier='F'
         )
+        self.client.force_login(self.user)
         self.creator = ms_models.Creator.objects.create(
             name='Tyne Music Pop'
         )
@@ -38,6 +40,19 @@ class MusicViewsTestCase(APITestCase):
         self.album_1: ms_models.Album = ms_models.Album.objects.create(
             title='WAX (Deluxe)',
             genre=self.genre,
+            date_of_release='2021-05-12',
+            published=True
+        )
+        self.album_2: ms_models.Album = ms_models.Album.objects.create(
+            title='WAX',
+            genre=self.genre,
+            date_of_release='2021-05-12',
+            published=True
+        )
+        self.album_1.add_sister_album(self.album_2)
+        self.album_3: ms_models.Album = ms_models.Album.objects.create(
+            title='WAX Platinum Edition',
+            genre=self.genre,
             date_of_release='2021-05-12'
         )
         self.album_1.artists.add(self.artist_1)
@@ -53,6 +68,11 @@ class MusicViewsTestCase(APITestCase):
             title='All Time Pop',
             creator=self.creator
         )
+        self.playlist_3: ms_models.Playlist = ms_models.Playlist.objects.create(
+            title=f'{self.artist_1} Must Listens',
+            creator=self.creator
+        )
+        self.artist_1.playlists.add(self.playlist_3)
         self.user_2 = User.objects.create_user(
             username='pl',
             email='pl@tyne.com',
@@ -70,11 +90,71 @@ class MusicViewsTestCase(APITestCase):
 
     def test_library_view(self):
         url = reverse('music:library')
-        self.client.force_login(self.user)
         response = self.client.get(url)
         self.assertEqual(response.json(), ms_s.Library(self.user.main_profile).data)
         response = self.client.get(f'{url}?p={self.user_2.main_profile.pk}')
         self.assertEqual(response.status_code, 404)
 
+    def test_albums(self):
+        url = reverse('music:albums')
 
+        # album list
+        response = self.client.get(url)
+        self.assertListEqual(
+            response.json(),
+            ms_s.AlbumSerializer(
+                ms_models.Album.objects.filter(published=True).order_by('date_of_release'),
+                many=True,
+                read_only=True,
+                no_discs=True
+            ).data
+        )
 
+        # specific album
+        response = self.client.get(f'{url}?id={self.album_1.pk}')
+        self.assertDictEqual(response.json(), ms_s.AlbumSerializer(self.album_1, read_only=True).data)
+
+        # unknown album or not published
+        response = self.client.get(f'{url}?id={self.album_3.pk}')
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(f'{url}?id=800')
+        self.assertEqual(response.status_code, 404)
+
+    def test_artists(self):
+        url = reverse('music:artists')
+
+        # list
+        response = self.client.get(url)
+        self.assertListEqual(
+            response.json(),
+            ms_s.ArtistSerializer(ms_models.Artist.objects.order_by('name'), many=True, read_only=True).data
+        )
+
+        # specific artist
+        response = self.client.get(f'{url}?id={self.artist_1.pk}')
+        artist_info = ms_s.ArtistSerializer(self.artist_1, read_only=True).data
+        album_songs = [
+            album.all_songs() for album in self.artist_1.album_set.filter(published=True) if album.all_songs()
+        ]
+        songs = [song for album in album_songs for song in album]
+        songs.sort(key=lambda song: song.streams, reverse=True)
+        album_set = self.artist_1.album_set.filter(published=True).order_by('-date_of_release')
+        albums = album_set.filter(is_ep=False, is_single=False)
+        eps = album_set.filter(is_ep=True)
+        singles = album_set.filter(is_single=True)
+
+        artist_info.update({
+            'top_songs': ms_s.SongSerializer(songs, many=True, read_only=True).data,
+            'albums': ms_s.AlbumSerializer(albums, many=True, read_only=True, no_discs=True).data,
+            'singles': ms_s.AlbumSerializer(singles, many=True, read_only=True, no_discs=True).data,
+            'eps': ms_s.AlbumSerializer(eps, many=True, read_only=True, no_discs=True).data,
+            'playlists': ms_s.PlaylistSerializer(self.artist_1.playlists.all(), many=True, read_only=True).data
+        })
+        self.assertDictEqual(
+            response.json(),
+            artist_info
+        )
+
+        # no such artist
+        response = self.client.get(f'{url}?id=800')
+        self.assertEqual(response.status_code, 404)
