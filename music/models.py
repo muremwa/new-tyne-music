@@ -70,6 +70,7 @@ class Genre(models.Model):
     description = models.TextField()
     avi = models.ImageField(default='/defaults/genre.png', upload_to=upload_genre_image)
     cover = models.ImageField(default='/defaults/genre_wide.png', upload_to=upload_genre_image)
+    main_curator = models.ForeignKey('Creator', blank=True, null=True, on_delete=models.PROTECT)
     objects = models.Manager()
 
     def __str__(self):
