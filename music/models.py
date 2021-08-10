@@ -191,7 +191,8 @@ class Song(models.Model):
     length = models.IntegerField(default=0, help_text='Length of the song in seconds')
     file = models.FileField(blank=True, null=True, upload_to=upload_song_file)
     likes = models.IntegerField(default=0, blank=True, null=True)
-    additional_artists = models.ManyToManyField(Artist, blank=True)
+    additional_artists = models.ManyToManyField(Artist, blank=True, related_name='additions')
+    featured_artists = models.ManyToManyField(Artist, blank=True, related_name='features')
     streams = models.IntegerField(default=0, blank=True, null=True)
     objects = models.Manager()
 
@@ -210,6 +211,10 @@ class Song(models.Model):
             minutes_ = minutes if minutes > 9 else f'0{minutes}'
             length = f'{self.length // 60}:{minutes_}'
         return length
+
+    @property
+    def album_artists(self):
+        return self.disc.album.artists.all()
 
     def add_additional_artist(self, artist):
         if self.pk and type(artist) == Artist and artist not in self.disc.album.artists.all():

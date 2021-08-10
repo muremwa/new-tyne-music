@@ -32,13 +32,23 @@ class GenreSerializer(ModelSerializer):
 
 class SongSerializer(ModelSerializer):
     additional_artists = ArtistSerializer(many=True, read_only=True)
+    album_artists = ArtistSerializer(many=True, read_only=True)
 
     class Meta:
         model = Song
         fields = (
             'id', 'track_no', 'title', 'explicit', 'length', 'file', 'likes', 'streams', 'additional_artists',
-            'album_art'
+            'album_art', 'album_artists'
         )
+
+    def __init__(self, *args, **kwargs):
+        album_info = kwargs.pop('album_info', False)
+
+        super(SongSerializer, self).__init__(*args, **kwargs)
+
+        if not album_info:
+            self.fields.pop('album_art')
+            self.fields.pop('album_artists')
 
 
 class DiscSerializer(ModelSerializer):

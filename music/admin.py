@@ -115,7 +115,7 @@ class GenreModelAdmin(admin.ModelAdmin):
 
 class SongInline(admin.TabularInline):
     model = Song
-    fields = ['track_no', 'title', 'genre', 'explicit']
+    fields = ['track_no', 'title', 'genre', 'explicit', 'additional_artists', 'featured_artists']
     extra = 1
     show_change_link = True
     ordering = ('track_no',)
@@ -195,7 +195,7 @@ class SongModelAdmin(admin.ModelAdmin):
         ),
         (
             'Relations', {
-                'fields': ['genre', 'additional_artists']
+                'fields': ['genre', 'additional_artists', 'featured_artists']
             }
         ),
         (

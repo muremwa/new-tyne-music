@@ -195,7 +195,6 @@ class MusicSerializerTestCase(TestCase):
                 'file': None,
                 'likes': 0,
                 'streams': 0,
-                'album_art': self.song_1.album_art,
                 'additional_artists': m_serializers.ArtistSerializer(
                     self.song_1.additional_artists.all(), many=True
                 ).data
