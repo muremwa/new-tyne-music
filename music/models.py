@@ -45,6 +45,7 @@ class Artist(models.Model):
     cover = models.ImageField(default='/defaults/artist_large.png', upload_to=upload_artist_image, help_text='16x16')
     bio = models.TextField(blank=True, null=True, help_text='Info about the artist')
     nicknames = models.TextField(blank=True, null=True, help_text='Comma separated names the artist goes by')
+    playlists = models.ManyToManyField('Playlist', blank=True)
     objects = models.Manager()
 
     def add_artist_to_group(self, artist: 'Artist'):
@@ -195,6 +196,10 @@ class Song(models.Model):
 
     class Meta:
         unique_together = (('disc', 'track_no'),)
+
+    @property
+    def album_art(self):
+        return self.disc.album.cover.url
 
     @property
     def length_string(self):
