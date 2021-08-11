@@ -151,6 +151,8 @@ class Album(models.Model):
 
     def add_sister_album(self, album):
         if type(album) == type(self) and self.pk:
+            for other_version in self.other_versions.all():
+                other_version.other_versions.add(album)
             self.other_versions.add(album)
 
     def clean(self):

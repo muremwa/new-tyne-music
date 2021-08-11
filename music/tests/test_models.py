@@ -150,6 +150,7 @@ class AlbumTestCase(TestCase):
         self.album_1.save()
         self.assertEqual(1, self.album_1.disc_set.count())
 
+    @tag('music-m-album-versions')
     def test_other_versions(self):
         for album in self.albums:
             self.assertEqual(album.other_versions.count(), 2)
