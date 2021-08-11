@@ -202,7 +202,7 @@ def genres(request):
             'curators': ms_serializers.CreatorSerializer(curators, many=True, read_only=True).data,
             'sections': ms_serializers.CreatorSectionSerializer(sections, many=True, read_only=True).data,
             'playlists': ms_serializers.PlaylistSerializer(
-                genre.main_curator.playlist_set.all(),
+                genre.main_curator.playlist_set.filter(artist__isnull=True),
                 many=True,
                 read_only=True
             ).data
