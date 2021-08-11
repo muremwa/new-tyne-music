@@ -1,5 +1,6 @@
 from typing import List, Dict
 from itertools import chain
+from time import time
 
 from Levenshtein import distance
 from django.db.models import Q
@@ -44,6 +45,7 @@ class MusicSearch:
         self.staff_view = staff_view
         self.results = None
         self.serial_data = None
+        self.time_taken = None
 
     def __distance(self, string: str) -> int:
         return distance(self.term.lower(), string.lower())
@@ -213,10 +215,13 @@ class MusicSearch:
 
     def get_results(self, serialize=False, refresh=False) -> Dict:
         """serialize=True to get serial_data"""
+        start_time = time()
         if self.results is None or refresh:
             self.results = self.__process()
 
         if (serialize and self.serial_data is None) or refresh:
             self.serial_data = self.__serialize_results(self.results)
+        end_time = time()
+        self.time_taken = end_time - start_time
 
         return self.serial_data if serialize else self.results

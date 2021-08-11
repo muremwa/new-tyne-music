@@ -9,6 +9,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 
 from . import models as ms_models, serializers as ms_serializers
+from .searches import MusicSearch
 
 
 @api_view(['GET'])
@@ -229,6 +230,36 @@ def curators(request, curator_id):
         response.update({
             'sections': ms_serializers.CreatorSectionSerializer(sections, many=True, read_only=True).data,
             'playlists': ms_serializers.PlaylistSerializer(playlists, many=True, read_only=True).data
+        })
+
+    return Response(response)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search(request):
+    """
+    Search the tyne music catalogue
+    use the parameter ?q=search_term
+    Results are in the following format
+    {
+        'top_results': [mix of albums, songs, playlists, genres, etc],
+        'albums': [albums],
+        'artists': [artists],
+        'playlists': [playlists],
+        'genres': [genres],
+        'curators': [curators],
+        'time': seconds of how long the search took
+    }
+    """
+    term = request.GET.get('q')
+    response = {}
+
+    if term:
+        ms_search = MusicSearch(term)
+        response = ms_search.get_results(serialize=True)
+        response.update({
+            'time': ms_search.time_taken
         })
 
     return Response(response)
