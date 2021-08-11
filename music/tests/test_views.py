@@ -205,7 +205,7 @@ class MusicViewsTestCase(APITestCase):
             'curators': ms_s.CreatorSerializer(set(curators), many=True).data,
             'sections': ms_s.CreatorSectionSerializer(self.genre.main_curator.creatorsection_set.all(), many=True).data,
             'playlists': ms_s.PlaylistSerializer(
-                self.genre.main_curator.playlist_set.all(),
+                self.genre.main_curator.playlist_set.filter(artist__isnull=True),
                 many=True,
                 read_only=True
             ).data
@@ -215,3 +215,21 @@ class MusicViewsTestCase(APITestCase):
         # no such genre
         response = self.client.get(f'{url}?id=800')
         self.assertEqual(response.status_code, 404)
+
+    def test_curator(self):
+        url = reverse('music:curator', kwargs={'curator_id': self.creator.pk})
+        response = self.client.get(url)
+        c_info = ms_s.CreatorSerializer(self.creator, read_only=True).data
+        c_info.update({
+            'sections': ms_s.CreatorSectionSerializer(
+                self.creator.creatorsection_set.all(),
+                many=True,
+                read_only=True
+            ).data,
+            'playlists': ms_s.PlaylistSerializer(
+                self.creator.playlist_set.filter(artist__isnull=True),
+                many=True,
+                read_only=True
+            ).data
+        })
+        self.assertEqual(response.json(), c_info)

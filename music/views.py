@@ -196,10 +196,10 @@ def genres(request):
 
         genre = get_object_or_404(ms_models.Genre, pk=genre_pk)
         response = ms_serializers.GenreSerializer(genre, read_only=True).data
-        curators = set(list(genre.creator_set.all()) + [genre.main_curator])
+        genre_curators = set(list(genre.creator_set.all()) + [genre.main_curator])
         sections = genre.main_curator.creatorsection_set.all()
         response.update({
-            'curators': ms_serializers.CreatorSerializer(curators, many=True, read_only=True).data,
+            'curators': ms_serializers.CreatorSerializer(genre_curators, many=True, read_only=True).data,
             'sections': ms_serializers.CreatorSectionSerializer(sections, many=True, read_only=True).data,
             'playlists': ms_serializers.PlaylistSerializer(
                 genre.main_curator.playlist_set.filter(artist__isnull=True),
@@ -211,5 +211,24 @@ def genres(request):
     else:
         all_genres = ms_models.Genre.objects.all()
         response = ms_serializers.GenreSerializer(all_genres, many=True, read_only=True).data
+
+    return Response(response)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def curators(request, curator_id):
+    curator = get_object_or_404(ms_models.Creator, pk=curator_id)
+    sections = curator.creatorsection_set.all()
+    playlists = curator.playlist_set.filter(artist__isnull=True)
+    response = ms_serializers.CreatorSerializer(curator, read_only=True).data
+
+    info_only = request.GET.get('io')
+
+    if not info_only:
+        response.update({
+            'sections': ms_serializers.CreatorSectionSerializer(sections, many=True, read_only=True).data,
+            'playlists': ms_serializers.PlaylistSerializer(playlists, many=True, read_only=True).data
+        })
 
     return Response(response)

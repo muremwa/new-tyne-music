@@ -1,7 +1,7 @@
 from django.urls import path
 
 
-from .views import profile_library, albums, artists, genres
+from .views import profile_library, albums, artists, genres, curators
 
 
 app_name = 'music'
@@ -19,5 +19,8 @@ urlpatterns = [
 
     # genres/
     path('genres/', genres, name='genres'),
+
+    # curators/
+    path('curators/<int:curator_id>/', curators, name='curator'),
 
 ]
