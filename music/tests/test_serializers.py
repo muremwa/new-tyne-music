@@ -107,8 +107,15 @@ class MusicSerializerTestCase(TestCase):
             genre=self.genre,
             date_of_release='2021-05-12'
         )
+        self.album_3: Album = Album.objects.create(
+            title='WAX (Tyne Music Edition)',
+            genre=self.genre,
+            date_of_release='2021-05-12'
+        )
         self.album_2.artists.add(self.artist_1)
         self.album_2.add_sister_album(self.album_1)
+        self.album_2.add_sister_album(self.album_3)
+        self.album_1.add_sister_album(self.album_3)
         self.song_3 = Song.objects.create(
             title='Pig',
             track_no=3,
@@ -213,6 +220,7 @@ class MusicSerializerTestCase(TestCase):
             }
         )
 
+    @tag('music-s-x-a')
     def test_album_data(self):
         ase = m_serializers.AlbumSerializer(self.album_1)
         data = {
@@ -227,7 +235,10 @@ class MusicSerializerTestCase(TestCase):
             'artists': m_serializers.ArtistSerializer(self.album_1.artists.all(), many=True, read_only=True).data,
             'copyright': self.album_1.copyright,
             'published': self.album_1.published,
-            'discs': m_serializers.DiscSerializer(self.album_1.disc_set.all(), many=True, read_only=True).data
+            'discs': m_serializers.DiscSerializer(self.album_1.disc_set.all(), many=True, read_only=True).data,
+            'other_versions': [
+                {'title': version.title, 'id': version.pk} for version in self.album_1.other_versions.all()
+            ]
         }
         self.assertDictEqual(ase.data, data)
         ase = m_serializers.AlbumSerializer(self.album_1, no_discs=True)

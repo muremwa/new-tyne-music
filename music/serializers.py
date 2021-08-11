@@ -64,6 +64,7 @@ class AlbumSerializer(ModelSerializer):
     album_type = CharField(source='al_code')
     artists = ArtistSerializer(many=True)
     genre = GenreSerializer()
+    other_versions = SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         no_discs = kwargs.pop('no_discs', False)
@@ -77,8 +78,19 @@ class AlbumSerializer(ModelSerializer):
         model = Album
         fields = (
             'id', 'title', 'notes', 'genre', 'date_of_release', 'album_type', 'cover', 'likes', 'artists', 'copyright',
-            'published', 'discs'
+            'published', 'discs', 'other_versions'
         )
+
+    def get_other_versions(self, obj):
+        versions = []
+        if hasattr(obj, 'other_versions'):
+            versions = [
+                {
+                    'title': version.title,
+                    'id': version.pk
+                } for version in obj.other_versions.all()
+            ]
+        return versions
 
 
 class PlaylistSerializer(ModelSerializer):
