@@ -1,0 +1,51 @@
+{% extends 'tyne/base.html' %}
+{% load staticfiles %}
+{% block title %}Sign in{% endblock title %}
+
+{% block action %}Login{% endblock action %}
+
+{% block signin %}active{% endblock signin %}
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'auth/css/login.css' %}">{% endblock style %}
+
+
+{% block content %}
+
+    <div id="login-form-div">
+        <form id="login-form" action="{% url 'master-login' %}" method="POST" autocomplete="off">
+            {% if user.is_anonymous %}
+                {% if wrong_creds %}
+                    <div class="alert alert-danger">
+                        Wrong email address or password
+                    </div>
+                {% else %}
+                    <h4 class="text-center">Sign in with your email and password</h4>
+                {% endif %}
+
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="email">email address</label>
+                    <input id="email" type="email" name="email" class="form-control" required placeholder="Example; email@tyne.com" value="{{ email }}"/>
+                </div>
+        
+                <div class="form-group">
+                    <label for="password">password</label>
+                    <input id="password" type="password" name="password" class="form-control" required/>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="sign in" class="btn btn-outline-dark">
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <h4>Signed in as {{ user.username }}</h4>
+                    <a class="btn btn-outline-dark" href="{% url 'master-logout' %}">Sign out</a>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+
+
+{% endblock content %}
+
+

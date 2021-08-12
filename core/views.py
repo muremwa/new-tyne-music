@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework import status
-from django.shortcuts import reverse, get_object_or_404
-from django.contrib.auth import authenticate
+from django.shortcuts import reverse, get_object_or_404, redirect, render
+from django.contrib.auth import authenticate, decorators, logout, login as d_login
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 
@@ -325,3 +325,34 @@ def profile_delete(request, profile_pk):
         response['success'] = True
 
     return Response(response, status=response_status)
+
+
+def master_login(request):
+    if request.method == 'GET':
+        return render(request, 'auth/login.html')
+
+    elif request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        if email and password:
+            try:
+                user = User.objects.get(email=email)
+                authenticated_user = authenticate(request, username=user.username, password=password)
+
+                if authenticated_user is not None:
+                    d_login(request, authenticated_user)
+                    return redirect('/')
+            except ObjectDoesNotExist:
+                pass
+
+        return render(request, 'auth/login.html', {
+            'wrong_creds': True,
+            'email': email
+        })
+
+
+@decorators.login_required
+def master_logout(request):
+    logout(request)
+    return redirect('/')

@@ -123,7 +123,7 @@ AUTH_USER_MODEL = 'core.User'
 MEDIA_ROOT = str(BASE_DIR / 'media')
 MEDIA_URL = '/media/'
 
-LOGIN_URL = '/core/login/'
+LOGIN_URL = '/login/'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -135,3 +135,8 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATICFILES_DIRS = (
+    str(BASE_DIR / "tyne/static"),
+)
+

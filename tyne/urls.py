@@ -4,6 +4,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.documentation import include_docs_urls
 
+from core.views import master_login, master_logout
+
 docs_description = """
     This are the API end points available on tyne music
 """
@@ -16,6 +18,15 @@ urlpatterns = [
 
     # music/
     path('music/', include('music.urls')),
+
+    # staff/
+    path('staff/', include('staff.urls')),
+
+    # login/
+    path('login/', master_login, name='master-login'),
+
+    # logout/
+    path('logout/', master_logout, name='master-logout'),
 
     # docs/
     path('docs/', include_docs_urls(title='Tyne Music API docs', description=docs_description))
