@@ -1,0 +1,37 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+
+{% block title %}Home{% endblock title %}
+{% block home %}active{% endblock home %}
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'staff/css/home.css' %}">{% endblock style %}
+
+{% block content %}
+    <div class="container">
+        {% if staff_actions %}
+            <h4>Actions available</h4>
+            <script type="text/javascript">
+                function clickLink(linkId) {
+                    document.getElementById(linkId).click()
+                }
+            </script>
+            <div class="row">
+                {% for action in staff_actions %}
+                    <div class="action col-md-2">
+                        <div class="action-info">
+                            <h5 class="action-title">{{ action.name }}</h5>
+                            <p class="action-description">{{ action.description }}</p>
+                        </div>
+                        <div class="action-link" onclick="clickLink('{{ action.id }}')">
+                            <a id="{{ action.id }}" href="{{ action.url }}">go</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center">
+                <h2>no actions available</h2>
+                <p>Contact your manager</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}

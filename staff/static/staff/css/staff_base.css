@@ -1,0 +1,22 @@
+* {
+    font-family: 'Google Sans', 'Lucida Sans', sans-serif;
+}
+
+#navbar-title {
+    color: aliceblue;
+    font-size: 2em;
+    width: 20%;
+    text-align: center;
+}
+
+#navbar-title > #top-name {
+    font-size: 1em;
+}
+
+#navbar-title > #bottom-name {
+    font-size: 0.5em;
+}
+
+#main {
+    padding-top: 2em;
+}

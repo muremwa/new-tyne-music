@@ -4,7 +4,7 @@
     <head>
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<title> {% block title %}{% endblock title %} - tyne music</title>
+		<title> {% block title %}{% endblock title %} - tyne music staff and moderation site</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="theme-color" content="#f8f9fa">
 		<link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/bootstrap.min.css' %}" />
@@ -17,7 +17,7 @@
             <div class="container-fluid">
                 <h1 id="navbar-title">
                     <span id="top-name">tyne music</span><br />
-                    <span id="bottom-name">{% block action %}{% endblock action %}</span>
+                    <span id="bottom-name">adminstration</span>
                 </h1>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainLinks" aria-controls="mainLinks" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,34 +27,28 @@
                 <div class="collapse navbar-collapse" id="mainLinks">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link {% block home %}{% endblock home %}" aria-current="page" href="/">Home</a>
+                            <a class="nav-link {% block home %}{% endblock home %}" aria-current="page" href="{% url 'staff:home' %}">Home</a>
                         </li>
 
-                        {% if user.is_authenticated %}
-                            <li class="nav-item">
-                                <a class="nav-link {% block listen %}{% endblock listen %}" aria-current="page" href="/">Listen</a>
-                            </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block listen %}{% endblock listen %}" aria-current="page" href="/">Listen</a>
+                        </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link {% block account %}{% endblock account %}" aria-current="page" href="/">Account</a>
-                            </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block account %}{% endblock account %}" aria-current="page" href="/">Account</a>
+                        </li>
 
-                            {% if user.is_staff %}
-                                <li class="nav-item">
-                                    <a class="nav-link" aria-current="page" href="">Staff</a>
-                                </li>
-                            {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link {% block signout %}{% endblock signout %}" aria-current="page" href="{% url 'master-logout' %}" title="Signed in as {{ user.username }}">Sign Out</a>
+                        </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link {% block signout %}{% endblock signout %}" aria-current="page" href="{% url 'master-logout' %}" title="Signed in as {{ user.username }}">Sign Out</a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link {% block signin %}{% endblock signin %}" aria-current="page" href="{% url 'master-login' %}">Sign In</a>
-                            </li>
-                        {% endif %}
+                        
 
                     </ul>
+
+                    <span class="navbar-text">
+                        <span>Signed in as {{ user.username }}</span>
+                    </span>
                 </div>
             </div>
         </nav>
