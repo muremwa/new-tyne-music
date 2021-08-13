@@ -1,0 +1,143 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+
+{% block title %}Add User{% endblock title %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'staff/css/add_user.css' %}">{% endblock style %}
+
+{% block content %}
+
+    <div class="container">
+        {% if manage %}
+            {% if manage.is_superuser %}
+                <div class="row">
+                    <div class="col-md-6">
+                        {% include 'staff/user_details.html' with d_user=manage %}
+                    </div>
+                    <div class="col-md-3">
+                        <h2>This user cannot be managed.</h2>
+                    </div>
+                </div>
+            {% else %}
+                <div class="row">
+                    <div class="col-md-4" id="ud">
+                        {% include 'staff/user_details.html' with d_user=manage %}
+                        <hr>
+
+                        {% if manage.is_staff %}
+                            <form action="{% url 'staff:add-users' %}" method="post" class="skimmy-border">
+                                {% csrf_token %}
+                                <h4>'{{ manage.username }}' is staff, change this</h4>
+                                <div class="alert alert-danger">By clicking the button below, '{{ manage.username }}' will no longer a staff member, They will lose all thier access.<br />Are you sure?</div>
+                                <input type="hidden" value="{{ manage.email }}" name="email">
+                                <input type="hidden" value="1" name="remove-staff" />
+                                <div class="form-group">
+                                    <input type="submit" value="remove '{{ manage.username }}' from staff" class="btn btn-outline-danger">
+                                </div>
+                            </form>
+                        {% endif %}
+
+                    </div>
+
+                    {% if not manage.is_staff %}
+                        <div class="col-md-4">
+                            <form action="{% url 'staff:add-users' %}" method="post">
+                                {% csrf_token %}
+                                <h4>To manage the user, they have to be staff</h4>
+                                <div class="alert alert-info">By clicking the button below, you make '{{ manage.username }}' a staff member who has access to this site.<br />Are you sure?</div>
+                                <input type="hidden" value="{{ manage.email }}" name="email">
+                                <input type="hidden" value="1" name="make-staff" />
+                                <div class="form-group">
+                                    <input type="submit" value="Make '{{ manage.username }}' staff">
+                                </div>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="col-md-8">
+                            <h4>Add or remove '{{ manage.username }}' from any of the following groups.</h4>
+
+                            <div id="group-grp" class="skimmy-border">
+                                <ul id="nav-tabs-sec" class="nav nav-tabs">
+                                    {% for group in groups %}
+                                        <li class="nav-item">
+                                            <span class="nav-link tab-nav{% if forloop.counter == 1 %} active{% endif %}" href="#" data-section-to="group-{{ group.pk }}" data-section-from="" id="group-{{ group.pk }}-open">{{ group.name }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+
+                                {% for group in groups %}
+                                    <div id="group-{{ group.pk }}" class="group-tab{% if forloop.counter == 1 %} group-tab-active{% endif %}">
+                                        {% if group in manage.groups.all %}
+                                            <form action="{% url 'staff:add-users' %}" method="post">
+                                                {% csrf_token %}
+                                                <h4>Remove "{{ manage.username }}" from {{ group.name }}</h4>
+                                                <div class="alert alert-warning">
+                                                    By clicking the button below you strip "{{ manage.username }}" the following permissions;
+                                                    <ul>
+                                                        {% for perm in group.permissions.all %}
+                                                            <li>{{ perm.name }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                                <input type="hidden" value="{{ manage.email }}" name="email">
+                                                <input type="hidden" value="{{ group.pk }}" name="group-remove"/>
+                                                <div class="form-group">
+                                                    <input type="submit" value="remove '{{ manage.username }}' from {{ group.name }}" class="btn btn-outline-danger">
+                                                </div>
+                                            </form>
+                                        {% else %}
+                                            <form action="{% url 'staff:add-users' %}" method="post">
+                                                {% csrf_token %}
+                                                <h4>Add "{{ manage.username }}" to {{ group.name }}</h4>
+                                                <div class="alert alert-info">
+                                                    By clicking the button below you give "{{ manage.username }}" the following permissions;
+                                                    <ul>
+                                                        {% for perm in group.permissions.all %}
+                                                            <li>{{ perm.name }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                                <input type="hidden" value="{{ manage.email }}" name="email">
+                                                <input type="hidden" value="{{ group.pk }}" name="group-add"/>
+                                                <div class="form-group">
+                                                    <input type="submit" value="Add '{{ manage.username }}' to {{ group.name }}">
+                                                </div>
+                                            </form>
+                                        {% endif %}
+                                        <span>To learn more about "{{ group.name }}", <a href="{% url 'staff:help-list' %}?q=staff groups">follow this link</a></span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div id="search-email">
+                <form action="{% url 'staff:add-users' %}" method="post">
+                    {% csrf_token %}
+                    {% if email_not_found %}
+                        <div class="alert alert-warning">
+                            The email you entered does not exist on tyne music
+                        </div>
+                    {% endif %}
+                    <div class="form-group">
+                        <label for="email">Enter the email of the user you want to manage</label>
+                        <input type="email" name="email" id="email" class="form-control" required value="{{ email }}" placeholder="Enter email to manage a user">
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="get user" class="btn btn-outline-dark">
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock content %}
+
+{% block bottomScript %}
+<script src="{% static '/staff/js/tabMaster.js' %}"></script>
+{% endblock bottomScript %}

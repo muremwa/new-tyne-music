@@ -1,0 +1,35 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+
+{% block title %}Help{% endblock title %}
+
+{% block help %}active{% endblock help %}
+
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'staff/css/help_list.css' %}" />{% endblock style %}
+
+{% block content %}
+    <div class="container">
+        {% if articles %}
+            <h3>Staff Help Articles</h3>
+            <hr>
+
+            <div id="articles">
+
+                {% for article in articles %}
+                    <div class="article">
+                        <h5><a href="{% url 'staff:help-article' article.slug %}">{{ article.title }}</a></h5>
+                        <p>{{ article.description }}</p>
+                        <small>Last modified {{ article.modified }}</small>
+                        <hr>
+                    </div>
+                {% endfor %}
+
+            </div>
+        {% else %}
+            <h3>No help articles available</h3>
+        {% endif %}
+
+    </div>
+
+
+{% endblock content %}

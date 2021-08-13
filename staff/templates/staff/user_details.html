@@ -1,0 +1,11 @@
+<div class="skimmy-border">
+    <h2>User Details</h2>
+    <p>Username: <strong>{{ d_user.username }}</strong></p>
+    <p>Email: <strong>{{ d_user.email }}</strong></p>
+    <p>Staff status: <strong>{{ d_user.is_staff }}</strong></p>
+    <p>Superuser status: <strong>{{ d_user.is_superuser }}</strong></p>
+    <p>Date joined: <strong>{{ d_user.date_joined }}</strong></p>
+    <p>Tier: <strong>{{ d_user.c_tier }}</strong></p>
+
+    <a href="{% url 'staff:add-users' %}" class="btn btn-outline-dark">Get a new user</a>
+</div>

@@ -1,0 +1,9 @@
+#articles {
+    width: 90%;
+    margin: auto;
+    padding: 1em;
+}
+
+.article a {
+    text-decoration: none;
+}

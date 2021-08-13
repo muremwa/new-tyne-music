@@ -1,0 +1,44 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+
+{% block title %}Help{% endblock title %}
+
+{% block help %}active{% endblock help %}
+
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'staff/css/help_detail.css' %}" />{% endblock style %}
+
+
+{% block content %}
+    <div class="container">
+        <h1>{{ article.title }}</h1>
+
+        <p>This article tries to explain:</p>
+        <p>{{ article.description }}</p>
+        <hr>
+        <p id="help-article">
+            <nav class="navbar sticky-top navbar-dark bg-dark" id="article-sections-nav">
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        <strong>{{ article.title }} sections</strong>
+                    </a>
+            
+                    <ul id="article-nav-drop-down" class="dropdown-menu" aria-labelledby="dropdownMenuLink">Loading...</ul>
+                </div>
+            </nav>
+            
+            <div id="article-top" class="js-article">
+                <div class="text-center">
+                    <img src="{% static 'imgs/200.gif' %}">
+                </div>
+                <input type="hidden" id="js-article-content" value="{{ article.help_text }}">
+            </div>
+        </p>
+    </div>
+
+{% endblock content %}
+
+{% block bottomScript %}
+<script src="{% static 'staff/js/marked.min.js' %}"></script>
+<script src="{% static 'staff/js/articleSection.js' %}"></script>
+<script src="{% static 'staff/js/article.js' %}"></script>
+{% endblock bottomScript %}

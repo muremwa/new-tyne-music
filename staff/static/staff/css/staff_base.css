@@ -2,6 +2,10 @@
     font-family: 'Google Sans', 'Lucida Sans', sans-serif;
 }
 
+html {
+    font-size: 14px;
+}
+
 #navbar-title {
     color: aliceblue;
     font-size: 2em;

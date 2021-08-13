@@ -140,3 +140,27 @@ STATICFILES_DIRS = (
     str(BASE_DIR / "tyne/static"),
 )
 
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
+        },
+    },
+    'handlers': {
+        'staff_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+            'filename': str(BASE_DIR / "logs/staff/info_log.log"),
+        },
+    },
+    'loggers': {
+        'tyne.staff': {
+            'handlers': ['staff_file'],
+            'level': 'INFO',
+        }
+    },
+}
