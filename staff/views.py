@@ -2,6 +2,7 @@ from typing import List
 import logging
 
 from django.shortcuts import render
+from django.urls import reverse
 from django.views import View, generic
 from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
@@ -12,6 +13,7 @@ from django.contrib.messages import add_message, constants as message_constants
 
 from .staff_actions import staff_actions
 from .models import HelpArticle
+from .forms import HelpArticleForm, HelpArticleEditForm
 from core.models import User
 from tyne_utils.funcs import is_string_true_or_false
 
@@ -148,7 +150,7 @@ class AddAdminUsers(StaffAccessMixin, StaffPermissionMixin, View):
 
 
 class StaffHelpList(StaffAccessMixin, generic.ListView):
-    queryset = HelpArticle.objects.filter(is_staff=True)
+    queryset = HelpArticle.objects.filter(is_staff=True).order_by('-id')
     context_object_name = 'articles'
     template_name = 'staff/help_list.html'
 
@@ -161,7 +163,51 @@ class StaffHelpList(StaffAccessMixin, generic.ListView):
 
 
 class StaffHelpArticlePage(StaffAccessMixin, generic.DetailView):
-    queryset = HelpArticle.objects.filter(is_staff=True)
+    queryset = HelpArticle.objects.all()
     slug_url_kwarg = 'article_slug'
     context_object_name = 'article'
     template_name = 'staff/help_detail.html'
+
+
+class StaffArticleAdd(StaffAccessMixin, PermissionRequiredMixin, generic.CreateView):
+    model = HelpArticle
+    form_class = HelpArticleForm
+    template_name = 'staff/article_edit.html'
+    permission_required = ('staff.add_helparticle',)
+
+    def get_success_url(self):
+        user_info = f'{self.request.user.username}({self.request.user.pk})'
+        staff_logger.info(
+            f'ID: create_article: {user_info} created article {self.object.title}({self.object.pk})'
+        )
+        return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
+
+
+class StaffArticleEdit(StaffAccessMixin, PermissionRequiredMixin, generic.UpdateView):
+    model = HelpArticle
+    form_class = HelpArticleEditForm
+    template_name = 'staff/article_edit.html'
+    pk_url_kwarg = 'article_pk'
+    context_object_name = 'article'
+    permission_required = ('staff.change_helparticle',)
+
+    def get_success_url(self):
+        user_info = f'{self.request.user.username}({self.request.user.pk})'
+        staff_logger.info(
+            f'ID: edited_article: {user_info} edited article {self.object.title}({self.object.pk})'
+        )
+        return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
+
+
+class StaffArticleHelpDelete(StaffAccessMixin, PermissionRequiredMixin, generic.DeleteView):
+    model = HelpArticle
+    pk_url_kwarg = 'article_pk'
+    context_object_name = 'article'
+    permission_required = ('staff.delete_helparticle',)
+
+    def get_success_url(self):
+        user_info = f'{self.request.user.username}({self.request.user.pk})'
+        staff_logger.info(
+            f'ID: delete_article: {user_info} deleted article {self.object.title}({self.object.pk})'
+        )
+        return reverse("staff:help-list")

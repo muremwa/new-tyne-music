@@ -16,6 +16,9 @@ class HelpArticle(models.Model):
         return f'HelpArticle: {self.title}'
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            self.slug = slugify(self.title)
-        return super().save(*args, **kwargs)
+        pk = self.pk
+        super().save()
+
+        if not pk or not self.slug:
+            self.slug = f'{slugify(self.title)}-{self.pk}'
+            self.save()

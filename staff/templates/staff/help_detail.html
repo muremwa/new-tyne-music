@@ -24,6 +24,15 @@
             
                     <ul id="article-nav-drop-down" class="dropdown-menu" aria-labelledby="dropdownMenuLink">Loading...</ul>
                 </div>
+
+                <span class="navbar-text">
+                    {% if perms.staff.change_helparticle and perms.staff.delete_helparticle %}
+                        <a href="{% url 'staff:help-edit' article.pk %}"><button class="btn btn-outline-primary">Edit '{{ article.title }}'</button></a>
+                        <span style="width: 10px;"></span>
+                        <a href="{% url 'staff:help-delete' article.pk %}"><button class="btn btn-outline-danger">Delete '{{ article.title }}'</button></a>
+                        <button style="visibility: hidden;" class="btn btn-outline-danger">Delete '{{ article.title }}'</button>
+                    {% endif %}
+                </span>
             </nav>
             
             <div id="article-top" class="js-article">

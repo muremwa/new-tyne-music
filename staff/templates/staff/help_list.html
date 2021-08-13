@@ -14,13 +14,24 @@
             <hr>
 
             <div id="articles">
-
                 {% for article in articles %}
                     <div class="article">
                         <h5><a href="{% url 'staff:help-article' article.slug %}">{{ article.title }}</a></h5>
                         <p>{{ article.description }}</p>
                         <small>Last modified {{ article.modified }}</small>
                         <hr>
+                        {% if perms.staff.change_helparticle and perms.staff.delete_helparticle %}
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <a href="{% url 'staff:help-edit' article.pk %}" class="btn btn-outline-dark">Edit '{{ article.title }}'</a>
+                                </div>
+                                <div class="col-md-1"></div>
+                                <div class="col-md-2">
+                                    <a href="{% url 'staff:help-delete' article.pk %}" class="btn btn-outline-danger">Delete '{{ article.title }}'</a>
+                                </div>
+                            </div>
+                            <hr>
+                        {% endif %}
                     </div>
                 {% endfor %}
 

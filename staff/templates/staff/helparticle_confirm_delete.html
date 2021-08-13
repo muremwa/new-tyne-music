@@ -1,0 +1,18 @@
+{% extends "staff/staff_base.html" %}
+
+{% block title %}Delete '{{ article.title }}'{% endblock title %}
+{% block help %}active{% endblock help %}
+
+{% block content %}
+    <div class="col-sm-9 container">
+        <div>
+            <h2>Are you sure you want to delete {{ article.title }}</h2>
+            <p class="text-info">once {{ article.title }} is deleted it cannot be recovered!</p>
+            <form class="form-inline" method="post">
+                {% csrf_token %}
+                <input type="submit" class="col-sm-2 btn btn-outline-danger" value="delete">
+                <a style="margin-left: 10px" href="{% url 'staff:help-article' article.slug %}" class="col-sm-2 btn btn-outline-primary">cancel</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

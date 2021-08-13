@@ -1,0 +1,100 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+
+{% block title %}{% if article %}Edit '{{ article.title }}'{% else %}Add Help Article{% endif %}{% endblock title %}
+
+{% block style %}
+    {{ form.media.css }}
+    <link rel="stylesheet" href="{% static 'staff/css/article_edit.css' %}">
+{% endblock style %}
+
+{% block help %}active{% endblock help %}
+
+{% block content %}
+    <div class="container-fluid">
+        {% if article %}
+            <h2>Edit "<a href="{% url 'staff:help-article' article.slug %}">{{ article.title }}</a>"</h2>
+        {% else %}
+            <h2>Add Help Article</h2>
+        {% endif %}
+
+        <form action="" method="post">
+            {% csrf_token %}
+            {% if not article %}
+                <div class="row">
+                    <!-- Title help text -->
+                    <div class="alert alert-info alert-dismissible fade show text-center col-md-3" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        Enter a title for the article
+                    </div>
+                    <!-- Title -->
+                    <div class="form-group col-md-3">
+                        {% if form.title.errors %}
+                            {% for error in form.title.errors %}
+                                <i class="stub">{{ error }}</i>
+                            {% endfor %}
+                        {% endif %}
+        
+                        <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                        {{ form.title }}
+                    </div>
+                    <!-- Is staff help text -->
+                    <div class="alert alert-info alert-dismissible fade show text-center col-md-3" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        Is this article meant for staff or normal users?
+                    </div>
+                    <!-- is staff -->
+                    <div class="form-group col-md-1">
+                        {% if form.is_staff.errors %}
+                            {% for error in form.is_staff.errors %}
+                                <i class="stub">{{ error }}</i>
+                            {% endfor %}
+                        {% endif %}
+                        <br>
+                        <label for="{{ form.is_staff.id_for_label }}">{{ form.is_staff.label }}</label>
+                        {{ form.is_staff }}
+                    </div>
+                </div>
+                <hr>
+            {% endif %}
+
+            <!-- Edit help text -->
+            <div id="edt-div">
+                {{ form.help_text }}
+            </div>
+
+            <hr>
+            <div id="bottom-grp">    
+                <!-- Description -->
+                <div class="form-group">
+                    <div class="alert alert-info alert-dismissible fade show text-center" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        Enter a short description for the article
+                    </div>
+                    {% if form.description.errors %}
+                        {% for error in form.description.errors %}
+                            <i class="stub"> {{ error }}</i>
+                        {% endfor %}
+                    {% endif %}
+
+                    <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                    {{ form.description }}
+                </div>
+
+                <hr>
+                
+                <div class="form-group">
+                    <input type="submit" value="{% if article %}edit '{{ article.title }}'{% else %}add article{% endif %}" class="btn btn-outline-dark">
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+{% endblock content %}
+
+{% block bottomScript %}
+    {{ form.media.js }}
+{% endblock bottomScript %}
+
+

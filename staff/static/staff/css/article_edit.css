@@ -1,0 +1,10 @@
+#bottom-grp {
+    width: 50%;
+    margin: auto;
+}
+
+#edt-div {
+    width: 90%;
+    margin: auto;
+    min-height: 100vh;
+}
