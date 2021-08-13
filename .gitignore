@@ -4,3 +4,4 @@ media/*
 !*defaults*
 .idea/*
 logs/*
+.vscode/*
