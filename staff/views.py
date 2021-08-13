@@ -3,7 +3,7 @@ import logging
 
 from django.shortcuts import render
 from django.views import View, generic
-from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
@@ -65,7 +65,8 @@ class AddAdminUsers(StaffAccessMixin, StaffPermissionMixin, View):
             group = Group.objects.get(pk=group_pk)
             user.groups.add(group)
             added = True
-            staff_logger.info(f'{self.log_message_user()}) added {user.username}({user.pk}) to {group.name}')
+            user_info = f'{user.username}({user.pk})'
+            staff_logger.info(f'ID: add_to_grp:{self.log_message_user()}) added {user_info} to {group.name}')
         except ObjectDoesNotExist:
             added = False
         return added
@@ -132,7 +133,7 @@ class AddAdminUsers(StaffAccessMixin, StaffPermissionMixin, View):
             manage.groups.remove(remove_from_group)
             message = f'\'{manage.username}\' removed from group ID {remove_from_group}'
             staff_logger.info(
-                f'{self.log_message_user()} removed {user_info} from group({remove_from_group})'
+                f'ID: add_to_grp:{self.log_message_user()} removed {user_info} from group({remove_from_group})'
             )
 
         if message:
