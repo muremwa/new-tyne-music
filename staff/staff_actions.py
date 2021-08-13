@@ -11,5 +11,14 @@ staff_actions = [
             'auth.change_group', 'auth.view_group', 'auth.change_permission', 'auth.view_permission',
             'core.change_user', 'core.view_user'
         ]
+    },
+    {
+        'name': 'Add Help Article',
+        'id': 'create_help_article',
+        'url': reverse_lazy("staff:help-add"),
+        'description': 'Add help articles for all of tyne music.',
+        'permissions': [
+            'staff.add_helparticle',
+        ]
     }
 ]
