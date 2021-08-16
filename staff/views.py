@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 import logging
 
 from django.shortcuts import render
@@ -211,3 +211,65 @@ class StaffArticleHelpDelete(StaffAccessMixin, PermissionRequiredMixin, generic.
             f'ID: delete_article: {user_info} deleted article {self.object.title}({self.object.pk})'
         )
         return reverse("staff:help-list")
+
+
+class StaffRolesView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateView):
+    template_name = 'staff/staff_roles.html'
+    permission_required = (
+        'auth.change_group', 'auth.view_group', 'auth.change_permission', 'auth.view_permission',
+        'core.change_user', 'core.view_user'
+    )
+
+    def get_permission_required(self):
+        perms = super().get_permission_required()
+        staff_id = self.request.GET.get('staff-id', '')
+
+        # if a user is attempting to view their own staff info, then they can be allowed to do so
+        if staff_id and staff_id.isdigit() and int(staff_id) == self.request.user.pk:
+            perms = tuple()
+        return perms
+
+    def staff_member_permissions(self, all_permissions: Set[str], staff_pk: int) -> List[str]:
+        perms = []
+        prefix = 'You can' if self.request.user.pk == staff_pk else 'Can'
+
+        for perm in all_permissions:
+            perm_ = perm.split('.')
+            perm_ = perm_[-1] if len(perm_) == 2 else ''
+            if perm_:
+                perm_ = perm_.translate(str.maketrans('_', ' '))
+
+                perms.append(
+                    f'{prefix} {perm_}'
+                )
+
+        return perms
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        staff_id = self.request.GET.get('staff-id', '')
+        staff = User.objects.filter(is_staff=True)
+
+        if staff_id and staff_id.isdigit():
+            try:
+                staff_member: User = staff.get(pk=int(staff_id))
+                perms = self.staff_member_permissions(staff_member.get_all_permissions(), staff_member.pk)
+            except ObjectDoesNotExist:
+                staff_member = None
+                perms = []
+            context.update({
+                'staff_member': staff_member,
+                'staff_id': staff_id,
+                'staff_member_permissions': perms
+            })
+
+        else:
+            query = self.request.GET.get('q', '')
+            if query:
+                staff = staff.filter((Q(username__icontains=query) | Q(email__icontains=query)))
+
+            context.update({
+                'staff': staff,
+                'q': query if query else None
+            })
+        return context

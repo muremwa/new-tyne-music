@@ -10,10 +10,16 @@ urlpatterns = [
     path('', views.StaffHome.as_view(), name='home'),
 
     # /add_user_to_staff/
-    path('add_user_to_staff/', views.AddAdminUsers.as_view(), name='add-users'),
+    path('manage-staff-user/', views.AddAdminUsers.as_view(), name='add-users'),
+
+    # staff-roles/
+    path('staff-roles/', views.StaffRolesView.as_view(), name='staff-view'),
 
     # help/
     path('help/', views.StaffHelpList.as_view(), name='help-list'),
+
+    # help/article/how-to-use-staff-page/
+    path('help/article/<slug:article_slug>/', views.StaffHelpArticlePage.as_view(), name='help-article'),
 
     # help/manage/
     path('help/manage/', views.StaffArticleAdd.as_view(), name='help-add'),
@@ -24,6 +30,4 @@ urlpatterns = [
     # help/manage/delete/43/
     path('help/manage/delete/<int:article_pk>/', views.StaffArticleHelpDelete.as_view(), name='help-delete'),
 
-    # help/article/how-to-use-staff-page/
-    path('help/article/<slug:article_slug>/', views.StaffHelpArticlePage.as_view(), name='help-article'),
 ]

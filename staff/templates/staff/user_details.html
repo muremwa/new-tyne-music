@@ -7,5 +7,9 @@
     <p>Date joined: <strong>{{ d_user.date_joined }}</strong></p>
     <p>Tier: <strong>{{ d_user.c_tier }}</strong></p>
 
-    <a href="{% url 'staff:add-users' %}" class="btn btn-outline-dark">Get a new user</a>
+    <div class="row">
+        <a href="{% url 'staff:add-users' %}" class="btn btn-outline-dark col-md-5">Manage a new user</a>
+        <span class="col"></span>
+        <a href="{% url 'staff:staff-view' %}" class="btn btn-outline-dark col-md-5">List all users</a>
+    </div>
 </div>

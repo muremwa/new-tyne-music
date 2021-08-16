@@ -1,0 +1,45 @@
+<div class="staff-member-det">
+    <div class="row">
+        <div class="col-md-4">{% include 'staff/user_details.html' with d_user=staff_member %}</div>
+        <div class="col-md-4">
+            <div class="skimmy-border">
+                <h4>Groups {% if staff_member.pk == user.pk %}you{% else %}"{{ staff_member.username }}"{% endif %} belongs to;</h4>
+
+                <ul>
+                    {% for group in staff_member.groups.all %}
+                        <li>{{ group.name }}</li>
+                    {% empty %}
+                        <p>"{{ staff_member.username }}" does not belong to any groups</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="skimmy-border">
+                <h4>Permissions that {% if staff_member.pk == user.pk %}you have{% else %}"{{ staff_member.username }}" has{% endif %};</h4>
+
+                {% if staff_member.is_superuser %}
+                    <p>Being a superuser all permission are granted without explicit assignment</p>
+                {% else %}
+                    <ul>
+                        {% for perm in staff_member_permissions %}
+                            <li>{{ perm }}</li>
+                        {% empty %}
+                            <p>{% if staff_member.pk == user.pk %}you have{% else %}"{{ staff_member.username }}" has{% endif %} no permissions</p>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <br />
+
+    {% if not staff_member.is_superuser and staff_member.pk != user.pk %}
+        <form action="{% url 'staff:add-users' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="email" value="{{ staff_member.email }}">
+            <input class="btn btn-outline-dark" value='Manage "{{ staff_member.username }}"' type="submit">
+        </form>
+    {% endif %}
+</div>

@@ -47,13 +47,22 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="{% url 'master-logout' %}" title="Signed in as {{ user.username }}">Sign Out</a>
+                            <a class="nav-link {% block si_as %}{% endblock si_as %}" aria-current="page" href="{% url 'staff:staff-view' %}?staff-id={{ user.pk }}">Signed in as {{ user.username }}</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="{% url 'master-logout' %}">Sign Out</a>
                         </li>
                     </ul>
 
-                    <span class="navbar-text">
-                        <span>Signed in as {{ user.username }}</span>
-                    </span>
+                    <form method="GET" action="{% block search_action %}{% endblock search_action %}" class="row" autocomplete="off">
+                        <div class="col-md-7">
+                            <input class="form-control" type="search" name="q" value="{{ q }}" placeholder="Search {% block search_placeholder %}{% endblock search_placeholder %}" aria-label="Search" required >
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-success" type="submit">Search</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </nav>

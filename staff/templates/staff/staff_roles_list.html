@@ -1,0 +1,32 @@
+<h2>Staff Members</h2>
+
+<div class="row">
+    {% for staff_member in staff %}
+        <div class="staff-member col-md-3 skimmy-border">
+            <div class="details">
+                <p>username: <strong>{{ staff_member.username }}</strong>{% if staff_member.pk == user.pk %} (You){% endif %}</p>
+                <p>email: <strong>{{ staff_member.email }}</strong></p>
+            </div>
+            <div class="row add-info">
+                <div class="col-sm">
+                    <a href="{% url 'staff:staff-view' %}?staff-id={{ staff_member.pk }}" class="btn btn-outline-dark">Details</a>
+                </div>
+
+                {% if user.pk != staff_member.pk and not staff_member.is_superuser %}
+                    <div class="col-sm">
+                        <form action="{% url 'staff:add-users' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ staff_member.email }}">
+                            <button class="btn btn-outline-dark">Manage</button>
+                        </form>
+                    </div>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <div class="col-sm">
+                        <a href="" class="btn btn-outline-dark">Logs</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>

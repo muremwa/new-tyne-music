@@ -1,0 +1,17 @@
+.skimmy-border {
+    border: 1px solid violet;
+    border-radius: 5px;
+    padding: 1em;
+}
+
+.staff-member {
+    margin: 0.5em;
+}
+
+.add-info a, .add-info button {
+    font-size: 0.8em;
+}
+
+div.staff-member-det > div.row > div {
+
+}

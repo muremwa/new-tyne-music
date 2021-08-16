@@ -1,0 +1,40 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+
+{% block title %}Staff Roles{% endblock title %}
+
+{% block style %}
+    <link href="{% static 'staff/css/roles.css' %}" type="text/css" rel="stylesheet" />
+{% endblock style %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block si_as %}active{% endblock si_as %}
+
+{% block search_action %}{% url 'staff:staff-view' %}{% endblock search_action %}
+
+{% block search_placeholder %}staff members by username or email{% endblock search_placeholder %}
+
+
+{% block content %}
+    <div class="container">
+        {% if staff %}
+            {% include 'staff/staff_roles_list.html' %}
+        {% else %}
+            {% if staff_member %}
+                {% include 'staff/staff_roles_detail.html' %}
+            {% else %}
+                {% if staff_id %}
+                    <div class="text-center">
+                        <h2>No staff "{{ staff_id }}"</h2>
+                    </div>    
+                {% else %}
+                    <div class="text-center">
+                        <h2>No staff found{% if q %}: '{{ q }}'{% endif %}</h2>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+
+{% endblock content %}
