@@ -56,7 +56,7 @@
                         </div>
                     {% else %}
                         <div class="col-md-8">
-                            <h4>Add or remove '{{ manage.username }}' from any of the following groups.</h4>
+                            <h4>Add or remove '<a href="{% url 'staff:staff-view' %}?staff-id={{ manage.pk }}">{{ manage.username }}</a>' from any of the following groups.</h4>
 
                             <div id="group-grp" class="skimmy-border">
                                 <ul id="nav-tabs-sec" class="nav nav-tabs">

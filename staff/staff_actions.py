@@ -20,5 +20,14 @@ staff_actions = [
         'permissions': [
             'staff.add_helparticle',
         ]
+    },
+    {
+        'name': 'List staff members',
+        'id': 'ls_staff',
+        'url': reverse_lazy('staff:staff-view'),
+        'description': 'Lists all staff members and you get to view their permissions and groups',
+        'permissions': [
+            'core.view_user', 'auth.view_group', 'auth.view_permission'
+        ]
     }
 ]
