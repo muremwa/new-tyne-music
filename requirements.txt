@@ -3,3 +3,4 @@ rest_framework=3.12.4
 pillow=5.3.0
 coreapi=2.3.3
 python-levenshtein=0.12.2
+dataclasses=0.8

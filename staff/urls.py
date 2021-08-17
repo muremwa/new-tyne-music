@@ -30,4 +30,7 @@ urlpatterns = [
     # help/manage/delete/43/
     path('help/manage/delete/<int:article_pk>/', views.StaffArticleHelpDelete.as_view(), name='help-delete'),
 
+    # logs/
+    path('logs/', views.StaffLogs.as_view(), name='logs'),
+
 ]

@@ -16,9 +16,14 @@ from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm
 from core.models import User
 from tyne_utils.funcs import is_string_true_or_false
+from .logs_processing import log_action_ids
 
 
 staff_logger = logging.getLogger('tyne.staff')
+
+
+def info_log_staff_message(action_id, message):
+    staff_logger.info(f'ID: {action_id}:{message}')
 
 
 class StaffAccessMixin(UserPassesTestMixin):
@@ -68,7 +73,10 @@ class AddAdminUsers(StaffAccessMixin, StaffPermissionMixin, View):
             user.groups.add(group)
             added = True
             user_info = f'{user.username}({user.pk})'
-            staff_logger.info(f'ID: add_to_grp:{self.log_message_user()}) added {user_info} to {group.name}')
+            info_log_staff_message(
+                log_action_ids.ADD_TO_GROUP,
+                f'{self.log_message_user()}) added {user_info} to {group.name}'
+            )
         except ObjectDoesNotExist:
             added = False
         return added
@@ -78,15 +86,17 @@ class AddAdminUsers(StaffAccessMixin, StaffPermissionMixin, View):
         user.is_staff = False
         user.save()
         user_info = f'{user.username}({user.pk})'
-        staff_logger.info(
-            f'ID: add_staff: {self.log_message_user()} removed {user_info} from staff'
+        info_log_staff_message(
+            log_action_ids.REMOVE_STAFF,
+            f'{self.log_message_user()} removed {user_info} from staff'
         )
 
     def make_user_staff(self, user):
         user.is_staff = True
         user.save()
-        staff_logger.info(
-            f'ID: add_staff: {self.log_message_user()} made {user.username}({user.pk}) staff'
+        info_log_staff_message(
+            log_action_ids.ADD_STAFF,
+            f'{self.log_message_user()} made {user.username}({user.pk}) staff'
         )
 
     def get(self, request):
@@ -134,8 +144,9 @@ class AddAdminUsers(StaffAccessMixin, StaffPermissionMixin, View):
         if remove_from_group and remove_from_group.isdigit() and manage:
             manage.groups.remove(remove_from_group)
             message = f'\'{manage.username}\' removed from group ID {remove_from_group}'
-            staff_logger.info(
-                f'ID: add_to_grp:{self.log_message_user()} removed {user_info} from group({remove_from_group})'
+            info_log_staff_message(
+                log_action_ids.REMOVE_FROM_GROUP,
+                f'{self.log_message_user()} removed {user_info} from group({remove_from_group})'
             )
 
         if message:
@@ -177,8 +188,9 @@ class StaffArticleAdd(StaffAccessMixin, PermissionRequiredMixin, generic.CreateV
 
     def get_success_url(self):
         user_info = f'{self.request.user.username}({self.request.user.pk})'
-        staff_logger.info(
-            f'ID: create_article: {user_info} created article {self.object.title}({self.object.pk})'
+        info_log_staff_message(
+            log_action_ids.CREATE_ARTICLE,
+            f'{user_info} created article {self.object.title}({self.object.pk})'
         )
         return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
 
@@ -193,8 +205,9 @@ class StaffArticleEdit(StaffAccessMixin, PermissionRequiredMixin, generic.Update
 
     def get_success_url(self):
         user_info = f'{self.request.user.username}({self.request.user.pk})'
-        staff_logger.info(
-            f'ID: edited_article: {user_info} edited article {self.object.title}({self.object.pk})'
+        info_log_staff_message(
+            log_action_ids.EDIT_ARTICLE,
+            f'{user_info} edited article {self.object.title}({self.object.pk})'
         )
         return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
 
@@ -207,8 +220,9 @@ class StaffArticleHelpDelete(StaffAccessMixin, PermissionRequiredMixin, generic.
 
     def get_success_url(self):
         user_info = f'{self.request.user.username}({self.request.user.pk})'
-        staff_logger.info(
-            f'ID: delete_article: {user_info} deleted article {self.object.title}({self.object.pk})'
+        info_log_staff_message(
+            log_action_ids.DELETE_ARTICLE,
+            f'{user_info} deleted article {self.object.title}({self.object.pk})'
         )
         return reverse("staff:help-list")
 
@@ -273,3 +287,12 @@ class StaffRolesView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateVie
                 'q': query if query else None
             })
         return context
+
+
+class StaffLogs(StaffAccessMixin, generic.TemplateView):
+    template_name = 'staff/staff_logs.html'
+
+    # only superusers can access this page
+    def test_func(self):
+        if hasattr(self.request.user, 'is_superuser'):
+            return self.request.user.is_superuser
