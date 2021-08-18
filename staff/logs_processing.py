@@ -3,7 +3,8 @@ from re import search, compile, findall, sub
 from datetime import datetime
 from dataclasses import dataclass
 
-from tyne.settings import BASE_DIR
+from django.conf import settings
+
 from tyne_utils.funcs import turn_string_to_datetime
 
 
@@ -165,4 +166,4 @@ class LogMaster:
 
 
 log_action_ids = LogActionIds()
-staff_logs = LogMaster(str(BASE_DIR / 'logs/staff/info_log.log'))
+staff_logs = LogMaster(str(settings.BASE_DIR / 'logs/staff/info_log.log'))
