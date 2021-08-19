@@ -1,0 +1,19 @@
+.log-search-form {
+    font-size: 0.75em;
+}
+
+.log {
+    margin-bottom: 2px;
+}
+
+.log-message {
+    margin: 1em;
+}
+
+.edge-case {
+    padding-top: 3em;
+}
+
+.ps {
+    border: 1px solid blue;
+}

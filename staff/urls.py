@@ -19,7 +19,7 @@ urlpatterns = [
     path('help/', views.StaffHelpList.as_view(), name='help-list'),
 
     # help/article/how-to-use-staff-page/
-    path('help/article/<slug:article_slug>/', views.StaffHelpArticlePage.as_view(), name='help-article'),
+    path('help/article/<int:article_pk>/', views.StaffHelpArticlePage.as_view(), name='help-article'),
 
     # help/manage/
     path('help/manage/', views.StaffArticleAdd.as_view(), name='help-add'),
@@ -31,6 +31,6 @@ urlpatterns = [
     path('help/manage/delete/<int:article_pk>/', views.StaffArticleHelpDelete.as_view(), name='help-delete'),
 
     # logs/
-    path('logs/', views.StaffLogs.as_view(), name='logs'),
+    path('staff-activity/', views.StaffLogs.as_view(), name='logs'),
 
 ]

@@ -4,6 +4,7 @@ from datetime import datetime
 from dataclasses import dataclass
 
 from django.conf import settings
+from django.urls import reverse_lazy
 
 from tyne_utils.funcs import turn_string_to_datetime
 
@@ -33,6 +34,10 @@ class Log:
         self.raw_message = raw_message
         self.clean_message = None
         self.time = None
+        self.clean_by = None
+        self.clean_to = None
+        self.__pk_pattern = compile(r'(?P<pk>\d+)')
+        self.__pk_strip_pattern = compile(r'\(\d+\)+')
 
         if self.raw_message:
             mss = self.raw_message.split(':')
@@ -42,9 +47,51 @@ class Log:
         if type(action_time) == str and type(action_date) == str:
             self.time = turn_string_to_datetime(f'{action_date} {action_time}')
 
+        if self.done_by:
+            self.clean_by = sub(self.__pk_strip_pattern, ' ', self.done_by)
+
+        if self.done_to:
+            self.clean_to = sub(self.__pk_strip_pattern, ' ', self.done_to)
+
     def full_time(self, tw_4h=True):
         if self.time:
             return self.time.strftime(f"%A %B %d, %Y at {'%H:%M' if tw_4h else '%I:%M %p'}")
+
+    def to_url(self):
+        url = ''
+        if self.done_to and self.action_id:
+            to_pks = search(self.__pk_pattern, self.done_to)
+            if to_pks:
+                to_pk = to_pks.group('pk')
+                url = self.__manufacture_urls(self.action_id, to_pk)
+        return url
+
+    def by_url(self):
+        url = ''
+        if self.done_by and self.action_id:
+            by_pks = search(self.__pk_pattern, self.done_by)
+            if by_pks:
+                by_pk = by_pks.group('pk')
+                url = self.__manufacture_urls(self.action_id, by_pk, to=False)
+        return url
+
+    @staticmethod
+    def __manufacture_urls(action: str, pk: str, to: bool = True) -> str:
+        """Create a ur based on the item"""
+        url = ''
+        user_url = f"{reverse_lazy('staff:staff-view')}?staff-id={str(pk)}"
+        article_url = reverse_lazy("staff:help-article", kwargs={"article_pk": str(pk)})
+
+        if 'staff' in action:
+            url = user_url
+
+        elif 'article' in action:
+            url = article_url if to else user_url
+
+        elif 'group' in action:
+            url = user_url
+
+        return url
 
     def __str__(self):
         return f'Log message from {self.full_time()}'
@@ -137,7 +184,7 @@ class LogMaster:
         return self.logs if info else self.p_logs
 
     def search(self, by: str=None, to: str=None, start_time: datetime=None, end_time: datetime=None,
-               action: str=None) -> List[Log]:
+               action: str=None, user: str=None) -> List[Log]:
         """
         search logs using
         1. name or id of done_by
@@ -147,11 +194,15 @@ class LogMaster:
         """
         logs = self.get_logs()
 
-        if type(action) == str:
-            logs = filter(lambda log: log.action_id == action, logs)
+        if type(user) == str:
+            logs = filter(lambda log: user in log.raw_message, logs)
 
-        if type(by) == str:
-            logs = filter(lambda log: by in log.done_by, logs)
+        else:
+            if type(action) == str:
+                logs = filter(lambda log: log.action_id == action, logs)
+
+            if type(by) == str:
+                logs = filter(lambda log: by in log.done_by, logs)
 
         if type(to) == str:
             logs = filter(lambda log: to in log.done_to, logs)

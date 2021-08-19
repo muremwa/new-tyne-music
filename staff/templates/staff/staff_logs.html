@@ -5,6 +5,98 @@
 
 {% block staff %}active{% endblock staff %}
 
-{% block style %}{% endblock style %}
 
-{% block content %}{% endblock content %}
+{% block search_action %}{% url 'staff:logs' %}{% endblock search_action %}
+{% block search_placeholder %}by user{% endblock search_placeholder %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'staff/css/staff_logs.css' %}">
+{% endblock style %}
+
+
+{% block content %}
+
+<div class="container-fluid row">
+    <div class="log-search-form col-md-3">
+        <h4>Filter Staff Activity<small class="h6">{% if show_help %}<a href="{% url 'staff:logs' %}">remove help</a>{% else %}<a href="?h=1">Show help</a>{% endif %}</small></h4>
+        <form action="{% url 'staff:logs' %}" method="get" id="filter-log-form" class="skimmy-border">
+            {% for field in log_form %}
+                <div class="form-group">
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="alert alert-warning alert-dismissible fade show text-center" role="alert">
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% if show_help %}
+                        <div class="alert alert-info alert-dismissible fade show text-center" role="alert">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            {{ field.help_text }}
+                        </div>
+                    {% endif %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    <hr>
+                </div>
+            {% endfor %}
+
+            <div class="row">
+                <div class="form-group col-md-5">
+                    <button type="submit" class="btn btn-outline-dark">filter activity</button>
+                </div>
+                <span class="col-md-2"></span>
+                <div class="form-group col-md-4">
+                    <button type="reset" class="btn btn-outline-danger">reset filter</button>
+                </div>
+            </div>            
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        
+        <h2 class="text-center">{% if filtered %}Filtered staff activity ({{ logs|length}}){% else %}Top {{ logs|length}} staff recent activity{% endif %}</h2>
+
+        {% for log in logs %}
+            <div class="log skimmy-border">
+                <div class="row">
+                    <div class="col-md-1">
+                        <h3>{{ forloop.counter }}.</h3>
+                    </div>
+                    <div class="col-md-11">
+                        <div class="row">
+                            <div class="col-md-3">By: <strong><a href="{{ log.by_url }}" target="_blank" rel="noopener noreferrer">{{ log.clean_by }}</a></strong></div>
+                            <div class="col-md-6">{{log.full_time }}</div>
+                            <div class="col-md-3">Affects: <strong><a href="{{ log.to_url }}" target="_blank" rel="noopener noreferrer">{{ log.clean_to }}</a></strong></div>
+                        </div>
+                        <p class="log-message">{{ log.clean_message }}</p>
+                        <div class="row">
+                            <a href="{% url 'staff:logs' %}?action={{ log.action_id }}" class="col-md-4" title="filter activity with id '{{ log.action_id }}'"><span>{{ log.action_id }}</span></a>
+                            <a href="{% url 'staff:logs' %}?by={{ log.done_by }}" class="col-md-4" title="filter activity by '{{ log.clean_by }}'"><span>{{ log.clean_by }}</span></a>
+                            <a href="{% url 'staff:logs' %}?to={{ log.done_to }}" class="col-md-4" title="filter activity done to '{{ log.clean_to }}'">{{ log.clean_to }}</a>
+                        </div>
+                    </div>
+                </div>                
+            </div>
+        {% empty %}
+            <div class="alert alert-primary alert-dismissible fade show text-center" role="alert">
+                No staff activity available {% if filtered %}with current filters{% endif %}
+                <br />
+                <br />
+                <a href="{% url 'staff:logs' %}" class="btn btn-outline-dark">clear filters</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-3 edge-case">
+
+        <a href="{% url 'staff:logs' %}" class="btn btn-outline-dark">Lose all filters</a>
+        <a href="{% url 'staff:logs' %}?all=1" class="btn btn-outline-dark">All activity ever</a>
+    </div>
+</div>
+
+
+{% endblock content %}
+    

@@ -13,10 +13,10 @@ from django.contrib.messages import add_message, constants as message_constants
 
 from .staff_actions import staff_actions
 from .models import HelpArticle
-from .forms import HelpArticleForm, HelpArticleEditForm
+from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
 from core.models import User
 from tyne_utils.funcs import is_string_true_or_false
-from .logs_processing import log_action_ids
+from .logs_processing import log_action_ids, staff_logs
 
 
 staff_logger = logging.getLogger('tyne.staff')
@@ -175,7 +175,7 @@ class StaffHelpList(StaffAccessMixin, generic.ListView):
 
 class StaffHelpArticlePage(StaffAccessMixin, generic.DetailView):
     queryset = HelpArticle.objects.all()
-    slug_url_kwarg = 'article_slug'
+    pk_url_kwarg = 'article_pk'
     context_object_name = 'article'
     template_name = 'staff/help_detail.html'
 
@@ -296,3 +296,33 @@ class StaffLogs(StaffAccessMixin, generic.TemplateView):
     def test_func(self):
         if hasattr(self.request.user, 'is_superuser'):
             return self.request.user.is_superuser
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        log_form = LogSearchForm(self.request.GET)
+        q = self.request.GET.get('q', '')
+        filtered = False
+
+        if q:
+            log_form = LogSearchForm({
+                'user': q
+            })
+
+        if log_form.is_valid() and log_form.has_changed():
+            logs = log_form.get_logs()
+            filtered = True
+        else:
+            logs = reversed(staff_logs.get_logs())
+            logs = list(logs)
+
+            if not self.request.GET.get('all'):
+                logs = logs[:20]
+
+        context.update({
+            'log_form': log_form,
+            'show_help': self.request.GET.get('h'),
+            'logs': logs,
+            'filtered': filtered,
+            'q': q
+        })
+        return context

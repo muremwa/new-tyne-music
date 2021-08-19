@@ -16,11 +16,6 @@
     border-right: 1px solid violet;
 }
 
-.skimmy-border {
-    border: 1px solid violet;
-    border-radius: 5px;
-    padding: 2em;
-}
 
 .tab-nav {
     cursor: pointer;
