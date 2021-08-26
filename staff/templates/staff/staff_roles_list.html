@@ -23,7 +23,7 @@
                 {% endif %}
                 {% if user.is_superuser %}
                     <div class="col-sm">
-                        <a href="" class="btn btn-outline-dark">Logs</a>
+                        <a href="{% url 'staff:logs' %}?by={{ staff_member.username }}({{ staff_member.pk }})" class="btn btn-outline-dark">view activity</a>
                     </div>
                 {% endif %}
             </div>

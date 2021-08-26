@@ -22,6 +22,8 @@
                 {% endif %}
 
                 {% csrf_token %}
+
+                <input type="hidden" name="next" value="{{ next }}">
                 
                 <div class="form-group">
                     <label for="email">email address</label>
