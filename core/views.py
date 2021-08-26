@@ -329,9 +329,12 @@ def profile_delete(request, profile_pk):
 
 def master_login(request):
     if request.method == 'GET':
-        return render(request, 'auth/login.html')
+        return render(request, 'auth/login.html', {
+            'next': request.GET.get('next')
+        })
 
     elif request.method == 'POST':
+        next_url = request.POST.get('next')
         email = request.POST.get('email')
         password = request.POST.get('password')
 
@@ -342,7 +345,7 @@ def master_login(request):
 
                 if authenticated_user is not None:
                     d_login(request, authenticated_user)
-                    return redirect('/')
+                    return redirect(next_url if next_url else '/')
             except ObjectDoesNotExist:
                 pass
 
