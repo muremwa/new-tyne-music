@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.contrib.messages import add_message, constants as message_constants
 
 from core.models import User
+from music.models import Album
 from tyne_utils.funcs import is_string_true_or_false
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -320,7 +321,7 @@ class GroupInfoView(SuperuserAccessMixin, generic.TemplateView):
 
         if group_id and group_id.isdigit():
             context.update({
-                'group': get_object_or_404(Group, pk=group_id),
+                'group': get_object_or_404(Group, pk=int(group_id)),
                 'group_id': group_id
             })
 
@@ -360,3 +361,52 @@ class StaffLogs(SuperuserAccessMixin, generic.TemplateView):
             'q': q
         })
         return context
+
+
+class StaffAlbumView(StaffAccessMixin, generic.TemplateView):
+    template_name = 'staff/albums.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['albums'] = Album.objects.all()
+        album_id = self.request.GET.get('album-id', '')
+        query = self.request.GET.get('q')
+
+        if album_id and album_id.isdigit():
+            context.update({
+                'album': get_object_or_404(Album, pk=int(album_id)),
+                'album_id': album_id
+            })
+
+        if query:
+            context.update({
+                'albums': Album.objects.filter((
+                    Q(title__icontains=query) |
+                    Q(artists__name__icontains=query) |
+                    Q(artists__group_members__name__icontains=query, artists__is_group=True)
+                )).order_by('-date_of_release'),
+                'q': query
+            })
+        return context
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

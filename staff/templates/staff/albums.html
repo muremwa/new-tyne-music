@@ -1,0 +1,60 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+{% load music_filter %}
+
+{% block title %}Manage {% if album %}{{ album }}{% else %}albums{% endif %}{% endblock title %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block search_action %}{% url 'staff:manage-albums' %}{% endblock search_action %}
+
+{% block search_placeholder %}album by title or artists{% endblock search_placeholder %}
+
+{% block style %} <link rel="stylesheet" href="{% static 'staff/css/albums.css' %}" type="text/css"> {% endblock style %}
+
+{% block content %}
+
+
+    {% if album_id %}
+    {% comment %} Single Album {% endcomment %}
+
+
+    {% else %}
+    {% comment %} All albums {% endcomment %}
+        <div class="container">
+            {% if albums %}
+                <h4>Albums available</h4>
+                <script type="text/javascript">
+                    function clickLink(linkId) {
+                        document.getElementById(linkId).click()
+                    }
+                </script>
+                <div class="row">
+                    {% for l_album in albums %}
+                        <div class="album col-md-2">
+                            <div class="album-info">
+                                <h5 class="album-title" data-bs-toggle="tooltip" title="{{ l_album.title }} • {{ l_album.date_of_release.year }}">{{ l_album.title }}</h5>
+                                <p class="album-description" {% if l_album.artists.count > 4 %}data-bs-toggle="tooltip" title="{{ l_album.artists|album_artists_string }}"{% endif %}>
+                                    from {{ l_album.artists|album_artists }}
+                                    |
+                                    <strong>{{ l_album.date_of_release.year }}</strong>
+                                </p>
+                            </div>
+                            <div class="album-link" onclick="clickLink('{{ l_album.pk }}-link')" aria-label="manage {{ l_album.title }}">
+                                <a id="{{ l_album.pk }}-link" href="{% url 'staff:manage-albums' %}?album-id={{ l_album.pk }}">manage</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <h2>no albums available</h2>
+                    <a href="" class="btn btn-outline-dark">Add New</a>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+
+
+{% endblock content %}

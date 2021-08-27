@@ -1,0 +1,51 @@
+.album {
+    border: 1px solid rgb(209, 220, 228);
+    border-radius: 5px;
+    height: 8em;
+    margin: 1em;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.album-info {
+    margin: 0.5em;
+    height: 63%;
+}
+
+.album-title {
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    line-height: 1em;
+    max-height: 1em;
+    cursor: default;
+}
+
+.album-description {
+    text-align: justify;
+    font-size: 0.8em;
+}
+
+.album-link {
+    height: 25%;
+    width: 100%;
+    border-top: 1px solid rgb(209, 220, 228);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.album-link > a {
+    text-decoration: none;
+}
+
+.album-link:hover > a, .album-link:focus-within > a {
+    text-decoration: none;
+    color: aliceblue;
+}
+
+.album-link:hover, .album-link:focus-within {
+    background-color: #3d444b;
+}

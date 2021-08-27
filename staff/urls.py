@@ -36,4 +36,7 @@ urlpatterns = [
     # logs/
     path('staff-activity/', views.StaffLogs.as_view(), name='logs'),
 
+    # manage-albums/
+    path('manage-albums/', views.StaffAlbumView.as_view(), name='manage-albums'),
+
 ]
