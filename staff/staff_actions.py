@@ -34,9 +34,15 @@ staff_actions = [
 
 superuser_actions = [
     {
-        'name': 'View Staff Activity',
+        'name': 'View staff activity',
         'id': 'view_staff_activity',
         'url': reverse_lazy("staff:logs"),
         'description': 'View records of activity by staff and who or what they affected',
+    },
+    {
+        'name': 'View all groups',
+        'id': 'view_all_groups',
+        'url': reverse_lazy("staff:staff-groups"),
+        'description': 'View all groups, their members, and permission allocated',
     }
 ]

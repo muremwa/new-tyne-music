@@ -72,7 +72,7 @@
                                         {% if group in manage.groups.all %}
                                             <form action="{% url 'staff:add-users' %}" method="post">
                                                 {% csrf_token %}
-                                                <h4>Remove "{{ manage.username }}" from {{ group.name }}</h4>
+                                                <h4>Remove "{{ manage.username }}" from <a href="{% url 'staff:staff-groups' %}?group-id={{ group.pk }}" target="_blank" rel="noopener noreferrer">{{ group.name }}</a> </h4>
                                                 <div class="alert alert-warning">
                                                     By clicking the button below you strip "{{ manage.username }}" the following permissions;
                                                     <ul>
@@ -90,7 +90,7 @@
                                         {% else %}
                                             <form action="{% url 'staff:add-users' %}" method="post">
                                                 {% csrf_token %}
-                                                <h4>Add "{{ manage.username }}" to {{ group.name }}</h4>
+                                                <h4>Add "{{ manage.username }}" to <a href="{% url 'staff:staff-groups' %}?group-id={{ group.pk }}" target="_blank" rel="noopener noreferrer">{{ group.name }}</a> </h4>
                                                 <div class="alert alert-info">
                                                     By clicking the button below you give "{{ manage.username }}" the following permissions;
                                                     <ul>

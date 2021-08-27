@@ -15,6 +15,9 @@ urlpatterns = [
     # staff-roles/
     path('staff-roles/', views.StaffRolesView.as_view(), name='staff-view'),
 
+    # staff-groups/
+    path('staff-groups/', views.GroupInfoView.as_view(), name='staff-groups'),
+
     # help/
     path('help/', views.StaffHelpList.as_view(), name='help-list'),
 

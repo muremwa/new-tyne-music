@@ -1,7 +1,7 @@
 from typing import List, Set
 import logging
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import View, generic
 from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
@@ -34,6 +34,14 @@ class StaffAccessMixin(UserPassesTestMixin):
 
     def handle_no_permission(self):
         raise Http404
+
+
+# superuser access mixin
+class SuperuserAccessMixin(StaffAccessMixin):
+    # only superusers can access this page
+    def test_func(self):
+        if hasattr(self, 'request') and hasattr(self.request.user, 'is_superuser'):
+            return self.request.user.is_superuser
 
 
 # permission mixin for staff, throw 404 if permission denied
@@ -301,14 +309,27 @@ class StaffRolesView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateVie
         return context
 
 
-# view staff activity
-class StaffLogs(StaffAccessMixin, generic.TemplateView):
-    template_name = 'staff/staff_logs.html'
+# view groups and their users
+class GroupInfoView(SuperuserAccessMixin, generic.TemplateView):
+    template_name = 'staff/groups.html'
 
-    # only superusers can access this page
-    def test_func(self):
-        if hasattr(self.request.user, 'is_superuser'):
-            return self.request.user.is_superuser
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['groups'] = Group.objects.all()
+        group_id = self.request.GET.get('group-id', '')
+
+        if group_id and group_id.isdigit():
+            context.update({
+                'group': get_object_or_404(Group, pk=group_id),
+                'group_id': group_id
+            })
+
+        return context
+
+
+# view staff activity
+class StaffLogs(SuperuserAccessMixin, generic.TemplateView):
+    template_name = 'staff/staff_logs.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

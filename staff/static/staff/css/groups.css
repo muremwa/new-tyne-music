@@ -1,0 +1,33 @@
+.group {
+    width: 22%;
+    margin: auto;
+    margin-bottom: 1em;
+    padding: 0;
+}
+
+.group-text {
+    margin: auto;
+}
+
+.forw-arrow-grp-home {
+    padding: 1em;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    transition: 0.1s;
+}
+
+.forw-arrow-grp-home:hover, .forw-arrow-grp-home:focus-within {
+    background-color: #212529;
+}
+
+.forw-arrow-grp-home:hover > .forw-arrow-grp, .forw-arrow-grp-home:focus-within > .forw-arrow-grp {
+    fill: white;
+}
+
+.ot-grp {
+    margin: 2em;
+}
+
+.ot-grp > a {
+    text-decoration: none;
+}

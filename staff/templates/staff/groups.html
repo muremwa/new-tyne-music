@@ -1,0 +1,80 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+
+{% block title %}{% if group_id %}{{ group.name }}{% else %}Groups{% endif %}{% endblock title %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block style %} <link rel="stylesheet" href="{% static 'staff/css/groups.css' %}" type="text/css"> {% endblock style %}
+
+{% block content %}
+
+{% if group_id %}
+    <div class="container">
+        <div class="group-home row">
+            <div class="groups-all col-md-2">
+                <a href="{% url 'staff:staff-groups' %}" class="btn btn-outline-dark">Groups</a>
+                {% for x_group in groups %}
+                <div class='ot-grp'>
+                    <a href="{% url 'staff:staff-groups' %}?group-id={{ x_group.pk }}">{{ x_group.name }}</a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="group-info col-md-4 alert alert-info">
+                <h4>{{ group.name }}</h4>
+                <p>Members: {{ group.user_set.count }}</p>
+
+                <ul>
+                    {% for member in group.user_set.all %}
+                        <li>
+                            <a href="{% url 'staff:staff-view' %}?staff-id={{ member.pk }}">{{ member.username }}</a><br />
+                            {{ member.email }}
+                        </li>
+                    {% empty %}
+                    <span>No members.</span>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-4 alert alert-info">
+                Permission users in '{{ group.name }}' have ({{ group.permissions.count }});
+
+                <ul>
+                    {% for permission in group.permissions.all %}
+                        <li>{{ permission.name }}</li>
+                    {% empty %}
+                        <p>No permissions</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{% else %}
+    {% if groups %}
+        <h2 class="text-center">Groups available</h2>
+        <div class="groups">
+            {% for l_group in groups %}
+                <div class="group skimmy-border row">
+                    <div class="col-md-8 group-text">
+                        <h4>{{ l_group.name }}</h4>
+                        <p>Members: {{ l_group.user_set.count }}</p>
+                    </div>
+                    <a href="{% url 'staff:staff-groups' %}?group-id={{ l_group.pk }}" class="col-md-4 forw-arrow-grp-home">
+                        <svg class="forw-arrow-grp" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M24 8l-2.83 2.83L32.34 22H8v4h24.34L21.17 37.17 24 40l16-16z"/></svg>
+                    </a>
+                </div>
+            {% endfor %}        
+        </div>
+    {% else %}
+        <h2>No groups available</h2>
+    {% endif %}
+{% endif %}
+
+
+{% endblock content %}

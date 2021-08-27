@@ -21,7 +21,7 @@
                             <h5 class="action-title">{{ action.name }}</h5>
                             <p class="action-description">{{ action.description }}</p>
                         </div>
-                        <div class="action-link" onclick="clickLink('{{ action.id }}')">
+                        <div class="action-link" onclick="clickLink('{{ action.id }}')" aria-label="visit {{ action.name }}">
                             <a id="{{ action.id }}" href="{{ action.url }}">go</a>
                         </div>
                     </div>
