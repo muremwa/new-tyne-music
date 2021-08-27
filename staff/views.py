@@ -11,12 +11,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.contrib.messages import add_message, constants as message_constants
 
-from .staff_actions import staff_actions
-from .models import HelpArticle
-from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
 from core.models import User
 from tyne_utils.funcs import is_string_true_or_false
+from .models import HelpArticle
+from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
 from .logs_processing import log_action_ids, staff_logs
+from .staff_actions import staff_actions, superuser_actions
 
 
 staff_logger = logging.getLogger('tyne.staff')
@@ -26,6 +26,7 @@ def info_log_staff_message(action_id, message):
     staff_logger.info(f'ID: {action_id}:{message}')
 
 
+# access mixin for staff, throw 404 if user not staff or superuser denied
 class StaffAccessMixin(UserPassesTestMixin):
     def test_func(self):
         if hasattr(self, 'request'):
@@ -35,28 +36,33 @@ class StaffAccessMixin(UserPassesTestMixin):
         raise Http404
 
 
+# permission mixin for staff, throw 404 if permission denied
 class StaffPermissionMixin(PermissionRequiredMixin):
     def handle_no_permission(self):
         raise Http404
 
 
+# see all user available actions
 class StaffHome(StaffAccessMixin, generic.TemplateView):
     template_name = 'staff/staff_home.html'
 
-    def user_has_perm(self, perm: str) -> bool:
-        return self.request.user.has_perm(perm)
-
-    def include_action(self, action_perms: List) -> bool:
-        return all([self.user_has_perm(perm) for perm in action_perms])
+    def include_action(self, action_perms: List[str]) -> bool:
+        return all([self.request.user.has_perm(perm) for perm in action_perms])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        all_actions = [action for action in staff_actions if self.include_action(action.get('permissions'))]
+
+        if self.request.user.is_superuser:
+            all_actions.extend(superuser_actions)
+
         context.update({
-            'staff_actions': [action for action in staff_actions if self.include_action(action.get('permissions'))]
+            'staff_actions': all_actions
         })
         return context
 
 
+# manage a user, give a user permission
 class AddAdminUsers(StaffAccessMixin, StaffPermissionMixin, View):
     template = 'staff/add_user.html'
     permission_required = (
@@ -160,6 +166,7 @@ class AddAdminUsers(StaffAccessMixin, StaffPermissionMixin, View):
         })
 
 
+# view help articles listed
 class StaffHelpList(StaffAccessMixin, generic.ListView):
     queryset = HelpArticle.objects.filter(is_staff=True).order_by('-id')
     context_object_name = 'articles'
@@ -173,6 +180,7 @@ class StaffHelpList(StaffAccessMixin, generic.ListView):
         return q_set
 
 
+# view a help article
 class StaffHelpArticlePage(StaffAccessMixin, generic.DetailView):
     queryset = HelpArticle.objects.all()
     pk_url_kwarg = 'article_pk'
@@ -180,6 +188,7 @@ class StaffHelpArticlePage(StaffAccessMixin, generic.DetailView):
     template_name = 'staff/help_detail.html'
 
 
+# add a help article
 class StaffArticleAdd(StaffAccessMixin, PermissionRequiredMixin, generic.CreateView):
     model = HelpArticle
     form_class = HelpArticleForm
@@ -195,6 +204,7 @@ class StaffArticleAdd(StaffAccessMixin, PermissionRequiredMixin, generic.CreateV
         return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
 
 
+# edit a help article
 class StaffArticleEdit(StaffAccessMixin, PermissionRequiredMixin, generic.UpdateView):
     model = HelpArticle
     form_class = HelpArticleEditForm
@@ -212,6 +222,7 @@ class StaffArticleEdit(StaffAccessMixin, PermissionRequiredMixin, generic.Update
         return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
 
 
+# edit a help article
 class StaffArticleHelpDelete(StaffAccessMixin, PermissionRequiredMixin, generic.DeleteView):
     model = HelpArticle
     pk_url_kwarg = 'article_pk'
@@ -227,6 +238,7 @@ class StaffArticleHelpDelete(StaffAccessMixin, PermissionRequiredMixin, generic.
         return reverse("staff:help-list")
 
 
+# view users and their roles
 class StaffRolesView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateView):
     template_name = 'staff/staff_roles.html'
     permission_required = (
@@ -289,6 +301,7 @@ class StaffRolesView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateVie
         return context
 
 
+# view staff activity
 class StaffLogs(StaffAccessMixin, generic.TemplateView):
     template_name = 'staff/staff_logs.html'
 
