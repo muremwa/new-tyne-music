@@ -388,25 +388,3 @@ class StaffAlbumView(StaffAccessMixin, generic.TemplateView):
                 'q': query
             })
         return context
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
