@@ -2,7 +2,7 @@ from unittest import TestCase
 from datetime import datetime
 from pytz import timezone
 
-from .funcs import is_string_true_or_false, turn_string_to_datetime
+from .funcs import is_string_true_or_false, turn_string_to_datetime, strip_punctuation
 
 
 class UtilsTestCase(TestCase):
@@ -27,3 +27,9 @@ class UtilsTestCase(TestCase):
         self.assertEqual(p_time.tzinfo, m_time.tzinfo)
         self.assertEqual(p_time.date(), m_time.date())
         self.assertEqual(p_time.time(), m_time.time())
+
+    def test_punctuations(self):
+        self.assertEqual('DAMN', strip_punctuation('DAMN.'))
+        self.assertEqual('DAMN', strip_punctuation('DAMN?'))
+        self.assertEqual('DAMN', strip_punctuation('DAMN#'))
+        self.assertEqual('DAMN', strip_punctuation('DAMN@'))

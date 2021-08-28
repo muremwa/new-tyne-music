@@ -39,4 +39,7 @@ urlpatterns = [
     # manage-albums/
     path('manage-albums/', views.StaffAlbumView.as_view(), name='manage-albums'),
 
+    # manage-albums/published-status/23/
+    path('manage-albums/published-status/<int:album_pk>/', views.PublishAlbums.as_view(), name='album-publish-status'),
+
 ]

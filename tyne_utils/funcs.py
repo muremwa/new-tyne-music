@@ -1,6 +1,7 @@
 from datetime import datetime
 from pytz import timezone
 from re import search
+from string import punctuation
 
 from tyne.settings import TIME_ZONE
 
@@ -30,3 +31,8 @@ def turn_string_to_datetime(string: str) -> datetime:
     date_ = [int(d) for d in string_x[0].split('-')]
     time_ = [int(t) for t in string_x[1].translate(str.maketrans(',', ':')).split(':')]
     return datetime(*date_, *time_, tz)
+
+
+def strip_punctuation(string: str) -> str:
+    """Remove punctuation from a string"""
+    return string.translate(str.maketrans('', '', punctuation))

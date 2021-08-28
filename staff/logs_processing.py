@@ -19,6 +19,11 @@ class LogActionIds:
         self.CREATE_ARTICLE = 'create_article'
         self.EDIT_ARTICLE = 'edit_article'
         self.DELETE_ARTICLE = 'delete_article'
+        self.CREATE_ALBUM = 'create_album'
+        self.EDIT_ALBUM = 'edit_album'
+        self.DELETE_ALBUM = 'delete_album'
+        self.PUBLISH_ALBUM = 'publish_album'
+        self.UN_PUBLISH_ALBUM = 'un_publish_album'
 
 
 class Log:
@@ -81,6 +86,7 @@ class Log:
         url = ''
         user_url = f"{reverse_lazy('staff:staff-view')}?staff-id={str(pk)}"
         article_url = reverse_lazy("staff:help-article", kwargs={"article_pk": str(pk)})
+        album_url = f'{reverse_lazy("staff:manage-albums")}?album-id={str(pk)}'
 
         if 'staff' in action:
             url = user_url
@@ -90,6 +96,9 @@ class Log:
 
         elif 'group' in action:
             url = user_url
+
+        elif 'album' in action:
+            url = album_url
 
         return url
 
@@ -184,7 +193,7 @@ class LogMaster:
         return self.logs if info else self.p_logs
 
     def search(self, by: str=None, to: str=None, start_time: datetime=None, end_time: datetime=None,
-               action: str=None, user: str=None) -> List[Log]:
+               action: str=None, user: str=None) -> Union[List[Dict], List[Log]]:
         """
         search logs using
         1. name or id of done_by

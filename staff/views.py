@@ -1,7 +1,7 @@
 from typing import List, Set
 import logging
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View, generic
 from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
@@ -13,7 +13,7 @@ from django.contrib.messages import add_message, constants as message_constants
 
 from core.models import User
 from music.models import Album
-from tyne_utils.funcs import is_string_true_or_false
+from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
 from .logs_processing import log_action_ids, staff_logs
@@ -90,7 +90,7 @@ class AddAdminUsers(StaffAccessMixin, StaffPermissionMixin, View):
             user_info = f'{user.username}({user.pk})'
             info_log_staff_message(
                 log_action_ids.ADD_TO_GROUP,
-                f'{self.log_message_user()}) added {user_info} to {group.name}'
+                f'{self.log_message_user()}) added {user_info} to {strip_punctuation(group.name)}'
             )
         except ObjectDoesNotExist:
             added = False
@@ -208,7 +208,7 @@ class StaffArticleAdd(StaffAccessMixin, PermissionRequiredMixin, generic.CreateV
         user_info = f'{self.request.user.username}({self.request.user.pk})'
         info_log_staff_message(
             log_action_ids.CREATE_ARTICLE,
-            f'{user_info} created article {self.object.title}({self.object.pk})'
+            f'{user_info} created article {strip_punctuation(self.object.title)}({self.object.pk})'
         )
         return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
 
@@ -226,7 +226,7 @@ class StaffArticleEdit(StaffAccessMixin, PermissionRequiredMixin, generic.Update
         user_info = f'{self.request.user.username}({self.request.user.pk})'
         info_log_staff_message(
             log_action_ids.EDIT_ARTICLE,
-            f'{user_info} edited article {self.object.title}({self.object.pk})'
+            f'{user_info} edited article {strip_punctuation(self.object.title)}({self.object.pk})'
         )
         return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
 
@@ -242,7 +242,7 @@ class StaffArticleHelpDelete(StaffAccessMixin, PermissionRequiredMixin, generic.
         user_info = f'{self.request.user.username}({self.request.user.pk})'
         info_log_staff_message(
             log_action_ids.DELETE_ARTICLE,
-            f'{user_info} deleted article {self.object.title}({self.object.pk})'
+            f'{user_info} deleted article {strip_punctuation(self.object.title)}({self.object.pk})'
         )
         return reverse("staff:help-list")
 
@@ -344,11 +344,10 @@ class StaffLogs(SuperuserAccessMixin, generic.TemplateView):
             })
 
         if log_form.is_valid() and log_form.has_changed():
-            logs = log_form.get_logs()
+            logs = list(reversed(log_form.get_logs()))
             filtered = True
         else:
-            logs = reversed(staff_logs.get_logs())
-            logs = list(logs)
+            logs = list(reversed(staff_logs.get_logs()))
 
             if not self.request.GET.get('all'):
                 logs = logs[:20]
@@ -368,23 +367,69 @@ class StaffAlbumView(StaffAccessMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['albums'] = Album.objects.all()
         album_id = self.request.GET.get('album-id', '')
-        query = self.request.GET.get('q')
 
         if album_id and album_id.isdigit():
             context.update({
                 'album': get_object_or_404(Album, pk=int(album_id)),
                 'album_id': album_id
             })
+        else:
+            album_type = self.request.GET.get('t', '')
+            query = self.request.GET.get('q')
+            albums = Album.objects.all()
 
-        if query:
-            context.update({
-                'albums': Album.objects.filter((
+            if album_type and album_type in ('EP', 'LP', 'S'):
+                if album_type == 'EP':
+                    albums = albums.filter(is_ep=True)
+                elif album_type == 'S':
+                    albums = albums.filter(is_single=True)
+                elif album_type == 'LP':
+                    albums = albums.filter(is_ep=False, is_single=False)
+
+            if query:
+                albums = albums.filter((
                     Q(title__icontains=query) |
                     Q(artists__name__icontains=query) |
                     Q(artists__group_members__name__icontains=query, artists__is_group=True)
-                )).order_by('-date_of_release'),
-                'q': query
+                )).order_by('-date_of_release')
+
+            context.update({
+                'albums': albums,
+                'q': query,
+                'album_type': album_type
             })
         return context
+
+
+class PublishAlbums(StaffAccessMixin, StaffPermissionMixin, View):
+    permission_required = (
+        'music.change_album'
+    )
+
+    def log_message(self, album: Album, action: bool=True):
+        message = 'published' if action else 'un published'
+        title = strip_punctuation(album.title)
+        info_log_staff_message(
+            log_action_ids.PUBLISH_ALBUM if action else log_action_ids.UN_PUBLISH_ALBUM,
+            f'{self.request.user.username}({self.request.user.pk}) {message} {title}({album.pk})'
+        )
+
+    def post(self, request, **kwargs):
+        album = get_object_or_404(Album, pk=kwargs.get('album_pk'))
+
+        # publish
+        publish = request.POST.get('publish')
+        if publish and not album.published:
+            album.published = True
+            album.save()
+            self.log_message(album)
+
+        # un publish
+        un_publish = request.POST.get('un-publish')
+        if un_publish and album.published:
+            album.published = False
+            album.save()
+            self.log_message(album, False)
+
+        return redirect(f'{reverse("staff:manage-albums")}?album-id={album.pk}')

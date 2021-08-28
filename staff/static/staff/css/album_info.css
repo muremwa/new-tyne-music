@@ -1,0 +1,26 @@
+img.album-info-cover-img {
+    width: 50%;
+}
+
+.songs {
+    /* border: 1px solid black; */
+    padding-left: 2em;
+    
+}
+
+.song {
+    /* border: 1px solid #212529; */
+    color: #212529;
+    border: 1px solid #b0ced4;
+    min-height: 2.5em;
+    height: fit-content;
+    margin-bottom: 0.25em;
+    border-radius: 3px;
+}
+
+.song > span {
+    margin-top: auto;
+    margin-bottom: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

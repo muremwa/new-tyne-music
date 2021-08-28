@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as __
@@ -200,6 +202,7 @@ class Song(models.Model):
 
     class Meta:
         unique_together = (('disc', 'track_no'),)
+        ordering = ('track_no',)
 
     @property
     def album_art(self):
@@ -221,6 +224,14 @@ class Song(models.Model):
     def add_additional_artist(self, artist):
         if self.pk and type(artist) == Artist and artist not in self.disc.album.artists.all():
             self.additional_artists.add(artist)
+
+    def song_artists(self):
+        artists = []
+
+        if self.additional_artists.count() > 0:
+            artists = chain(self.disc.album.artists.all(), self.additional_artists.all())
+
+        return artists
 
     def __repr__(self):
         return f'<Song: \'{self.title}\' from \'{self.disc.album}\'>'

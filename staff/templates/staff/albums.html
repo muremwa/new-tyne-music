@@ -10,7 +10,7 @@
 
 {% block search_placeholder %}album by title or artists{% endblock search_placeholder %}
 
-{% block style %} <link rel="stylesheet" href="{% static 'staff/css/albums.css' %}" type="text/css"> {% endblock style %}
+{% block style %}{% if album_id %}<link rel="stylesheet" href="{% static 'staff/css/album_info.css' %}" type="text/css">{% else %}<link rel="stylesheet" href="{% static 'staff/css/albums.css' %}" type="text/css">{% endif %}{% endblock style %}
 
 {% block content %}
 
@@ -18,12 +18,137 @@
     {% if album_id %}
     {% comment %} Single Album {% endcomment %}
 
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-4">
+                <div class="alert alert-info">
+                    <img src="{{ album.cover.url }}" alt="{{ album.title }}'s cover" class="album-info-cover-img">
+                    <h2>{{ album.title }} ({{ album.date_of_release.year }})</h2>
+                    <h5>by {% for artist in album.artists.all %}{% if forloop.counter > 1 %}, {% endif %} <a href="" target="_blank" rel="noopener noreferrer">{{ artist.name }}</a>{% endfor %} </h5>
+                    <p>Released <strong>{{ album.date_of_release|full_release }} ({{ album.date_of_release|release_date_to }})</strong></p>
+                    <hr>
+                    <ul class="list-unstyled">
+                        <li>Album Type: <strong>{{ album.album_type }}</strong></li>
+                        <li>Artists Display Name: <strong>{{ album.artists|album_artists }}</strong></li>
+                        <li>Genre: <strong>{{ album.genre.title }}</strong></li>
+                        <li>Likes: <strong>{{ album.likes }}</strong></li>
+                        <li>Copyright: <strong>{{ album.copyright }}</strong></li>
+                    </ul>
+                </div>
+
+                {% if album.published %}
+                    <div class="alert alert-danger text-center">
+                        <h2>"{{ album.title }}" is  published</h2>
+                        <form action="{% url 'staff:album-publish-status' album.pk %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="un-publish" value="1">
+                            <button type="submit" class="btn btn-outline-danger">Un publish '{{ album.title }}'</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-primary text-center">
+                        <h2>"{{ album.title }}" is <strong>NOT</strong> published</h2>
+                        <form action="{% url 'staff:album-publish-status' album.pk %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="publish" value="1">
+                            <button type="submit" class="btn btn-outline-danger">Publish '{{ album.title }}'</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-8 songs">
+                {% if album.notes %}
+                    <p class="alert alert-info">{{ album.notes }}</p>
+                    <hr>
+                {% endif %}
+                <div>
+                    {% for disc in album.disc_set.all %}
+                        <h4>{{ disc.name }}</h4>
+                        <ul class="list-unstyled">
+                            {% for song in disc.song_set.all %}
+                                <li class="song row">
+                                    <span class="col-md-1">{{ song.track_no }}.</span>
+                                    <span class="col-md-6">{{ song.title }}</span>
+                                    <span class="col-md-2">{{ song.length_string }}</span>
+                                    {% if song.additional_artists.count > 0 %}
+                                        <span class="col-md-3">{{ song.song_artists|album_artists:0 }}</span>
+                                    {% else %}
+                                        <span class="col-md-3">{{ song.genre.title }}</span>
+                                    {% endif %}
+                                </li>
+                            {% empty %}
+                                <h5>No songs available</h5>
+                            {% endfor %}
+                        </ul>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     {% else %}
     {% comment %} All albums {% endcomment %}
         <div class="container">
             {% if albums %}
-                <h4>Albums available</h4>
+                <div class="row top-links">
+                    <h4 class="col-md-2">
+                        {% if album_type == 'LP' %}Albums{% else %}{% if album_type == 'S' %}Singles{% else %}{% if album_type == 'EP' %}Extended Plays{% else %}All Records{% endif %}{% endif %}{% endif %} available
+                    </h4>
+                    <div class="col-md-2">
+                        <a href="" class="btn btn-outline-dark">New Album</a>
+                    </div>
+
+                    <div class="col-md-2">
+                        <a href="{% url 'staff:manage-albums' %}?t=S" class="btn btn-outline-dark">Singles</a>
+                    </div>
+
+                    <div class="col-md-2">
+                        <a href="{% url 'staff:manage-albums' %}?t=EP" class="btn btn-outline-dark">EPs</a>
+                    </div>
+
+                    <div class="col-md-2">
+                        <a href="{% url 'staff:manage-albums' %}?t=LP" class="btn btn-outline-dark">Albums</a>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <a href="{% url 'staff:manage-albums' %}" class="btn btn-outline-dark">All</a>
+                    </div>
+                </div>
                 <script type="text/javascript">
                     function clickLink(linkId) {
                         document.getElementById(linkId).click()
@@ -54,7 +179,4 @@
             {% endif %}
         </div>
     {% endif %}
-
-
-
 {% endblock content %}

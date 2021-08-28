@@ -16,10 +16,10 @@
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
+    height: 30%;
     display: block;
     line-height: 1em;
     max-height: 1em;
-    cursor: default;
 }
 
 .album-description {
@@ -48,4 +48,8 @@
 
 .album-link:hover, .album-link:focus-within {
     background-color: #3d444b;
+}
+
+.top-links > div > a {
+    width: 100%;
 }
