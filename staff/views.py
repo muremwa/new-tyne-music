@@ -376,7 +376,7 @@ class StaffAlbumView(StaffAccessMixin, generic.TemplateView):
             })
         else:
             album_type = self.request.GET.get('t', '')
-            query = self.request.GET.get('q')
+            query = self.request.GET.get('q', '')
             albums = Album.objects.all()
 
             if album_type and album_type in ('EP', 'LP', 'S'):

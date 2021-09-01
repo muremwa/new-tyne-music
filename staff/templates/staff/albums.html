@@ -35,11 +35,12 @@
                         <li>Likes: <strong>{{ album.likes }}</strong></li>
                         <li>Copyright: <strong>{{ album.copyright }}</strong></li>
                     </ul>
+                    <a href="{% url 'staff:manage-albums' %}" class="btn btn-outline-dark">All albums</a>
                 </div>
 
                 {% if album.published %}
                     <div class="alert alert-danger text-center">
-                        <h2>"{{ album.title }}" is  published</h2>
+                        <h4>"{{ album.title }}" is  published</h4>
                         <form action="{% url 'staff:album-publish-status' album.pk %}" method="post">
                             {% csrf_token %}
                             <input type="hidden" name="un-publish" value="1">
@@ -48,7 +49,7 @@
                     </div>
                     {% else %}
                     <div class="alert alert-primary text-center">
-                        <h2>"{{ album.title }}" is <strong>NOT</strong> published</h2>
+                        <h4>"{{ album.title }}" is <strong>NOT</strong> published</h4>
                         <form action="{% url 'staff:album-publish-status' album.pk %}" method="post">
                             {% csrf_token %}
                             <input type="hidden" name="publish" value="1">
@@ -145,9 +146,11 @@
                         <a href="{% url 'staff:manage-albums' %}?t=LP" class="btn btn-outline-dark">Albums</a>
                     </div>
                     
+                    {% if album_type or q %}
                     <div class="col-md-2">
-                        <a href="{% url 'staff:manage-albums' %}" class="btn btn-outline-dark">All</a>
+                        <a href="{% url 'staff:manage-albums' %}" class="btn btn-outline-primary">All</a>
                     </div>
+                    {% endif %}
                 </div>
                 <script type="text/javascript">
                     function clickLink(linkId) {
@@ -175,6 +178,7 @@
                 <div class="text-center">
                     <h2>no albums available</h2>
                     <a href="" class="btn btn-outline-dark">Add New</a>
+                    <a href="{% url 'staff:manage-albums' %}" class="btn btn-outline-primary">All albums</a>
                 </div>
             {% endif %}
         </div>
