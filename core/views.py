@@ -334,7 +334,7 @@ def master_login(request):
         })
 
     elif request.method == 'POST':
-        next_url = request.POST.get('next')
+        next_url = request.POST.get('next', '/')
         email = request.POST.get('email')
         password = request.POST.get('password')
 
@@ -345,7 +345,7 @@ def master_login(request):
 
                 if authenticated_user is not None:
                     d_login(request, authenticated_user)
-                    return redirect(next_url if next_url else '/')
+                    return redirect(next_url)
             except ObjectDoesNotExist:
                 pass
 
