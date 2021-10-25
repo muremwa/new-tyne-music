@@ -1,0 +1,39 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+{% load music_filter %}
+
+
+{% block title %}Edit '{{ form.instance.title }}'{% endblock title %}
+
+{% block staff %}active{% endblock staff %}
+
+
+{% block style %}
+    {{ form.media.css }}
+{% endblock style %}
+
+{% block content %}
+    <div class="container">
+        <h2>Edit {{ form.instance }} by {{ form.instance.artists|album_artists }}</h2>
+        {% if form.non_field_errors %}
+            <div class="alert alert-warning">
+                {% for error in form.non_field_errors %}
+                    {{ error }} <br />
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include 'staff/album_form.html' %}
+            <hr>
+            <div class="form-group">
+                <button class="btn btn-outline-dark">Edit album</button>
+                <a href="{% url 'staff:manage-albums' %}?album-id={{ form.instance.pk }}" class="btn btn-outline-dark">Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+
+{% block bottomScript %}
+    {{ form.media.js }}
+{% endblock bottomScript %}

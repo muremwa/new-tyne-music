@@ -33,9 +33,10 @@
                         <li>Artists Display Name: <strong>{{ album.artists|album_artists }}</strong></li>
                         <li>Genre: <strong>{{ album.genre.title }}</strong></li>
                         <li>Likes: <strong>{{ album.likes }}</strong></li>
-                        <li>Copyright: <strong>{{ album.copyright }}</strong></li>
+                        <li>Copyright: <strong><pre>{{ album.copyright }}</pre></strong></li>
                     </ul>
                     <a href="{% url 'staff:manage-albums' %}" class="btn btn-outline-dark">All albums</a>
+                    <a href="{% url 'staff:album-edit' album.pk %}" class="btn btn-outline-secondary">Edit '{{ album.title }}'</a>
                 </div>
 
                 {% if album.published %}
@@ -57,11 +58,19 @@
                         </form>
                     </div>
                 {% endif %}
+                <div class="alert alert-danger text-center">
+                    <h4>Once "{{ album.title }}" is deleted it can not be recovered.</h4>
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete" value="1">
+                        <button type="submit" class="btn btn-outline-danger">Delete '{{ album.title }}'</button>
+                    </form>
+                </div>
             </div>
 
             <div class="col-md-8 songs">
                 {% if album.notes %}
-                    <p class="alert alert-info">{{ album.notes }}</p>
+                    <pre class="alert alert-info notes">{{ album.notes }}</pre>
                     <hr>
                 {% endif %}
                 <div>
@@ -89,38 +98,6 @@
 
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     {% else %}
     {% comment %} All albums {% endcomment %}

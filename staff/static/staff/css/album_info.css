@@ -3,13 +3,11 @@ img.album-info-cover-img {
 }
 
 .songs {
-    /* border: 1px solid black; */
     padding-left: 2em;
     
 }
 
 .song {
-    /* border: 1px solid #212529; */
     color: #212529;
     border: 1px solid #b0ced4;
     min-height: 2.5em;
@@ -23,4 +21,13 @@ img.album-info-cover-img {
     margin-bottom: auto;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.notes {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: normal;
 }

@@ -5,14 +5,16 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View, generic
 from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.contrib.messages import add_message, constants as message_constants
 
 from core.models import User
-from music.models import Album
+from music.models import Album, Artist
+from music.forms import AlbumEditForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -55,12 +57,9 @@ class StaffPermissionMixin(PermissionRequiredMixin):
 class StaffHome(StaffAccessMixin, generic.TemplateView):
     template_name = 'staff/staff_home.html'
 
-    def include_action(self, action_perms: List[str]) -> bool:
-        return all([self.request.user.has_perm(perm) for perm in action_perms])
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        all_actions = [action for action in staff_actions if self.include_action(action.get('permissions'))]
+        all_actions = [action for action in staff_actions if self.request.user.has_perms(action.get('permissions'))]
 
         if self.request.user.is_superuser:
             all_actions.extend(superuser_actions)
@@ -362,8 +361,11 @@ class StaffLogs(SuperuserAccessMixin, generic.TemplateView):
         return context
 
 
-class StaffAlbumView(StaffAccessMixin, generic.TemplateView):
+class StaffAlbumView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateView):
     template_name = 'staff/albums.html'
+    permission_required = (
+        'music.add_album', 'music.view_album', 'music.change_album', 'music.delete_album'
+    )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -404,7 +406,7 @@ class StaffAlbumView(StaffAccessMixin, generic.TemplateView):
 
 class PublishAlbums(StaffAccessMixin, StaffPermissionMixin, View):
     permission_required = (
-        'music.change_album'
+        'music.view_album', 'music.change_album',
     )
 
     def log_message(self, album: Album, action: bool=True):
@@ -433,3 +435,79 @@ class PublishAlbums(StaffAccessMixin, StaffPermissionMixin, View):
             self.log_message(album, False)
 
         return redirect(f'{reverse("staff:manage-albums")}?album-id={album.pk}')
+
+
+# edit an album
+class AlbumEditView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
+    form_class = AlbumEditForm
+    template_name = 'staff/edit_album.html'
+    permission_required = (
+        'music.view_album', 'music.change_album',
+    )
+
+    @staticmethod
+    def retrieve_artist(artist_id):
+        try:
+            artist = Artist.objects.get(pk=artist_id)
+            return artist
+        except ObjectDoesNotExist:
+            return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['album'] = get_object_or_404(Album, pk=self.kwargs.get('album_pk'))
+        return context
+
+    def get_success_url(self):
+        return f'{reverse("staff:manage-albums")}?album-id={self.kwargs.get("album_pk")}'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        album = get_object_or_404(Album, pk=self.kwargs.get('album_pk'))
+        kwargs['instance'] = album
+
+        if self.request.method == 'GET':
+            kwargs['initial'] = {
+                key: getattr(album, key) for key in self.form_class().fields_info()
+            }
+        return kwargs
+
+    def form_valid(self, form):
+        is_single = self.request.POST.get('is_single')
+        is_ep = self.request.POST.get('is_ep')
+        album = form.save(commit=False)
+        artists = self.request.POST.get('artists')
+
+        if artists:
+            artists = [int(artist_id) for artist_id in artists.split(',')]
+            artists_objs = [self.retrieve_artist(artist_id) for artist_id in artists]
+            album.artists.clear()
+            album.artists.add(*[artist for artist in artists_objs if artist])
+
+        if is_single:
+            album.is_single = True
+            album.is_ep = False
+
+        elif is_ep:
+            album.is_ep = True
+            album.is_single = False
+
+        else:
+            album.is_single = False
+            album.is_ep = False
+
+        album.save()
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        return render(self.request, self.template_name, {
+            'form': form
+        })
+
+
+@user_passes_test(test_func=lambda user: user.is_staff)
+def artists_names(request):
+    if request.method == 'GET':
+        name = request.GET.get('name', '')
+        artists = Artist.objects.filter(name__icontains=name)
+        return JsonResponse([[artist.name, artist.pk] for artist in artists], safe=False)

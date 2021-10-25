@@ -1,0 +1,17 @@
+.album-cover-div {
+    width: 100%;
+}
+
+.album-cover-div.error .one-by {
+    display: inline-block;
+}
+
+.album-cover {
+    width: 50%;
+    margin-bottom: 1em;
+}
+
+.one-by, .hidden-checks {
+    display: none;
+}
+

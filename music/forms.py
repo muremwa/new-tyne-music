@@ -26,13 +26,14 @@ class ModelEditWithRelatedFields(SmartForm, forms.Form):
         if isinstance(instance, Model):
             self.instance = instance
 
-    def save(self):
+    def save(self, commit=True):
         if self.has_changed():
             for key in self.changed_data:
                 if hasattr(self.instance, key):
                     new_value = self.cleaned_data.get(key)
                     setattr(self.instance, key, new_value)
-            self.instance.save()
+            if commit:
+                self.instance.save()
         return self.instance
 
 
@@ -64,14 +65,22 @@ class AlbumForm(SmartForm, forms.ModelForm):
 
 
 class AlbumEditForm(ModelEditWithRelatedFields):
-    title = forms.CharField(max_length=100, required=False)
-    notes = forms.CharField(widget=forms.Textarea, required=False)
-    is_single = forms.BooleanField(required=False)
-    is_ep = forms.BooleanField(required=False)
-    genre = forms.ModelChoiceField(queryset=Genre.objects.all(), required=False)
-    date_of_release = forms.DateField(required=False)
-    cover = forms.ImageField(required=False)
-    copyright = forms.CharField(widget=forms.Textarea, required=False)
+    title = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    notes = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}), required=False)
+    is_single = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'hidden-checks'}))
+    is_ep = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'hidden-checks'}))
+    genre = forms.ModelChoiceField(queryset=Genre.objects.all(), required=False, widget=forms.Select(attrs={
+        'class': 'form-select',
+    }))
+    date_of_release = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'form-select', 'type': 'date',}))
+    cover = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
+    copyright = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}), required=False)
+
+    class Media:
+        js = ('js/ajaxWrapper.js', 'staff/js/album_form.js', 'staff/js/select_artists.js')
+        css = {
+            'all': ('staff/css/album_form.css', 'staff/css/select_artists.css')
+        }
 
     def clean(self):
         if not hasattr(self, 'instance'):

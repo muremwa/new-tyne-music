@@ -1,0 +1,134 @@
+{% load music_filter %}
+
+<div class="row skimmy-border">
+    <!-- Title -->
+    <div class="form-group col-md-3">
+        {% if form.title.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.title.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Appropriate Title</div>
+        {% endif %}
+        <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+        {{ form.title }}
+    </div>
+
+    <!-- Genre -->
+    <div class="form-group col-md-4">
+        {% if form.genre.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.genre.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">The most fitting genre for the album</div>
+        {% endif %}
+        <label for="{{ form.genre.id_for_label }}">{{ form.genre.label }}</label>
+        {{ form.genre }}
+    </div>
+
+    <!-- Date of release -->
+    <div class="form-group col-md-5">
+        {% if form.date_of_release.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.date_of_release.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">The date the album was released or will be released</div>
+        {% endif %}
+        <label for="{{ form.date_of_release.id_for_label }}">{{ form.date_of_release.label }}</label>
+        {{ form.date_of_release }}
+        <br />
+        <span id="date_of_release_lang">{{ form.instance.date_of_release|full_release }}</span>
+    </div>
+</div>
+<hr>
+<div class="row skimmy-border">
+    <!-- Notes -->
+    <div class="form-group col-md-5">
+        {% if form.notes.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.notes.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">You editor notes</div>
+        {% endif %}
+        <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+        {{ form.notes }}
+    </div>
+
+    <!-- Artists -->
+    <div class="form-group col-md-4">
+        {% if form.cover.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.cover.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Album cover</div>
+        {% endif %}
+        <label for="{{ form.cover.id_for_label }}">{{ form.cover.label }}</label>
+        <div class="album-cover-div">
+            <img src="{{ form.instance.cover.url }}" class="album-cover" id="album-cover-preview">
+            <span class="alert alert-danger one-by">Image is not 1:1</span>
+        </div>
+        {{ form.cover }}
+    </div>
+
+    <!-- album type -->
+    <div class="form-group col-md-3">
+        {{ form.is_ep }}
+        {{ form.is_single }}
+
+        <div class="alert alert-info">Long Play, Extended Play or single?</div>
+        <input type="hidden" value="{{ form.instance.al_code }}" id="album-code">
+        <select id="type-select" class="form-select">
+            <option value="LP">Long Play (Album)</option>
+            <option value="EP">Extended Play</option>
+            <option value="S">Single</option>
+        </select>
+
+        <br>
+
+        <div class="alert alert-info">
+            Long play - Full length Album.<br/>
+            Extended play - Usually less than half an hour. <br>
+            Single - Usually a single song or two.
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<div class="row skimmy-border">
+    <!-- copyright -->
+    <div class="form-group col-md-5">
+        {% if form.copyright.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.copyright.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">The album's copyright information</div>
+        {% endif %}
+        <label for="{{ form.copyright.id_for_label }}">{{ form.copyright.label }}</label>
+        {{ form.copyright }}
+    </div>
+
+    <!-- artists -->
+    <div class="form-group col-md-7">
+        <div class="alert alert-info">The Album's artists</div>
+        <label for="">Album Artists</label>
+        {% include 'staff/select_artists.html' with obj=album %}
+    </div>
+</div>

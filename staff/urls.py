@@ -36,10 +36,16 @@ urlpatterns = [
     # logs/
     path('staff-activity/', views.StaffLogs.as_view(), name='logs'),
 
+    # search-artists/
+    path('search-artists/', views.artists_names, name='search-artists'),
+
     # manage-albums/
     path('manage-albums/', views.StaffAlbumView.as_view(), name='manage-albums'),
 
     # manage-albums/published-status/23/
     path('manage-albums/published-status/<int:album_pk>/', views.PublishAlbums.as_view(), name='album-publish-status'),
+
+    # manage-albums/edit/23/
+    path('manage-albums/edit/<int:album_pk>/', views.AlbumEditView.as_view(), name='album-edit'),
 
 ]

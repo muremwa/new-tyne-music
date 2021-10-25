@@ -1,0 +1,32 @@
+.select-artist-name {
+    border: 1px solid rgba(0, 128, 128, 0.589);
+    margin: 0.5em;
+    padding: 0.5em;
+    font-weight: bold;
+    font-size: 1.3em;
+    display: flex;
+    flex-direction: row;
+}
+
+.select-artist-name > span {
+    width: 80%;
+}
+
+.select-artist-name > svg {
+    width: 20%;
+    height: 2em;
+}
+
+.select-artist-name > svg:hover, .select-artist-name > svg:focus {
+    cursor: pointer;
+    fill: rgb(224, 114, 224);
+}
+
+.select-selected-artists {
+    list-style-type: none;
+}
+
+.select-artist-row > div {
+    max-height: 70vh;
+    overflow: auto;
+}
