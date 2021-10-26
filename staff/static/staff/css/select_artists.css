@@ -30,3 +30,7 @@
     max-height: 70vh;
     overflow: auto;
 }
+
+.search-info img {
+    height: 2em;
+}

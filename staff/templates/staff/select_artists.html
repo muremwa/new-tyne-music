@@ -1,10 +1,10 @@
 {% load static %}
 
-<div class="modal fade" id="artists-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade select-artists-modal-home" data-prefix-name="{{ to }}" id="{{ to }}-artists-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Pick artists {% if obj %} for {{ obj.title }}{% endif %} <small class="text-danger visually-hidden not-saved">Changes were not saved</small></h5>
+                <h5 class="modal-title">Pick {{ modal_title }} {% if obj %} for {{ obj.title }}{% endif %} <small class="text-danger visually-hidden {{ to }}-not-saved">Changes were not saved</small></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
             </div>
             
@@ -16,12 +16,12 @@
                         <h5>Search artists</h5>
                         <div>
                             <br>
-                            <input type="text" id="artist-name-search" placeholder="Enter an artist name to search" class="form-control" data-search-artists-url="{% url 'staff:search-artists' %}">
+                            <input type="text" id="{{ to }}-artist-name-search" placeholder="Enter an artist name to search" class="form-control" data-search-artists-url="{% url 'staff:search-artists' %}">
                         </div>
 
                         <br>
 
-                        <div class="alert alert-info">
+                        <div class="alert alert-info search-info">
                             <h6>How to add or remove artists</h6>
                             1. <strong>Add artists</strong>: Search the name of the artist on the input above. 
                             On the column next, some results will appear. Click on the add icon on the name you wish and the name shall 
@@ -36,21 +36,21 @@
                             Click enter to search.
                             <strong>Once done</strong> click on the save button below to update the changes.
                             <br>
-                            The order of the artists matters too*
+                            Clearing all artists is ignored and can only be done by your manager.
                         </div>
                     </div>
                 
                     <div class="col-md-4">
                         <h5>Search results</h5>
-                        <img class="visually-hidden" id="load-artists" src="{% static 'imgs/200.gif' %}" alt="loading gif">
-                        <ul class="select-search-artists" id="select-id-search-artists">
+                        <img class="visually-hidden" id="{{ to }}-load-artists" src="{% static 'imgs/200.gif' %}" alt="loading gif">
+                        <ul class="select-search-artists" id="{{ to }}-select-id-search-artists">
                             <div class="alert alert-info">search results appear here</div>
                         </ul>
                     </div>
 
                     <div class="col-md-4">
                         <h5>Artists included</h5>
-                        <ul class="select-selected-artists" id="select-id-selected-artists"></ul>
+                        <ul class="select-selected-artists" id="{{ to }}-select-id-selected-artists"></ul>
                     </div>
 
 
@@ -58,20 +58,21 @@
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="modal-close-btn">close</button>
-                <button type="button" class="btn btn-outline-primary" id="save-artists-btn">save</button>
+                <button type="button" class="btn btn-outline-dark" id="{{ to }}-modal-reset-btn">reset</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="{{ to }}-modal-close-btn">close</button>
+                <button type="button" class="btn btn-outline-primary" id="{{ to }}-save-artists-btn">save</button>
             </div>
         </div>
     </div>
 </div>
 
 <div>
-    <div class="alert alert-danger visually-hidden not-saved">Changes were not saved</div>
+    <div class="alert alert-danger visually-hidden {{ to }}-not-saved">Changes were not saved</div>
     <div class="row">
         {% if obj %}
             <div class="col-md-6">
                 <h4>Current Artists for {{ obj.title }} </h4>
-                <ul id="current-artists">
+                <ul id="{{ to }}-current-artists">
                     {% for artist in obj.artists.all %}
                         <li data-ar-id="{{ artist.pk }}">{{ artist.name }}</li>
                     {% endfor %}
@@ -80,10 +81,10 @@
         {% endif %}
         <div class="col-md-6 visually-hidden"  aria-hidden="true">
             <h4>Edited artists</h4>
-            <input id="artists-ids" type="hidden" name="artists" value="">
-            <ul id="edited-artists"></ul>
+            <input id="{{ to }}-artists-ids" type="hidden" name="{{ to }}-artists" value="">
+            <ul id="{{ to }}-edited-artists"></ul>
         </div>
     </div>
     <hr>
-    <button id="select-artists-modal-btn" type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#artists-modal">Edit "{{ form.title.value }}" artists</button>
+    <button id="{{ to }}-select-artists-modal-btn" type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#{{ to }}-artists-modal">Edit "{{ form.title.value }}" artists</button>
 </div>

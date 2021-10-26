@@ -129,6 +129,6 @@
     <div class="form-group col-md-7">
         <div class="alert alert-info">The Album's artists</div>
         <label for="">Album Artists</label>
-        {% include 'staff/select_artists.html' with obj=album %}
+        {% include 'staff/select_artists.html' with obj=album to='album' modal_title="album artists" %}
     </div>
 </div>

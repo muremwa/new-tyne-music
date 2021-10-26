@@ -476,7 +476,7 @@ class AlbumEditView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
         is_single = self.request.POST.get('is_single')
         is_ep = self.request.POST.get('is_ep')
         album = form.save(commit=False)
-        artists = self.request.POST.get('artists')
+        artists = self.request.POST.get('album-artists')
 
         if artists:
             artists = [int(artist_id) for artist_id in artists.split(',')]
