@@ -50,7 +50,9 @@
 
                     <div class="col-md-4">
                         <h5>Artists included</h5>
-                        <ul class="select-selected-artists" id="{{ to }}-select-id-selected-artists"></ul>
+                        <ul class="select-selected-artists" id="{{ to }}-select-id-selected-artists">
+                            <div class="alert alert-info">Staged artists appear here</div>
+                        </ul>
                     </div>
 
 
@@ -73,10 +75,15 @@
             <div class="col-md-6">
                 <h4>Current Artists for {{ obj.title }} </h4>
                 <ul id="{{ to }}-current-artists">
-                    {% for artist in obj.artists.all %}
+                    {% for artist in c_artists.all %}
                         <li data-ar-id="{{ artist.pk }}">{{ artist.name }}</li>
                     {% endfor %}
                 </ul>
+            </div>
+        {% else %}
+            <div class="col-md-6">
+                <div class="alert alert-info">Click on the button below to add artists</div>
+                <ul id="{{ to }}-current-artists"></ul>
             </div>
         {% endif %}
         <div class="col-md-6 visually-hidden"  aria-hidden="true">

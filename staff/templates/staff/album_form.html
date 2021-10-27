@@ -59,7 +59,7 @@
                 {% endfor %}
             </ul>
         {% else %}
-            <div class="alert alert-info">You editor notes</div>
+            <div class="alert alert-info">Your editor notes</div>
         {% endif %}
         <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
         {{ form.notes }}
@@ -129,6 +129,6 @@
     <div class="form-group col-md-7">
         <div class="alert alert-info">The Album's artists</div>
         <label for="">Album Artists</label>
-        {% include 'staff/select_artists.html' with obj=album to='album' modal_title="album artists" %}
+        {% include 'staff/select_artists.html' with obj=album c_artists=album.artists to='album' modal_title="album artists" %}
     </div>
 </div>
