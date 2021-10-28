@@ -25,8 +25,16 @@ from .staff_actions import staff_actions, superuser_actions
 staff_logger = logging.getLogger('tyne.staff')
 
 
-def info_log_staff_message(action_id, message):
+def info_log_staff_message(action_id: log_action_ids, message: str):
     staff_logger.info(f'ID: {action_id}:{message}')
+
+
+@user_passes_test(test_func=lambda user: user.is_staff)
+def artists_names(request):
+    if request.method == 'GET':
+        name = request.GET.get('name', '')
+        artists = Artist.objects.filter(name__icontains=name)
+        return JsonResponse([[artist.name, artist.pk] for artist in artists], safe=False)
 
 
 # access mixin for staff, throw 404 if user not staff or superuser denied
@@ -438,6 +446,8 @@ class PublishAlbums(StaffAccessMixin, StaffPermissionMixin, View):
 
 
 class AlbumEditingAbstract(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
+    new_album = False
+
     @staticmethod
     def retrieve_artist(artist_id):
         try:
@@ -445,6 +455,18 @@ class AlbumEditingAbstract(StaffAccessMixin, StaffPermissionMixin, generic.FormV
             return artist
         except ObjectDoesNotExist:
             return None
+
+    def log_activity(self, pk, title):
+        if self.new_album:
+            done_action = 'created'
+            done_action_id = log_action_ids.CREATE_ALBUM
+        else:
+            done_action = 'edited'
+            done_action_id = log_action_ids.EDIT_ALBUM
+
+        user = f'{self.request.user.username}({self.request.user.pk})'
+        message = f'{user} {done_action} album {title}({pk})'
+        info_log_staff_message(done_action_id, message)
 
     def form_valid(self, form):
         is_single = self.request.POST.get('is_single')
@@ -471,6 +493,8 @@ class AlbumEditingAbstract(StaffAccessMixin, StaffPermissionMixin, generic.FormV
             artists_objs = [self.retrieve_artist(artist_id) for artist_id in artists]
             album.artists.clear()
             album.artists.add(*[artist for artist in artists_objs if artist])
+
+        self.log_activity(album.pk, album.title)
 
         return redirect(f'{reverse("staff:manage-albums")}?album-id={album.pk}')
 
@@ -506,6 +530,7 @@ class AlbumEditView(AlbumEditingAbstract):
 
 
 class StaffAlbumCreateView(AlbumEditingAbstract):
+    new_album = True
     form_class = AlbumForm
     template_name = 'staff/create_album.html'
     permission_required = (
@@ -513,9 +538,15 @@ class StaffAlbumCreateView(AlbumEditingAbstract):
     )
 
 
-@user_passes_test(test_func=lambda user: user.is_staff)
-def artists_names(request):
-    if request.method == 'GET':
-        name = request.GET.get('name', '')
-        artists = Artist.objects.filter(name__icontains=name)
-        return JsonResponse([[artist.name, artist.pk] for artist in artists], safe=False)
+class AlbumDelete(StaffAccessMixin, StaffPermissionMixin, generic.DeleteView):
+    model = Album
+    pk_url_kwarg = 'album_pk'
+    context_object_name = 'album'
+    permission_required = ('music.delete_album', 'music.change_album')
+    template_name = 'staff/album_confirm_delete.html'
+
+    def get_success_url(self):
+        album = f'{strip_punctuation(self.object.title)}({self.object.pk})'
+        m = f'{self.request.user.username}({self.request.user.pk}) deleted album {album}'
+        info_log_staff_message(log_action_ids.DELETE_ALBUM, m)
+        return reverse('staff:manage-albums')

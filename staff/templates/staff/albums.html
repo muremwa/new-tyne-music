@@ -60,11 +60,7 @@
                 {% endif %}
                 <div class="alert alert-danger text-center">
                     <h4>Once "{{ album.title }}" is deleted it can not be recovered.</h4>
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="delete" value="1">
-                        <button type="submit" class="btn btn-outline-danger">Delete '{{ album.title }}'</button>
-                    </form>
+                        <a href="{% url 'staff:album-delete' album_pk=album.pk %}" class="btn btn-outline-danger">Delete '{{ album.title }}'</a>
                 </div>
             </div>
 

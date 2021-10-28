@@ -1,0 +1,36 @@
+{% extends "staff/staff_base.html" %}
+
+{% block title %}Delete '{{ album.title }}'{% endblock title %}
+{% block help %}active{% endblock help %}
+
+{% block content %}
+    <div class="col-sm-9 container">
+        <div>
+            <h2>Are you sure you want to delete {{ album.title }}</h2>
+            <p class="text-primary">
+                once {{ album.title }} is deleted it cannot be recovered! <br/>
+                Another solution would be to unpublish it
+            </p>
+            
+            <div class="row">
+                <div class="col-md-3">
+                    <form action="{% url 'staff:album-publish-status' album.pk %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="un-publish" value="1">
+                        <button type="submit" class="btn btn-outline-danger">Un publish '{{ album.title }}' instead</button>
+                    </form>
+                </div>
+
+                <div class="col-md-1"></div>
+
+                <div class="col-md-4">
+                    <form class="form-inline" method="post">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-outline-danger" value="delete">
+                        <a style="margin-left: 10px" href="{% url 'staff:manage-albums' %}?album-id={{ album.pk }}" class="btn btn-outline-primary">cancel</a>                     
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

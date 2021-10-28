@@ -48,6 +48,9 @@ urlpatterns = [
     # manage-albums/edit/23/
     path('manage-albums/edit/<int:album_pk>/', views.AlbumEditView.as_view(), name='album-edit'),
 
+    # manage-albums/delete/23/
+    path('manage-albums/delete/<int:album_pk>/', views.AlbumDelete.as_view(), name='album-delete'),
+
     # manage-albums/create/
     path('manage-albums/create/', views.StaffAlbumCreateView.as_view(), name='album-create'),
 
