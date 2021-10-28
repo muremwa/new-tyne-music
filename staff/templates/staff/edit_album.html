@@ -14,7 +14,7 @@
 
 {% block content %}
     <div class="container">
-        <h2>Edit {{ form.instance }} by {{ form.instance.artists|album_artists }}</h2>
+        <h2>Edit <a href="{% url 'staff:manage-albums' %}?album-id={{ form.instance.pk }}">{{ form.instance }}</a> by {{ form.instance.artists|album_artists }}</h2>
         {% if form.non_field_errors %}
             <div class="alert alert-warning">
                 {% for error in form.non_field_errors %}
