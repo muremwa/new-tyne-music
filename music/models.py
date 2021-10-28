@@ -173,6 +173,12 @@ class Album(models.Model):
                 album=self
             )
 
+    def delete(self, using=None, keep_parents=False):
+        if self.cover != '/defaults/album.png':
+            self.cover.delete()
+
+        return super().delete(using, keep_parents)
+
     def __repr__(self):
         name = 'Album'
         if self.is_ep:
