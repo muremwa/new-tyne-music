@@ -209,7 +209,7 @@ class StaffArticleAdd(StaffAccessMixin, PermissionRequiredMixin, generic.CreateV
             log_action_ids.CREATE_ARTICLE,
             f'{user_info} created article {strip_punctuation(self.object.title)}({self.object.pk})'
         )
-        return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
+        return reverse('staff:help-article', kwargs={'article_pk': str(self.object.pk)})
 
 
 # edit a help article
@@ -227,7 +227,7 @@ class StaffArticleEdit(StaffAccessMixin, PermissionRequiredMixin, generic.Update
             log_action_ids.EDIT_ARTICLE,
             f'{user_info} edited article {strip_punctuation(self.object.title)}({self.object.pk})'
         )
-        return reverse("staff:help-article", kwargs={"article_slug": str(self.object.slug)})
+        return reverse('staff:help-article', kwargs={'article_pk': str(self.object.pk)})
 
 
 # edit a help article
