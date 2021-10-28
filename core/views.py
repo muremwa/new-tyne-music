@@ -351,7 +351,8 @@ def master_login(request):
 
         return render(request, 'auth/login.html', {
             'wrong_creds': True,
-            'email': email
+            'email': email,
+            'next': next_url
         })
 
 
