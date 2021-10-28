@@ -29,6 +29,15 @@ staff_actions = [
         'permissions': [
             'core.view_user', 'auth.view_group', 'auth.view_permission'
         ]
+    },
+    {
+        'name': 'Manage Albums',
+        'id': 'mg_albums',
+        'url': reverse_lazy('staff:manage-albums'),
+        'description': 'Add, view, edit, publish or delete albums',
+        'permissions': [
+            'music.add_album', 'music.view_album', 'music.change_album', 'music.delete_album'
+        ]
     }
 ]
 
