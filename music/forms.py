@@ -1,5 +1,7 @@
 from django import forms
 from django.db.models import Model
+from django.db.models.fields.files import ImageFieldFile, FileField
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as __
 
@@ -31,6 +33,13 @@ class ModelEditWithRelatedFields(SmartForm, forms.Form):
             for key in self.changed_data:
                 if hasattr(self.instance, key):
                     new_value = self.cleaned_data.get(key)
+
+                    # delete old files
+                    if isinstance(new_value, InMemoryUploadedFile):
+                        old_file = getattr(self.instance, key)
+
+                        if isinstance(old_file, ImageFieldFile) or isinstance(old_file, FileField):
+                            old_file.delete()
                     setattr(self.instance, key, new_value)
             if commit:
                 self.instance.save()
