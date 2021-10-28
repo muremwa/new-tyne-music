@@ -32,11 +32,20 @@ staff_actions = [
     },
     {
         'name': 'Manage Albums',
-        'id': 'mg_albums',
+        'id': 'manage_albums',
         'url': reverse_lazy('staff:manage-albums'),
         'description': 'Add, view, edit, publish or delete albums',
         'permissions': [
             'music.add_album', 'music.view_album', 'music.change_album', 'music.delete_album'
+        ]
+    },
+    {
+        'name': 'New Album',
+        'id': 'create_album',
+        'url': reverse_lazy('staff:album-create'),
+        'description': 'Add albums',
+        'permissions': [
+            'music.add_album', 'music.view_album',
         ]
     }
 ]
