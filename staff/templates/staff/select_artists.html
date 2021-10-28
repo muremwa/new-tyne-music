@@ -71,9 +71,9 @@
 <div>
     <div class="alert alert-danger visually-hidden {{ to }}-not-saved">Changes were not saved</div>
     <div class="row">
-        {% if obj %}
+        {% if obj or c_artists.count %}
             <div class="col-md-6">
-                <h4>Current Artists for {{ obj.title }} </h4>
+                <h4>Current Artists {% if obj %}for "{{ obj.title }}"{% else %}(initialized){% endif %}</h4>
                 <ul id="{{ to }}-current-artists">
                     {% for artist in c_artists.all %}
                         <li data-ar-id="{{ artist.pk }}">{{ artist.name }}</li>

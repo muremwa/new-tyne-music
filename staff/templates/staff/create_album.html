@@ -18,7 +18,7 @@
         <form action="{% url 'staff:album-create' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
-            {% include 'staff/album_form.html' %}
+            {% include 'staff/album_form.html' with initial_artists=force_artists %}
 
             <hr>
 

@@ -537,6 +537,17 @@ class StaffAlbumCreateView(AlbumEditingAbstract):
         'music.add_album', 'music.view_album',
     )
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        artist_pks = self.request.GET.get('artists')
+
+        if artist_pks:
+            artist_pks = set([int(pk) for pk in artist_pks.split(',') if pk.strip().isdigit()])
+            artist_pks = [pk for pk in artist_pks if pk > -1]
+            context['force_artists'] = Artist.objects.filter(pk__in=artist_pks)
+
+        return context
+
 
 class AlbumDelete(StaffAccessMixin, StaffPermissionMixin, generic.DeleteView):
     model = Album
