@@ -59,9 +59,25 @@ class ArtistEditForm(ClassicModelEditForm):
 
 class AlbumForm(SmartForm, forms.ModelForm):
 
+    class Media:
+        js = ('js/ajaxWrapper.js', 'staff/js/album_form.js', 'staff/js/select_artists.js')
+        css = {
+            'all': ('staff/css/album_form.css', 'staff/css/select_artists.css')
+        }
+
     class Meta:
         model = Album
         exclude = ('other_versions', 'artists', 'published', 'likes')
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Album title...'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Editor notes here...'}),
+            'is_single': forms.CheckboxInput(attrs={'class': 'hidden-checks'}),
+            'is_ep': forms.CheckboxInput(attrs={'class': 'hidden-checks'}),
+            'genre': forms.Select(attrs={'class': 'form-select'}),
+            'date_of_release': forms.DateInput(attrs={'class': 'form-select', 'type': 'date'}),
+            'cover': forms.FileInput(attrs={'class': 'form-control'}),
+            'copyright': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Copyright information...'})
+        }
 
 
 class AlbumEditForm(ModelEditWithRelatedFields):
@@ -69,12 +85,15 @@ class AlbumEditForm(ModelEditWithRelatedFields):
     notes = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}), required=False)
     is_single = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'hidden-checks'}))
     is_ep = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'hidden-checks'}))
+    cover = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
+    copyright = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}), required=False)
     genre = forms.ModelChoiceField(queryset=Genre.objects.all(), required=False, widget=forms.Select(attrs={
         'class': 'form-select',
     }))
-    date_of_release = forms.DateField(required=False, widget=forms.DateInput(attrs={'class': 'form-select', 'type': 'date',}))
-    cover = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
-    copyright = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}), required=False)
+    date_of_release = forms.DateField(required=False, widget=forms.DateInput(attrs={
+        'class': 'form-select',
+        'type': 'date'
+    }))
 
     class Media:
         js = ('js/ajaxWrapper.js', 'staff/js/album_form.js', 'staff/js/select_artists.js')

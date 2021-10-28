@@ -108,7 +108,7 @@
                         {% if album_type == 'LP' %}Albums{% else %}{% if album_type == 'S' %}Singles{% else %}{% if album_type == 'EP' %}Extended Plays{% else %}All Records{% endif %}{% endif %}{% endif %} available
                     </h4>
                     <div class="col-md-2">
-                        <a href="" class="btn btn-outline-dark">New Album</a>
+                        <a href="{% url 'staff:album-create' %}" class="btn btn-outline-primary">New Album</a>
                     </div>
 
                     <div class="col-md-2">

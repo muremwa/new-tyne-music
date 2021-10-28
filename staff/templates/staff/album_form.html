@@ -45,7 +45,9 @@
         <label for="{{ form.date_of_release.id_for_label }}">{{ form.date_of_release.label }}</label>
         {{ form.date_of_release }}
         <br />
-        <span id="date_of_release_lang">{{ form.instance.date_of_release|full_release }}</span>
+        {% if form.instance %}
+            <span id="date_of_release_lang">{{ form.instance.date_of_release|full_release }}</span>
+        {% endif %}
     </div>
 </div>
 <hr>
@@ -65,7 +67,7 @@
         {{ form.notes }}
     </div>
 
-    <!-- Artists -->
+    <!-- Album cover -->
     <div class="form-group col-md-4">
         {% if form.cover.errors %}
             <ul class="alert alert-danger list-unstyled">

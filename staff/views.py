@@ -14,7 +14,7 @@ from django.contrib.messages import add_message, constants as message_constants
 
 from core.models import User
 from music.models import Album, Artist
-from music.forms import AlbumEditForm
+from music.forms import AlbumEditForm, AlbumForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -437,14 +437,7 @@ class PublishAlbums(StaffAccessMixin, StaffPermissionMixin, View):
         return redirect(f'{reverse("staff:manage-albums")}?album-id={album.pk}')
 
 
-# edit an album
-class AlbumEditView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
-    form_class = AlbumEditForm
-    template_name = 'staff/edit_album.html'
-    permission_required = (
-        'music.view_album', 'music.change_album',
-    )
-
+class AlbumEditingAbstract(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
     @staticmethod
     def retrieve_artist(artist_id):
         try:
@@ -453,36 +446,11 @@ class AlbumEditView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
         except ObjectDoesNotExist:
             return None
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['album'] = get_object_or_404(Album, pk=self.kwargs.get('album_pk'))
-        return context
-
-    def get_success_url(self):
-        return f'{reverse("staff:manage-albums")}?album-id={self.kwargs.get("album_pk")}'
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        album = get_object_or_404(Album, pk=self.kwargs.get('album_pk'))
-        kwargs['instance'] = album
-
-        if self.request.method == 'GET':
-            kwargs['initial'] = {
-                key: getattr(album, key) for key in self.form_class().fields_info()
-            }
-        return kwargs
-
     def form_valid(self, form):
         is_single = self.request.POST.get('is_single')
         is_ep = self.request.POST.get('is_ep')
         album = form.save(commit=False)
         artists = self.request.POST.get('album-artists')
-
-        if artists:
-            artists = [int(artist_id) for artist_id in artists.split(',')]
-            artists_objs = [self.retrieve_artist(artist_id) for artist_id in artists]
-            album.artists.clear()
-            album.artists.add(*[artist for artist in artists_objs if artist])
 
         if is_single:
             album.is_single = True
@@ -497,12 +465,52 @@ class AlbumEditView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
             album.is_ep = False
 
         album.save()
-        return redirect(self.get_success_url())
+
+        if artists:
+            artists = [int(artist_id) for artist_id in artists.split(',')]
+            artists_objs = [self.retrieve_artist(artist_id) for artist_id in artists]
+            album.artists.clear()
+            album.artists.add(*[artist for artist in artists_objs if artist])
+
+        return redirect(f'{reverse("staff:manage-albums")}?album-id={album.pk}')
 
     def form_invalid(self, form):
         return render(self.request, self.template_name, {
             'form': form
         })
+
+
+# edit an album
+class AlbumEditView(AlbumEditingAbstract):
+    form_class = AlbumEditForm
+    template_name = 'staff/edit_album.html'
+    permission_required = (
+        'music.view_album', 'music.change_album',
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['album'] = get_object_or_404(Album, pk=self.kwargs.get('album_pk'))
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        album = get_object_or_404(Album, pk=self.kwargs.get('album_pk'))
+        kwargs['instance'] = album
+
+        if self.request.method == 'GET':
+            kwargs['initial'] = {
+                key: getattr(album, key) for key in self.form_class().fields_info()
+            }
+        return kwargs
+
+
+class StaffAlbumCreateView(AlbumEditingAbstract):
+    form_class = AlbumForm
+    template_name = 'staff/create_album.html'
+    permission_required = (
+        'music.add_album', 'music.view_album',
+    )
 
 
 @user_passes_test(test_func=lambda user: user.is_staff)

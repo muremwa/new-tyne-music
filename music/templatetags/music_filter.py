@@ -35,13 +35,16 @@ def album_artists_string(artists):
 
 @register.filter
 def release_date_to(release_date):
-    if release_date > timezone.now().date():
-        stamp = f'Pre-release: {timesince.timeuntil(release_date)} to go'
-    else:
-        stamp = f'{timesince.timesince(release_date)} ago'
+    stamp = ''
+
+    if release_date:
+        if release_date > timezone.now().date():
+            stamp = f'Pre-release: {timesince.timeuntil(release_date)} to go'
+        else:
+            stamp = f'{timesince.timesince(release_date)} ago'
     return stamp
 
 
 @register.filter
 def full_release(release_date):
-    return release_date.strftime('%A %B %d, %Y')
+    return release_date.strftime('%A %B %d, %Y') if release_date else ''

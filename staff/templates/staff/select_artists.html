@@ -93,5 +93,5 @@
         </div>
     </div>
     <hr>
-    <button id="{{ to }}-select-artists-modal-btn" type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#{{ to }}-artists-modal">Edit "{{ form.title.value }}" artists</button>
+    <button id="{{ to }}-select-artists-modal-btn" type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#{{ to }}-artists-modal">Edit {% if obj %}"{{ form.title.value }}"{% endif %} artists</button>
 </div>

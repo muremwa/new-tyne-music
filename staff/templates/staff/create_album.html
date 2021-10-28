@@ -1,0 +1,35 @@
+{% extends 'staff/staff_base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}New Album{% endblock title %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block style %}
+    {{ form.media.css }}
+{% endblock style %}
+
+{% block content %}
+
+    <div class="container">
+        <h2>Create a new album</h2>
+
+        <form action="{% url 'staff:album-create' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% include 'staff/album_form.html' %}
+
+            <hr>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-outline-dark">Save album</button>
+            </div>
+        </form>
+    </div>
+
+{% endblock content %}
+
+{% block bottomScript %}
+    {{ form.media.js }}
+{% endblock bottomScript %}
