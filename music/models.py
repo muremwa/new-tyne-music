@@ -9,23 +9,23 @@ from core.models import Profile
 
 
 def upload_artist_image(instance: 'Artist', filename: str):
-    return f'dy/music/artists/{instance.pk}/{filename}'
+    return f'dy/music/artists/new/{filename}'
 
 
 def upload_creator_image(instance: 'Creator', filename: str):
-    return f'dy/music/creators/{instance.pk}/{filename}'
+    return f'dy/music/creators/new/{filename}'
 
 
 def upload_genre_image(instance: 'Genre', filename: str):
-    return f'dy/music/creators/{instance.pk}/{filename}'
+    return f'dy/music/creators/new/{filename}'
 
 
 def upload_album_image(instance: 'Album', filename: str):
-    return f'dy/music/albums/{instance.pk}/{filename}'
+    return f'dy/music/albums/new/{filename}'
 
 
 def upload_song_file(instance: 'Song', filename: str):
-    return f'dy/music/albums/{instance.disc.album.pk}/{instance.disc.pk}/{instance.pk}/{filename}'
+    return f'dy/music/albums/{instance.disc.album.pk}/{instance.disc.pk}/{filename}'
 
 
 def upload_playlist_image(instance: 'Playlist', filename: str):
