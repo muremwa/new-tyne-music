@@ -7,11 +7,13 @@
     <p>Date joined: <strong>{{ d_user.date_joined }}</strong></p>
     <p>Tier: <strong>{{ d_user.c_tier }}</strong></p>
 
-    <div class="row">
-        <span class="col-md-1"></span>
-        <a href="{% url 'staff:add-users' %}" class="btn btn-outline-dark col-md-4">Manage a new user</a>
-        <span class="col-md-2"></span>
-        <a href="{% url 'staff:staff-view' %}" class="btn btn-outline-dark col-md-4">List all users</a>
-        <span class="col-md-1"></span>
-    </div>
+    {% if perms.core.view_user %}
+        <div class="row">
+            <span class="col-md-1"></span>
+            <a href="{% url 'staff:add-users' %}" class="btn btn-outline-dark col-md-4">Manage a new user</a>
+            <span class="col-md-2"></span>
+            <a href="{% url 'staff:staff-view' %}" class="btn btn-outline-dark col-md-4">List all users</a>
+            <span class="col-md-1"></span>
+        </div>
+    {% endif %}
 </div>
