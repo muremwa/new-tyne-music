@@ -8,8 +8,14 @@ from django.core.exceptions import ValidationError
 from core.models import Profile
 
 
-def upload_artist_image(instance: 'Artist', filename: str):
-    return f'dy/music/artists/new/{filename}'
+def upload_artist_image(instance: 'Artist', filename: str, cover: bool = False):
+    inter_type = instance.pk if instance.pk else 'new'
+    if cover:
+        inter_type = f'{inter_type}/covers'
+    else:
+        inter_type = f'{inter_type}/avis'
+
+    return f'dy/music/artists/{inter_type}/{filename}'
 
 
 def upload_creator_image(instance: 'Creator', filename: str):
@@ -43,12 +49,20 @@ class Artist(models.Model):
     name = models.CharField(max_length=100, help_text='Artist\'s name')
     is_group = models.BooleanField(default=False, help_text='Is the artist a group')
     group_members = models.ManyToManyField('self', blank=True)
-    avi = models.ImageField(default='/defaults/artist.png', upload_to=upload_artist_image, help_text='A 1x1 pic')
-    cover = models.ImageField(default='/defaults/artist_large.png', upload_to=upload_artist_image, help_text='16x16')
     bio = models.TextField(blank=True, null=True, help_text='Info about the artist')
     nicknames = models.TextField(blank=True, null=True, help_text='Comma separated names the artist goes by')
     playlists = models.ManyToManyField('Playlist', blank=True)
     objects = models.Manager()
+    avi = models.ImageField(
+        default='/defaults/artist.png',
+        upload_to=upload_artist_image,
+        help_text='A 1x1 image'
+    )
+    cover = models.ImageField(
+        default='/defaults/artist_large.png',
+        upload_to=lambda instance, filename: upload_artist_image(instance, filename, True),
+        help_text='A 3x1 image'
+    )
 
     def add_artist_to_group(self, artist: 'Artist'):
         if self.is_group and type(artist) == type(self) and not artist.is_group:

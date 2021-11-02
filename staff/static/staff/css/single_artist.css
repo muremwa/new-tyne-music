@@ -1,0 +1,45 @@
+.artist-info {
+    list-style-type: none;
+}
+
+.artist-info > li > span.title, .x-title {
+    color: rgb(112, 25, 194);
+    font-size: 1.7em;
+    letter-spacing: 5px;
+}
+
+.artist-info > li > span.value, .x-p {
+    font-size: 1.2em;
+}
+
+.main-cover {
+    height: 40vh;
+    overflow: hidden;
+    margin-bottom: 1em;
+}
+
+.main-cover > img {
+    width: 100%;
+}
+
+.x-p {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: normal;
+}
+
+.artist-avi {
+    border-radius: 3px;
+    width: 100%;
+}
+
+.actions > div {
+    text-align: center;
+}
+
+.actions > div > a {
+    min-width: 50%;
+}
