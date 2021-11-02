@@ -387,7 +387,7 @@ class StaffAlbumView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateVie
         else:
             album_type = self.request.GET.get('t', '')
             query = self.request.GET.get('q', '')
-            albums = Album.objects.all()
+            albums = Album.objects.order_by('title')
 
             if album_type and album_type in ('EP', 'LP', 'S'):
                 if album_type == 'EP':
@@ -561,3 +561,60 @@ class AlbumDelete(StaffAccessMixin, StaffPermissionMixin, generic.DeleteView):
         m = f'{self.request.user.username}({self.request.user.pk}) deleted album {album}'
         info_log_staff_message(log_action_ids.DELETE_ALBUM, m)
         return reverse('staff:manage-albums')
+
+
+class StaffArtistsView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateView):
+    template_name = 'staff/artists/manage_artists.html'
+    permission_required = (
+        'music.view_artist', 'music.add_artist', 'music.change_artist', 'music.delete_artist'
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        artist_id = self.request.GET.get('artist-id')
+
+        if artist_id and artist_id.strip().isdigit():
+            artist_id = int(artist_id)
+            context.update({
+                'artist_id': artist_id,
+                'artist': get_object_or_404(Artist, pk=artist_id)
+            })
+
+        else:
+            query = self.request.GET.get('q')
+            artist_type = self.request.GET.get('t')
+            artists = Artist.objects.order_by('name')
+
+            if artist_type and artist_type in ['G', 'L']:
+                group_status = True if artist_type == 'G' else False
+                artists = artists.filter(is_group=group_status)
+                context['artist_type'] = artist_type
+
+            if query:
+                artists = artists.filter((Q(name__icontains=query) | Q(nicknames__icontains=query)))
+                context['q'] = query
+
+            context['artists'] = artists
+
+        return context
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

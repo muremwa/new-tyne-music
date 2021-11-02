@@ -54,4 +54,7 @@ urlpatterns = [
     # manage-albums/create/
     path('manage-albums/create/', views.StaffAlbumCreateView.as_view(), name='album-create'),
 
+    # manage-artists/
+    path('manage-artists/', views.StaffArtistsView.as_view(), name='manage-artists'),
+
 ]

@@ -1,0 +1,73 @@
+<div>
+    <div class="row top-links">
+        <h2 class="col-md-3">
+            Manage Artists
+            <small>
+            {% if artist_type == 'G' %}
+                (Groups only)
+            {% else %}
+                {% if artist_type == 'L' %}
+                    (Loner Artists only)
+                {% endif %}
+            {% endif %}
+            </small>
+        </h2>
+        <div class="col-md-2">
+            <a href="" class="btn btn-outline-primary">New Artist</a>
+        </div>
+
+        <div class="col-md-2">
+            <a href="{% url 'staff:manage-artists' %}?t=G" class="btn btn-outline-dark">Groups / Bands</a>
+        </div>
+
+        <div class="col-md-2">
+            <a href="{% url 'staff:manage-artists' %}?t=L" class="btn btn-outline-dark">Loner Artists</a>
+        </div>
+        
+        {% if artist_type or q %}
+        <div class="col-md-2">
+            <a href="{% url 'staff:manage-artists' %}" class="btn btn-outline-primary">All</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script type="text/javascript">
+        function clickLink(linkId) {
+            document.getElementById(linkId).click()
+        }
+    </script>
+    <div class="row">
+        {% for artist in artists %}
+            <div class="artist col-md-2">
+                <div class="artist-info">
+                    <h5
+                        class="artist-title"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-html="true"
+                        title="<img class='tool-img' src='{{ artist.avi.url }}'>"
+                    >{{ artist.name }}</h5>
+                    <p>
+                        {% if artist.is_group %}
+                            GROUP with {{ artist.group_members.count }} member(s)
+                        {% endif %}
+                        
+                        {% if artist.nicknames %}
+                            {{ artist.nicknames }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="artist-link" onclick="clickLink('{{ artist.pk }}-link')" aria-label="manage {{ artist.title }}">
+                    <a id="{{ artist.pk }}-link" href="{% url 'staff:manage-artists' %}?artist-id={{ artist.pk }}">manage</a>
+                </div>
+            </div>
+        {% empty %}
+            
+            <div class="alert alert-info text-center text-dark">
+                No artists here
+            </div>
+        {% endfor %}
+    </div>
+
+
+</div>

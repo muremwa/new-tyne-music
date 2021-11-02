@@ -1,0 +1,35 @@
+{% extends 'staff/staff_base.html' %}
+{% load static %}
+
+{% block title %}Manage {% if artist_id %}{{ artist.name }}{% else %}Artists{% endif %}{% endblock title %}
+
+{% block style %}
+    {% if artist_id %}
+        <link rel="stylesheet" href="{% static 'staff/css/single_artist.css' %}" type="text/css">
+    {% else %}
+        <link rel="stylesheet" href="{% static 'staff/css/artists.css' %}" type="text/css">
+    {% endif %}
+{% endblock style %}
+
+{% block search_action %}{% url 'staff:manage-artists' %}{% endblock search_action %}
+
+{% block search_placeholder %}artist by name or nicknames{% endblock search_placeholder %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block content %}
+
+
+    <div class="container">
+        {% if artist_id %}
+            {% comment %} Single artist {% endcomment %}
+            {% include 'staff/artists/single_artist.html' %}
+        {% else %}
+            {% comment %} Multiple artists {% endcomment %}
+            {% include 'staff/artists/multiple_artists.html' %}
+        {% endif %}
+    </div>
+    
+
+
+{% endblock content %}
