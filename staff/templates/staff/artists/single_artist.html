@@ -16,8 +16,12 @@
                 <li>
                     <span class="title">Nicknames</span><br>
                     <span class="value">
-                        {% if artists.nicknames %}
-                            {{ artist.nicknames }}
+                        {% if artist.nicknames %}
+                            <ul>
+                                {% for n in artist.all_nicknames %}
+                                    <li>{{ n}}</li>
+                                {% endfor %}
+                            </ul>
                         {% else %}
                             No nicknames
                         {% endif %}
