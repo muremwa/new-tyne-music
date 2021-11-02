@@ -599,6 +599,34 @@ class StaffArtistsView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateV
         return context
 
 
+class EditArtistGroupMember(StaffAccessMixin, StaffPermissionMixin, View):
+    permission_required = (
+        'music.view_artist', 'music.change_artist'
+    )
+
+    def log_action(self, artist):
+        m = f'{self.request.user.username}({self.request.user.pk}) edited {artist}'
+        info_log_staff_message(log_action_ids.EDIT_ARTIST, m)
+
+    def post(self, request, **kwargs):
+        artist = get_object_or_404(Artist, pk=kwargs.get('artist_id'))
+
+        if not artist.is_group:
+            raise Http404
+
+        artists = request.POST.get('group-artists')
+
+        if artists:
+            grp_artists = {int(artist_id) for artist_id in artists.split(',')}
+            artists = Artist.objects.filter(pk__in=grp_artists, is_group=False)
+            artist.group_members.clear()
+
+            for member in artists:
+                artist.add_artist_to_group(member)
+
+            self.log_action(f'{artist.name}({artist.pk})')
+
+        return redirect(f"{reverse('staff:manage-artists')}?artist-id={artist.pk}#group-members-edit")
 
 
 

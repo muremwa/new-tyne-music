@@ -32,10 +32,6 @@
                     <span class="title">Type</span><br>
                     <span class="value">{{ artist.a_type }}</span>
                 </li>
-                <li>
-                    <span class="title"></span><br>
-                    <span class="value"></span>
-                </li>
             </ul>
         </div>
         <div class="col-md-4">
@@ -55,6 +51,19 @@
 
     <div>
         <h3 class="text-center x-title">Actions</h3>
+        {% if artist.is_group %}
+            <form id="group-members-edit" action="{% url 'staff:group-members' artist_id=artist.pk %}" method="post" class="alert alert-info">
+                <h4>Add Group members</h4>
+                
+                {% csrf_token %}
+                {% include 'staff/select_artists.html' with c_artists=artist.group_members to='group' modal_title="Group Artists" %}
+
+                <div class="form-group">
+                    <br>
+                    <button class="btn btn-outline-dark" type="submit">save group members</button>    
+                </div>
+            </form>
+        {% endif %}
         <br>
         <div class="row actions">
             <div class="col-md-4">

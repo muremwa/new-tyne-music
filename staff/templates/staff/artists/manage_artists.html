@@ -6,6 +6,7 @@
 {% block style %}
     {% if artist_id %}
         <link rel="stylesheet" href="{% static 'staff/css/single_artist.css' %}" type="text/css">
+        <link rel="stylesheet" href="{% static 'staff/css/select_artists.css' %}" type="text/css">
     {% else %}
         <link rel="stylesheet" href="{% static 'staff/css/artists.css' %}" type="text/css">
     {% endif %}
@@ -33,3 +34,8 @@
 
 
 {% endblock content %}
+
+{% block bottomScript %}
+    <script src="{% static 'js/ajaxWrapper.js' %}"></script>
+    <script src="{% static 'staff/js/select_artists.js' %}"></script>
+{% endblock bottomScript %}

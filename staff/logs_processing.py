@@ -24,6 +24,12 @@ class LogActionIds:
         self.DELETE_ALBUM = 'delete_album'
         self.PUBLISH_ALBUM = 'publish_album'
         self.UN_PUBLISH_ALBUM = 'un_publish_album'
+        self.CREATE_ARTIST = 'create_artist'
+        self.EDIT_ARTIST = 'edit_artist'
+        self.DELETE_ARTIST = 'delete_artist'
+        self.CREATE_PLAYLIST = 'create_playlist'
+        self.EDIT_PLAYLIST = 'edit_playlist'
+        self.DELETE_PLAYLIST = 'delete_playlist'
 
 
 class Log:

@@ -57,4 +57,7 @@ urlpatterns = [
     # manage-artists/
     path('manage-artists/', views.StaffArtistsView.as_view(), name='manage-artists'),
 
+    # manage-artists/edit/49/members/
+    path('manage-artists/edit/<int:artist_id>/members/', views.EditArtistGroupMember.as_view(), name='group-members'),
+
 ]
