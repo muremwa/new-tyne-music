@@ -19,15 +19,15 @@ def upload_artist_image(instance: 'Artist', filename: str, cover: bool = False):
 
 
 def upload_creator_image(instance: 'Creator', filename: str):
-    return f'dy/music/creators/new/{filename}'
+    return f'dy/music/creators/creators/{instance.pk if instance.pk else "new"}/{filename}'
 
 
 def upload_genre_image(instance: 'Genre', filename: str):
-    return f'dy/music/creators/new/{filename}'
+    return f'dy/music/creators/genres/{instance.pk if instance.pk else "new"}/{filename}'
 
 
 def upload_album_image(instance: 'Album', filename: str):
-    return f'dy/music/albums/new/{filename}'
+    return f'dy/music/albums/{instance.pk if instance.pk else "new"}/{filename}'
 
 
 def upload_song_file(instance: 'Song', filename: str):
@@ -35,12 +35,13 @@ def upload_song_file(instance: 'Song', filename: str):
 
 
 def upload_playlist_image(instance: 'Playlist', filename: str):
+    inter_type = instance.pk if instance.pk else "new"
     if instance.profile:
-        abs_path = f'users/{instance.profile.user.pk}/{instance.profile.pk}/{instance.pk}/{filename}'
+        abs_path = f'users/{instance.profile.user.pk}/{instance.profile.pk}/{inter_type}/{filename}'
     elif instance.creator:
-        abs_path = f'creator/{instance.creator.pk}/{instance.pk}/{filename}'
+        abs_path = f'creator/{instance.creator.pk}/{inter_type}/{filename}'
     else:
-        abs_path = f'blank/{instance.pk}/{filename}'
+        abs_path = f'blank/{inter_type}/{filename}'
 
     return f'dy/music/playlists/{abs_path}'
 
