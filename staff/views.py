@@ -14,7 +14,7 @@ from django.contrib.messages import add_message, constants as message_constants
 
 from core.models import User
 from music.models import Album, Artist
-from music.forms import AlbumEditForm, AlbumForm
+from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -629,6 +629,51 @@ class EditArtistGroupMember(StaffAccessMixin, StaffPermissionMixin, View):
         return redirect(f"{reverse('staff:manage-artists')}?artist-id={artist.pk}#group-members-edit")
 
 
+class EditArtistAbstract(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
+    form_class = ArtistEditForm
+    new_artist = False
+
+    def log_action(self, artist: Artist):
+        user = f'{self.request.user.username}({self.request.user.pk})'
+        artist = f'{artist.name}({artist.pk})'
+        action = 'created' if self.new_artist else 'edited'
+        info_log_staff_message(log_action_ids.EDIT_ARTIST, f'{user} {action} artist {artist}')
+
+    def form_valid(self, form: ArtistEditForm):
+        artist = form.save()
+        self.log_action(artist)
+        return redirect(f"{reverse('staff:manage-artists')}?artist-id={artist.pk}")
+
+    def form_invalid(self, form):
+        artist = get_object_or_404(Artist, pk=self.kwargs.get('artist_id')) if self.kwargs.get('artist_id') else None
+
+        return render(self.request, self.template_name, {
+            'form': form,
+            'artist': artist
+        })
+
+
+class EditArtist(EditArtistAbstract):
+    template_name = 'staff/artists/edit_artist.html'
+    permission_required = (
+        'music.view_artist', 'music.change_artist'
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['artist'] = get_object_or_404(Artist, pk=self.kwargs.get('artist_id'))
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        artist = get_object_or_404(Artist, pk=self.kwargs.get('artist_id'))
+        kwargs['instance'] = artist
+
+        if self.request.method == 'GET':
+            kwargs['initial'] = {
+                key: getattr(artist, key) for key in self.form_class().fields_info()
+            }
+        return kwargs
 
 
 

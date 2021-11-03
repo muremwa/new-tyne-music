@@ -2,6 +2,7 @@ from django import forms
 from django.db.models import Model
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as __
+from django.core.files.images import get_image_dimensions
 
 from core.forms import SmartForm
 from core.models import Profile
@@ -37,6 +38,52 @@ class ModelEditWithRelatedFields(SmartForm, forms.Form):
         return self.instance
 
 
+class CleanArtist:
+    @staticmethod
+    def check_aspect_ratio(width: int, height: int, ratio: []) -> bool:
+        """
+        Checks whether the width and height are in the aspect ratio; ratio
+        :param width: width of an item
+        :type width: int
+        :param height: height of an item
+        :type height: int
+        :param ratio: a list of ratio; if aspect ratio is 16:9 then ratio will be [16, 9]
+        :type ratio: list
+        :return: Whether or not the aspect ratio matches
+        :rtype: bool
+        """
+        pro = (width / height) * ratio[-1]
+        return pro == ratio[0]
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+
+        if not name:
+            raise ValidationError(__('Name is required'))
+
+        return name
+
+    def clean_avi(self):
+        avi = self.cleaned_data.get('avi')
+
+        if avi:
+            width, height = get_image_dimensions(avi)
+            if not self.check_aspect_ratio(width, height, [1, 1]):
+                raise ValidationError(__('Artist avi should 1:1'))
+
+        return avi
+
+    def clean_cover(self):
+        cover = self.cleaned_data.get('cover')
+
+        if cover:
+            width, height = get_image_dimensions(cover)
+            if not self.check_aspect_ratio(width, height, [3, 1]):
+                raise ValidationError(__('Artist cover should be 3:1'))
+
+        return cover
+
+
 class ArtistForm(SmartForm, forms.ModelForm):
 
     class Meta:
@@ -44,11 +91,24 @@ class ArtistForm(SmartForm, forms.ModelForm):
         exclude = ('group_members',)
 
 
-class ArtistEditForm(ClassicModelEditForm):
+class ArtistEditForm(CleanArtist, ClassicModelEditForm):
+
+    class Media:
+        css = {
+            'all': ('staff/css/artists/artist_form.css',)
+        }
+        js = ('staff/js/artists/artist_form.js',)
 
     class Meta:
         model = Artist
         exclude = ('group_members',)
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'artist\'s name'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Something about the artist'}),
+            'avi': forms.FileInput(attrs={'class': 'form-control'}),
+            'cover': forms.FileInput(attrs={'class': 'form-control'}),
+            'nicknames': forms.HiddenInput()
+        }
 
     def clean(self):
         if not self.instance.pk:

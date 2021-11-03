@@ -60,4 +60,7 @@ urlpatterns = [
     # manage-artists/edit/49/members/
     path('manage-artists/edit/<int:artist_id>/members/', views.EditArtistGroupMember.as_view(), name='group-members'),
 
+    # manage-artists/edit/49/
+    path('manage-artists/edit/<int:artist_id>/', views.EditArtist.as_view(), name='artist-edit'),
+
 ]

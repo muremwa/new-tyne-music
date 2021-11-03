@@ -1,0 +1,40 @@
+.way-point {
+    max-width: 40%;
+}
+
+.current-image {
+    margin: 1em;
+}
+
+.current-image > img {
+    width: 100%;
+}
+
+.select-nickname {
+    border: 1px solid rgba(0, 128, 128, 0.589);
+    margin: 0.5em;
+    padding: 0.5em;
+    font-weight: bold;
+    display: flex;
+    flex-direction: row;
+}
+
+.select-nickname > span {
+    width: 80%;
+}
+
+
+.select-nickname > svg {
+    width: 20%;
+    height: 1em;
+}
+
+.select-nickname > svg:hover, .select-nickname > svg:focus {
+    cursor: pointer;
+    fill: rgb(224, 114, 224);
+}
+
+.select-nickname-row > div {
+    max-height: 70vh;
+    overflow: auto;
+}

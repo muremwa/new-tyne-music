@@ -1,7 +1,9 @@
 <div>
     <div class="row artist-row">
         <div class="main-cover">
-            <img src="{{ artist.cover.url }}" alt="artist cover image">
+            {% if artist.cover %}
+                <img src="{{ artist.cover.url }}" alt="artist cover image">
+            {% endif %}
         </div>
 
         <hr>
@@ -43,7 +45,9 @@
             {% endif %}
         </div>
         <div class="col-md-4 text-center">
-            <img src="{{ artist.avi.url }}" alt="{{ artist.name }}'s avi" class="artist-avi">
+            {% if artist.avi %}
+                <img src="{{ artist.avi.url }}" alt="{{ artist.name }}'s avi" class="artist-avi">
+            {% endif %}
         </div>
     </div>
 
@@ -70,7 +74,7 @@
                 <a href="{% url 'staff:manage-artists' %}" class="btn btn-outline-dark">All artists</a>
             </div>
             <div class="col-md-4">
-                <a href="" class="btn btn-outline-dark">Edit {{ artist.name }}</a>
+                <a href="{% url 'staff:artist-edit' artist_id=artist.pk %}" class="btn btn-outline-dark">Edit {{ artist.name }}</a>
             </div>
             <div class="col-md-4">
                 <a href="" class="btn btn-outline-danger">Delete {{ artist.name }}</a>

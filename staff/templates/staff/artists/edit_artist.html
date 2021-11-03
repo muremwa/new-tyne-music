@@ -1,0 +1,49 @@
+{% extends 'staff/staff_base.html' %}
+
+{% block title %}Edit {{ artist.name }}(artist){% endblock title %}
+
+{% block style %}
+    {{ form.media.css }}
+{% endblock style %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block content %}
+
+    <div class="container">
+        <h2>Edit "<a href="{% url 'staff:manage-artists' %}?artist-id={{ artist.pk }}">{{ artist.name }}</a>"</h2>
+        
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% include 'staff/artists/r_artist_form.html' %}
+            
+            <hr>
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <button class="btn btn-outline-dark" type="submit">save changes to '{{ artist.name }}'</button>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'staff:manage-artists' %}?artist-id={{ artist.pk }}" class="btn btn-outline-primary">cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+        
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock content %}
+
+{% block bottomScript %}
+    {{ form.media.js }}
+{% endblock bottomScript %}

@@ -1,0 +1,174 @@
+{% load static %}
+
+<div class="row skimmy-border">
+    <!-- Name -->
+    <div class="col-md-4">
+        {% if form.name.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.name.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Artist's name / title</div>
+        {% endif %}
+
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+    </div>
+
+    <!-- Bio -->
+    <div class="col-md-5">
+        {% if form.bio.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.bio.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Some information about the artist.</div>
+        {% endif %}
+
+        <label for="{{ form.bio.id_for_label }}">{{ form.bio.label }}</label>
+        {{ form.bio }}
+    </div>
+
+    <!-- Nicknames -->
+    <div class="col-md-3">
+        {% if form.nicknames.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.nicknames.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Other names that the artist goes by</div>
+        {% endif %}
+
+        <label for="{{ form.nicknames.id_for_label }}">{{ form.nicknames.label }}</label>
+        {{ form.nicknames }}
+
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Current nicknames</h6>
+                {% if artist.nicknames %}
+                    <ul>
+                        {% for n in artist.all_nicknames %}
+                            <li>{{ n}}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    No nicknames
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h6>Edited nicknames</h6>
+                <ul id="saved-nicknames">
+                    <div class="alert alert-info">Edited nicknames show up here</div>
+                </ul>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#nicknames-modal">Edit nicknames</button>
+    </div>
+</div>
+
+<br>
+
+<div class="row skimmy-border">
+    <!-- Avi -->
+    <div class="col-md-3">
+        {% if form.avi.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.avi.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">A 1×1 image of the artist</div>
+        {% endif %}
+
+        <label for="{{ form.avi.id_for_label }}">{{ form.avi.label }}</label>
+        <div class="current-image js-img-pr">
+            {% if artist.avi %}
+                <img src="{{ artist.avi.url }}" alt="current avi" data-aspect-ratio="1:1" data-input-name="avi">
+            {% endif %}
+        </div>
+        <p class="alert alert-danger visually-hidden" id="alert-avi">Image is not 1:1</p>
+        {{ form.avi }}
+    </div>
+    
+    <!-- Divider -->
+    <div class="col-md-1"></div>
+    
+    <!-- Cover -->
+    <div class="col-md-8">
+        {% if form.cover.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.cover.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">A 3×1 image for the artist</div>
+        {% endif %}
+        
+        <label for="{{ form.cover.id_for_label }}">{{ form.cover.label }}</label>
+        <div class="current-image js-img-pr">
+            {% if artist.cover %}
+                <img src="{{ artist.cover.url }}" alt="current cover" data-aspect-ratio="3:1" data-input-name="cover">
+            {% endif %}
+        </div>
+        <p class="alert alert-danger way-point visually-hidden" id="alert-cover">Image is not 3:1</p>
+        <div class="way-point">
+            {{ form.cover }}
+        </div>
+    </div>
+</div>
+
+<br>
+
+
+<div class="modal fade" id="nicknames-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit nicknames {% if artist %}for {{ artist.name }}{% endif %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="nickname-input">New Nickname</label>
+                            <input id="nickname-input" type="text" placeholder="Enter nickname" class="form-control">
+                        </div>
+
+                        <br>
+
+                        <div class="alert alert-info">
+                            Enter nickname in the field above, then click enter to save the name. <br>
+                            To remove a name, click the remove icon on a nickname. <hr>
+                            Closing this window/dialog/modal saves changes.
+                            <hr>
+                            If you comma separate them, they are split into different names
+                        </div>
+                    </div>
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <ul id="nicknames-home">
+                            <div class="alert alert-info">No nicknames yet</div>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
