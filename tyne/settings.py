@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'staff.apps.StaffConfig',
     'music.apps.MusicConfig',
+
+    'django_cleanup.apps.CleanupConfig'
 ]
 
 MIDDLEWARE = [
