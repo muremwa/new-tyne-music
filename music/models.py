@@ -27,11 +27,12 @@ def upload_genre_image(instance: 'Genre', filename: str):
 
 
 def upload_album_image(instance: 'Album', filename: str):
-    return f'dy/music/albums/{instance.pk if instance.pk else "new"}/{filename}'
+    inter_type = f'{instance.pk}/cover' if instance.pk else "new"
+    return f'dy/music/albums/{inter_type}/{filename}'
 
 
 def upload_song_file(instance: 'Song', filename: str):
-    return f'dy/music/albums/{instance.disc.album.pk}/{instance.disc.pk}/{filename}'
+    return f'dy/music/albums/{instance.disc.album.pk}/disks/{instance.disc.pk}/{filename}'
 
 
 def upload_playlist_image(instance: 'Playlist', filename: str):
