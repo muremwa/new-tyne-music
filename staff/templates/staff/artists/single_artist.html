@@ -77,7 +77,7 @@
                 <a href="{% url 'staff:artist-edit' artist_id=artist.pk %}" class="btn btn-outline-dark">Edit {{ artist.name }}</a>
             </div>
             <div class="col-md-4">
-                <a href="" class="btn btn-outline-danger">Delete {{ artist.name }}</a>
+                <a href="{% url 'staff:artist-delete' artist_id=artist.pk %}" class="btn btn-outline-danger">Delete {{ artist.name }}</a>
             </div>
         </div>
     </div>

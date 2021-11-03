@@ -1,0 +1,27 @@
+{% extends 'staff/staff_base.html' %}
+
+{% block title %}Delete {{ artist.name }}{% endblock title %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block content %}
+
+    <div class="container text-center">
+        <h2>Are you sure you want to delete "{{ artist.name }}"</h2>
+
+        <div class="alert alert-info">
+            The artist and all their info will be deleted/lost and cannot be recovered
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <button type="submit" class="btn btn-outline-danger col-md-4">Delete '{{ artist.name }}'</button>
+                <div class="col-md-4"></div>
+                <a href="{% url 'staff:manage-artists' %}?artist-id={{ artist.pk }}" class="btn btn-outline-dark col-md-4">cancel</a>
+            </div>
+        </form>
+    </div>
+
+
+{% endblock content %}

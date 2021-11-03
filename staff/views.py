@@ -685,15 +685,17 @@ class ArtistCreate(EditArtistAbstract):
     )
 
 
+class ArtistDelete(StaffAccessMixin, StaffPermissionMixin, generic.DeleteView):
+    model = Artist
+    template_name = 'staff/artists/artist_delete.html'
+    pk_url_kwarg = 'artist_id'
+    context_object_name = 'artist'
+    permission_required = (
+        'music.view_artist', 'music.delete_artist'
+    )
 
-
-
-
-
-
-
-
-
-
-
-
+    def get_success_url(self):
+        user = f'{self.request.user.username}({self.request.user.pk})'
+        artist = f'{self.object.name}({self.object.pk})'
+        info_log_staff_message(log_action_ids.DELETE_ARTIST, f'{user} deleted artist {artist}')
+        return reverse('staff:manage-artists')
