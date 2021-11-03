@@ -63,4 +63,7 @@ urlpatterns = [
     # manage-artists/edit/49/
     path('manage-artists/edit/<int:artist_id>/', views.EditArtist.as_view(), name='artist-edit'),
 
+    # manage-artists/create/
+    path('manage-artists/create/', views.ArtistCreate.as_view(), name='artist-create'),
+
 ]

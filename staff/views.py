@@ -14,7 +14,7 @@ from django.contrib.messages import add_message, constants as message_constants
 
 from core.models import User
 from music.models import Album, Artist
-from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm
+from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -676,7 +676,13 @@ class EditArtist(EditArtistAbstract):
         return kwargs
 
 
-
+class ArtistCreate(EditArtistAbstract):
+    new_artist = True
+    template_name = 'staff/artists/create_artist.html'
+    form_class = ArtistForm
+    permission_required = (
+        'music.view_artist', 'music.add_artist'
+    )
 
 
 

@@ -90,8 +90,10 @@
 
         <label for="{{ form.avi.id_for_label }}">{{ form.avi.label }}</label>
         <div class="current-image js-img-pr">
-            {% if artist.avi %}
-                <img src="{{ artist.avi.url }}" alt="current avi" data-aspect-ratio="1:1" data-input-name="avi">
+            {% if form.instance.avi.url %}
+                <img src="{{ form.instance.avi.url }}" alt="current avi" data-aspect-ratio="1:1" data-input-name="avi">
+            {% else %}
+                <img src="" alt="current avi" data-aspect-ratio="1:1" data-input-name="avi">
             {% endif %}
         </div>
         <p class="alert alert-danger visually-hidden" id="alert-avi">Image is not 1:1</p>
@@ -115,8 +117,10 @@
         
         <label for="{{ form.cover.id_for_label }}">{{ form.cover.label }}</label>
         <div class="current-image js-img-pr">
-            {% if artist.cover %}
-                <img src="{{ artist.cover.url }}" alt="current cover" data-aspect-ratio="3:1" data-input-name="cover">
+            {% if form.instance.cover.url %}
+                <img src="{{ form.instance.cover.url }}" alt="current cover" data-aspect-ratio="3:1" data-input-name="cover">
+            {% else %}
+                <img src="" alt="current cover" data-aspect-ratio="3:1" data-input-name="cover">
             {% endif %}
         </div>
         <p class="alert alert-danger way-point visually-hidden" id="alert-cover">Image is not 3:1</p>

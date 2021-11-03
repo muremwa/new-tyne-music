@@ -39,6 +39,23 @@ class ModelEditWithRelatedFields(SmartForm, forms.Form):
 
 
 class CleanArtist:
+    class Media:
+        css = {
+            'all': ('staff/css/artists/artist_form.css',)
+        }
+        js = ('staff/js/artists/artist_form.js',)
+
+    class Meta:
+        model = Artist
+        exclude = ('group_members',)
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'artist\'s name'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Something about the artist'}),
+            'avi': forms.FileInput(attrs={'class': 'form-control'}),
+            'cover': forms.FileInput(attrs={'class': 'form-control'}),
+            'nicknames': forms.HiddenInput()
+        }
+
     @staticmethod
     def check_aspect_ratio(width: int, height: int, ratio: []) -> bool:
         """
@@ -66,7 +83,7 @@ class CleanArtist:
     def clean_avi(self):
         avi = self.cleaned_data.get('avi')
 
-        if avi:
+        if avi and '/defaults/' not in str(avi):
             width, height = get_image_dimensions(avi)
             if not self.check_aspect_ratio(width, height, [1, 1]):
                 raise ValidationError(__('Artist avi should 1:1'))
@@ -76,7 +93,7 @@ class CleanArtist:
     def clean_cover(self):
         cover = self.cleaned_data.get('cover')
 
-        if cover:
+        if cover and '/defaults/' not in str(cover):
             width, height = get_image_dimensions(cover)
             if not self.check_aspect_ratio(width, height, [3, 1]):
                 raise ValidationError(__('Artist cover should be 3:1'))
@@ -84,31 +101,11 @@ class CleanArtist:
         return cover
 
 
-class ArtistForm(SmartForm, forms.ModelForm):
-
-    class Meta:
-        model = Artist
-        exclude = ('group_members',)
+class ArtistForm(SmartForm, CleanArtist, forms.ModelForm):
+    pass
 
 
 class ArtistEditForm(CleanArtist, ClassicModelEditForm):
-
-    class Media:
-        css = {
-            'all': ('staff/css/artists/artist_form.css',)
-        }
-        js = ('staff/js/artists/artist_form.js',)
-
-    class Meta:
-        model = Artist
-        exclude = ('group_members',)
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'artist\'s name'}),
-            'bio': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Something about the artist'}),
-            'avi': forms.FileInput(attrs={'class': 'form-control'}),
-            'cover': forms.FileInput(attrs={'class': 'form-control'}),
-            'nicknames': forms.HiddenInput()
-        }
 
     def clean(self):
         if not self.instance.pk:
