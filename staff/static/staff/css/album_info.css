@@ -16,11 +16,12 @@ img.album-info-cover-img {
     border-radius: 3px;
 }
 
-.song > span {
+.song > span, .song > a {
     margin-top: auto;
     margin-bottom: auto;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-decoration: none;
 }
 
 .notes {
@@ -30,4 +31,10 @@ img.album-info-cover-img {
     white-space: -pre-wrap;
     white-space: -o-pre-wrap;
     word-wrap: normal;
+}
+
+.disc-name-form {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    display: none;
 }

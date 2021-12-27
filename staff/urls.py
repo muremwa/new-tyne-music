@@ -54,6 +54,15 @@ urlpatterns = [
     # manage-albums/create/
     path('manage-albums/create/', views.StaffAlbumCreateView.as_view(), name='album-create'),
 
+    # manage-albums/disc/new/23/
+    path('manage-albums/disc/new/<int:album_id>/', views.add_disc_to_album, name='new-disc'),
+
+    # manage-albums/disc/change/34/
+    path('manage-albums/disc/change/<int:disc_id>/', views.change_disc_name, name='change-disc'),
+
+    # manage-albums/disc/delete/34/
+    path('manage-albums/disc/delete/<int:disc_id>/', views.delete_disc_from_album, name='delete-disc'),
+
     # manage-artists/
     path('manage-artists/', views.StaffArtistsView.as_view(), name='manage-artists'),
 

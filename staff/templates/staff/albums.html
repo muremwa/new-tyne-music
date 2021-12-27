@@ -71,12 +71,12 @@
                 {% endif %}
                 <div>
                     {% for disc in album.disc_set.all %}
-                        <h4>{{ disc.name }}</h4>
+                        <h4 id="disc-{{ disc.pk }}">{{ disc.name }}</h4>
                         <ul class="list-unstyled">
                             {% for song in disc.song_set.all %}
                                 <li class="song row">
                                     <span class="col-md-1">{{ song.track_no }}.</span>
-                                    <span class="col-md-6">{{ song.title }}</span>
+                                    <a href="" class="col-md-6">{{ song.title }}</a>
                                     <span class="col-md-2">{{ song.length_string }}</span>
                                     {% if song.additional_artists.count > 0 %}
                                         <span class="col-md-3">{{ song.song_artists|album_artists:0 }}</span>
@@ -85,10 +85,33 @@
                                     {% endif %}
                                 </li>
                             {% empty %}
-                                <h5>No songs available</h5>
+                                <h5>No songs available on "{{ disc.name }}"</h5>
+                                {% if album.disc_set.count > 1 %}
+                                    <form action="{% url 'staff:delete-disc' disc_id=disc.pk %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="submit" value='Delete "{{ disc.name }}"' class="btn btn-outline-danger">
+                                    </form>
+                                {% endif %}
                             {% endfor %}
                         </ul>
+                        <a href="" class="btn btn-outline-primary">Add song to {{ disc.name }}</a>
+                        <button data-name-form-id="{{ disc.pk }}-name-form" class="btn btn-outline-secondary chg-disc-name">Change "{{ disc.name }}" name </button>
+
+                        <form data-open="0" action="{% url 'staff:change-disc' disc_id=disc.pk %}" method="post" id="{{ disc.pk }}-name-form" class="col-md-6 disc-name-form alert alert-info">
+                            {% csrf_token %}
+                            <input type="text" name="disc-name" class="form-control" placeholder="Enter new disc name for '{{ disc.name }}'" required>
+                            <hr>
+                            <input type="submit" value="save new name" class="btn btn-outline-dark">
+                        </form>
+                        <hr>
                     {% endfor %}
+
+                    <hr>
+
+                    <form action="{% url 'staff:new-disc' album_id=album.pk %}" method="post">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-outline-dark" value="Add disc to {{ album.title }}">
+                    </form>
                 </div>
             </div>
 
@@ -157,3 +180,10 @@
         </div>
     {% endif %}
 {% endblock content %}
+
+
+{% block bottomScript %}
+    {% if album_id %}
+        <script src="{% static 'staff/js/albums/album_info.js' %}"></script>
+    {% endif %}
+{% endblock bottomScript %}

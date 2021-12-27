@@ -13,7 +13,7 @@ from django.db.models import Q
 from django.contrib.messages import add_message, constants as message_constants
 
 from core.models import User
-from music.models import Album, Artist
+from music.models import Album, Artist, Disc
 from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
@@ -699,3 +699,45 @@ class ArtistDelete(StaffAccessMixin, StaffPermissionMixin, generic.DeleteView):
         artist = f'{self.object.name}({self.object.pk})'
         info_log_staff_message(log_action_ids.DELETE_ARTIST, f'{user} deleted artist {artist}')
         return reverse('staff:manage-artists')
+
+
+# add a disc to an album
+@user_passes_test(test_func=lambda user: user.is_staff)
+def add_disc_to_album(request, album_id):
+    album = get_object_or_404(Album, pk=album_id)
+    disc_pk = 0
+
+    if request.method == 'POST':
+        disc = Disc.objects.create(
+            name=f'Disc {album.disc_set.count() + 1}',
+            album=album
+        )
+        disc_pk = disc.pk
+
+    return redirect(f"{reverse('staff:manage-albums')}?album-id={album.pk}#disc-{disc_pk}")
+
+
+# delete a disc from album
+@user_passes_test(test_func=lambda user: user.is_staff)
+def delete_disc_from_album(request, disc_id):
+    disc = get_object_or_404(Disc, pk=disc_id)
+
+    if request.method == 'POST' and disc.song_set.count() == 0 and disc.album.disc_set.count() > 1:
+        disc.delete()
+
+    return redirect(f"{reverse('staff:manage-albums')}?album-id={disc.album.pk}")
+
+
+# change disc name
+@user_passes_test(test_func=lambda user: user.is_staff)
+def change_disc_name(request, disc_id):
+    disc = get_object_or_404(Disc, pk=disc_id)
+
+    if request.method == 'POST':
+        new_name = request.POST.get('disc-name')
+
+        if new_name:
+            disc.name = new_name
+            disc.save()
+
+    return redirect(f"{reverse('staff:manage-albums')}?album-id={disc.album.pk}#disc-{disc.pk}")
