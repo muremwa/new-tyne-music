@@ -247,6 +247,10 @@ class Song(models.Model):
         if self.pk and type(artist) == Artist and artist not in self.disc.album.artists.all():
             self.additional_artists.add(artist)
 
+    def add_featured_artist(self, artist):
+        if self.pk and type(artist) == Artist and artist not in self.disc.album.artists.all():
+            self.featured_artists.add(artist)
+
     def song_artists(self):
         artists = []
 

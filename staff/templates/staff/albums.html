@@ -76,7 +76,7 @@
                             {% for song in disc.song_set.all %}
                                 <li class="song row">
                                     <span class="col-md-1">{{ song.track_no }}.</span>
-                                    <a href="" class="col-md-6">{{ song.title }}</a>
+                                    <a href="{% url 'staff:edit-song' song_id=song.pk %}" class="col-md-6">{{ song.title }}</a>
                                     <span class="col-md-2">{{ song.length_string }}</span>
                                     {% if song.additional_artists.count > 0 %}
                                         <span class="col-md-3">{{ song.song_artists|album_artists:0 }}</span>

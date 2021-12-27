@@ -12,9 +12,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.contrib.messages import add_message, constants as message_constants
 
+import mutagen
+
 from core.models import User
-from music.models import Album, Artist, Disc
-from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm
+from music.models import Album, Artist, Disc, Song
+from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm, SongEditForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -741,3 +743,62 @@ def change_disc_name(request, disc_id):
             disc.save()
 
     return redirect(f"{reverse('staff:manage-albums')}?album-id={disc.album.pk}#disc-{disc.pk}")
+
+
+# edit song
+class EditSongView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
+    form_class = SongEditForm
+    template_name = 'staff/albums/songs/edit_song.html'
+    permission_required = (
+        'music.view_artist', 'music.change_artist', 'music.delete_artist'
+    )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        song = get_object_or_404(Song, pk=self.kwargs.get('song_id'))
+        kwargs['instance'] = song
+
+        if self.request.method == 'GET':
+            kwargs['initial'] = {
+                key: getattr(song, key) for key in self.form_class().fields_info()
+            }
+        return kwargs
+
+    def form_valid(self, form):
+        song = form.instance
+
+        # length of song
+        song_file = self.request.FILES.get('file')
+
+        if song_file:
+            song_file_x = mutagen.File(song_file)
+            song.length = song_file_x.info.length
+
+        # edit featured artists
+        feat_artists = self.request.POST.get('featured-artists', '')
+        if feat_artists:
+            feat_artists = [int(ar_pk) for ar_pk in feat_artists.split(',')]
+            feat_artists = Artist.objects.filter(pk__in=feat_artists)
+            song.featured_artists.clear()
+
+            for artist in feat_artists:
+                song.add_featured_artist(artist)
+
+        # additional artists
+        add_artists = self.request.POST.get('additional-artists', '')
+        if add_artists:
+            add_artists = [int(ar_pk) for ar_pk in add_artists.split(',')]
+            add_artists = Artist.objects.filter(pk__in=add_artists)
+            song.additional_artists.clear()
+
+            for artist in add_artists:
+                song.add_additional_artist(artist)
+
+        form.save()
+
+        return redirect(f"{reverse('staff:manage-albums')}?album-id={song.disc.album.pk}#disc-{song.disc.pk}")
+
+    def form_invalid(self, form):
+        return render(self.request, self.template_name, {
+            'form': form
+        })

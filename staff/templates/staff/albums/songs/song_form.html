@@ -1,0 +1,110 @@
+<div class="row skimmy-border">
+    <!-- track number  -->
+    <div class="form-group col-md-4">
+        {% if form.track_no.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.track_no.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">
+                Enter a track number unique to the disc '{{ song.disc.name }}'
+            </div>
+        {% endif %}
+        <label for="{{ form.track_no.id_for_label }}">{{ form.track_no.label }}</label>
+        {{ form.track_no }}        
+    </div>
+    
+    <!-- Title -->
+    <div class="form-group col-md-4">
+        {% if form.title.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.title.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Enter the appropriate title for the song</div>
+        {% endif %}
+        <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+        {{ form.title }}
+    </div>
+
+    <!-- Genre -->
+    <div class="form-group col-md-4">
+        {% if form.genre.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.genre.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">The most fitting genre for the album</div>
+        {% endif %}
+        <label for="{{ form.genre.id_for_label }}">{{ form.genre.label }}</label>
+        {{ form.genre }}
+    </div>
+</div>
+
+<hr>
+
+
+<div class="row skimmy-border">
+    <div class="form-group col-md-1"></div>
+    
+    <!-- song file  -->
+    <div class="form-group col-md-6">
+        {% if form.file.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.file.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">The file for the song. The length will be automatically populated</div>
+        {% endif %}
+
+        {% if song.file %}
+            <p>Current file <a href="{{ song.file.url }}" target="_blank" rel="noopener noreferrer">"{{ song.file }}"</a></p>
+        {% endif %}
+
+        <label for="{{ form.file.id_for_label }}">{{ form.file.label }}</label>
+        {{ form.file }}
+    </div>
+    
+
+    <!-- explicit or not -->
+    <div class="form-group col-md-4">
+        <div class="alert alert-info">Is this song explicit?</div>
+
+        <label for="{{ form.explicit.id_for_label }}">{{ form.explicit.label }}</label>
+        {{ form.explicit }}
+    </div>
+
+</div>
+
+<hr>
+
+
+<div class="row skimmy-border">
+    <!-- Featured artists  -->
+    <div class="form-group col-md-6">
+        <div class="alert alert-info">
+            Artists featured on the song
+        </div>
+        <label for="">Featured artists</label>
+        {% include 'staff/select_artists.html' with obj=song c_artists=song.featured_artists to='featured' modal_title="Featured artists" %}
+    </div>
+    
+    
+    <!-- additional artists  -->
+    <div class="form-group col-md-6">
+        <!-- additional artists on the song -->
+        <div class="alert alert-info">
+            Additional artists on the song
+        </div>
+        <label for="">Additional artists</label>
+        {% include 'staff/select_artists.html' with obj=song c_artists=song.additional_artists to='additional' modal_title="Additional artists" %}
+    </div>
+</div>

@@ -63,6 +63,9 @@ urlpatterns = [
     # manage-albums/disc/delete/34/
     path('manage-albums/disc/delete/<int:disc_id>/', views.delete_disc_from_album, name='delete-disc'),
 
+    # manage-albums/song/14/edit/
+    path('manage-albums/song/<int:song_id>/edit/', views.EditSongView.as_view(), name='edit-song'),
+
     # manage-artists/
     path('manage-artists/', views.StaffArtistsView.as_view(), name='manage-artists'),
 

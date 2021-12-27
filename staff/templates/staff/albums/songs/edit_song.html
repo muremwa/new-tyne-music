@@ -1,0 +1,30 @@
+{% extends 'staff/staff_base.html' %}
+{% load static %}
+
+{% block title %}Edit song '{{ form.instance.title }}'{% endblock title %}
+
+{% block style %}
+    {{ form.media.css }}
+{% endblock style %}
+
+{% block content %}
+    <div class="container">
+        <h2>Edit song '{{ form.instance.title }}' from "<a href="{% url 'staff:manage-albums' %}?album-id={{ form.instance.disc.album.pk }}#disc-{{ form.instance.disc.pk }}">{{ form.instance.disc.album.title}}</a>" on {{ form.instance.disc.name}}</h2>
+
+        <form action="{% url 'staff:edit-song' song_id=form.instance.pk %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include 'staff/albums/songs/song_form.html' with song=form.instance %}
+
+            <hr>
+
+            <div class="form-group">
+                <input class="btn btn-outline-dark" type="submit" value="Save changes to '{{ form.instance.title }}'">
+                <a href="{% url 'staff:manage-albums' %}?album-id={{ form.instance.disc.album.pk }}#disc-{{ form.instance.disc.pk }}" class="btn btn-outline-secondary">cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+
+{% block bottomScript %}
+    {{ form.media.js }}
+{% endblock bottomScript %}

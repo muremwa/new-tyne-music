@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as __
 from django.core.files.images import get_image_dimensions
 
+from mutagen import File
+
 from core.forms import SmartForm
 from core.models import Profile
 from .models import Artist, Album, Genre, Disc, Song, Creator, CreatorSection, Playlist
@@ -213,12 +215,52 @@ class SongForm(SmartForm, forms.ModelForm):
 
 
 class SongEditForm(ModelEditWithRelatedFields):
-    track_no = forms.IntegerField(required=False)
-    title = forms.CharField(required=False, max_length=100)
-    genre = forms.ModelChoiceField(queryset=Genre.objects.all(), required=False)
+    track_no = forms.IntegerField(required=False, label='Track Number', widget=forms.NumberInput(
+        attrs={'class': 'form-control', 'placeholder': 'Enter track number', 'min': '1'}
+    ))
+    title = forms.CharField(required=False, max_length=100, widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Enter song title'
+    }))
+    genre = forms.ModelChoiceField(queryset=Genre.objects.all(), required=False, widget=forms.Select(attrs={
+        'class': 'form-select'
+    }))
+    file = forms.FileField(required=False, widget=forms.FileInput(attrs={
+        'class': 'form-control',
+        'accept': 'audio/*'
+    }))
     explicit = forms.BooleanField(required=False)
-    file = forms.FileField(required=False)
     length = forms.IntegerField(required=False, help_text='Length of the file, if it exists')
+
+    class Media:
+        js = ('js/ajaxWrapper.js', 'staff/js/select_artists.js')
+        css = {
+            'all': ('staff/css/select_artists.css',)
+        }
+
+    def clean_track_no(self):
+        track_no = int(self.data.get('track_no'))
+
+        if track_no:
+            if track_no < 1:
+                raise ValidationError(__('No negative track numbers'))
+
+            if self.instance:
+                if self.instance.disc.song_set.filter(track_no=track_no).exclude(pk=self.instance.pk).count() != 0:
+                    raise ValidationError(__(f'Another song with the track number "{track_no}" exists'))
+
+        return track_no
+
+    def clean_file(self):
+        file = self.files.get('file')
+
+        if file:
+            x_file = File(file)
+
+            if not x_file or not hasattr(x_file.info, 'length'):
+                raise ValidationError(__('Wrong format audio  file'))
+
+        return file
 
 
 class CreatorForm(SmartForm, forms.ModelForm):
