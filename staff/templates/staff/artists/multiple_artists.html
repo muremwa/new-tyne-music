@@ -17,11 +17,11 @@
         </div>
 
         <div class="col-md-2">
-            <a href="{% url 'staff:manage-artists' %}?t=G" class="btn btn-outline-dark">Groups / Bands</a>
+            <a href="{% url 'staff:manage-artists' %}?t=G" class="btn btn-{% if artist_type != 'G' %}outline-{% endif %}dark">Groups / Bands</a>
         </div>
 
         <div class="col-md-2">
-            <a href="{% url 'staff:manage-artists' %}?t=L" class="btn btn-outline-dark">Loner Artists</a>
+            <a href="{% url 'staff:manage-artists' %}?t=L" class="btn btn-{% if artist_type != 'L' %}outline-{% endif %}dark">Loner Artists</a>
         </div>
         
         {% if artist_type or q %}

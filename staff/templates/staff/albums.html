@@ -108,15 +108,15 @@
                     </div>
 
                     <div class="col-md-2">
-                        <a href="{% url 'staff:manage-albums' %}?t=S" class="btn btn-outline-dark">Singles</a>
+                        <a href="{% url 'staff:manage-albums' %}?t=S" class="btn btn-{% if album_type != 'S' %}outline-{% endif %}dark">Singles</a>
                     </div>
 
                     <div class="col-md-2">
-                        <a href="{% url 'staff:manage-albums' %}?t=EP" class="btn btn-outline-dark">EPs</a>
+                        <a href="{% url 'staff:manage-albums' %}?t=EP" class="btn btn-{% if album_type != 'EP' %}outline-{% endif %}dark">EPs</a>
                     </div>
 
                     <div class="col-md-2">
-                        <a href="{% url 'staff:manage-albums' %}?t=LP" class="btn btn-outline-dark">Albums</a>
+                        <a href="{% url 'staff:manage-albums' %}?t=LP" class="btn btn-{% if album_type != 'LP' %}outline-{% endif %}dark">Albums</a>
                     </div>
                     
                     {% if album_type or q %}
