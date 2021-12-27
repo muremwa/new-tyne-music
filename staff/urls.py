@@ -66,6 +66,9 @@ urlpatterns = [
     # manage-albums/song/14/edit/
     path('manage-albums/song/<int:song_id>/edit/', views.EditSongView.as_view(), name='edit-song'),
 
+    # manage-albums/song/14/delete/
+    path('manage-albums/song/<int:song_id>/delete/', views.DeleteSongView.as_view(), name='delete-song'),
+
     # manage-artists/
     path('manage-artists/', views.StaffArtistsView.as_view(), name='manage-artists'),
 

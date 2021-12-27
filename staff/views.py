@@ -750,7 +750,7 @@ class EditSongView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
     form_class = SongEditForm
     template_name = 'staff/albums/songs/edit_song.html'
     permission_required = (
-        'music.view_artist', 'music.change_artist', 'music.delete_artist'
+        'music.view_song', 'music.change_song', 'music.delete_song'
     )
 
     def get_form_kwargs(self):
@@ -802,3 +802,20 @@ class EditSongView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
         return render(self.request, self.template_name, {
             'form': form
         })
+
+
+# delete a song
+class DeleteSongView(StaffAccessMixin, StaffPermissionMixin, generic.DeleteView):
+    model = Song
+    pk_url_kwarg = 'song_id'
+    context_object_name = 'song'
+    template_name = 'staff/albums/songs/delete_song.html'
+    permission_required = (
+        'music.delete_song', 'music.view_song'
+    )
+
+    def get_success_url(self):
+        user = f'{self.request.user.username}({self.request.user.pk})'
+        song = f'{self.object.title}({self.object.pk})'
+        info_log_staff_message(log_action_ids.DELETE_SONG, f'{user} deleted song {song}')
+        return f"{reverse('staff:manage-albums')}?album-id={self.object.disc.album.pk}#disc-{self.object.disc.pk}"

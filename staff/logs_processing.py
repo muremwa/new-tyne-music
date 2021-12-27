@@ -30,6 +30,12 @@ class LogActionIds:
         self.CREATE_PLAYLIST = 'create_playlist'
         self.EDIT_PLAYLIST = 'edit_playlist'
         self.DELETE_PLAYLIST = 'delete_playlist'
+        self.ADD_DISC = 'add_disc'
+        self.EDIT_DISC = 'edit_disc'
+        self.DELETE_DISC = 'delete_disc'
+        self.ADD_SONG = 'add_song'
+        self.EDIT_SONG = 'edit_song'
+        self.DELETE_SONG = 'delete_song'
 
 
 class Log:

@@ -19,6 +19,7 @@
 
             <div class="form-group">
                 <input class="btn btn-outline-dark" type="submit" value="Save changes to '{{ form.instance.title }}'">
+                <a href="{% url 'staff:delete-song' song_id=form.instance.pk %}" class="btn btn-outline-danger">Delete '{{ form.instance.title }}'</a>
                 <a href="{% url 'staff:manage-albums' %}?album-id={{ form.instance.disc.album.pk }}#disc-{{ form.instance.disc.pk }}" class="btn btn-outline-secondary">cancel</a>
             </div>
         </form>

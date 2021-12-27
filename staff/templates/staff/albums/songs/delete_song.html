@@ -1,0 +1,22 @@
+{% extends 'staff/staff_base.html' %}
+
+
+{% block title %}Delete song "{{ song.title }}"{% endblock title %}
+
+{% block content %}
+    
+    <form action="" method="post" class="container">
+        {% csrf_token %}
+
+        <h2>Are you sure you want to delete "{{ song.title }}"</h2>
+
+        <div class="alert alert-danger">Once deleted the song and its associated file will  be deleted</div>
+
+        <div class="form-group row">
+            <input class="col-md-5 btn btn-outline-danger" value="delete" type="submit" />
+            <div class="col-md-2"></div>
+            <a href="{% url 'staff:manage-albums' %}?album-id={{ song.disc.album.pk }}#disc-{{ song.disc.pk }}" class="col-md-5 btn btn-outline-dark">Cancel</a>
+        </div>
+    </form>
+
+{% endblock content %}
