@@ -67,7 +67,7 @@ class StaffHome(StaffAccessMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        all_actions = [action for action in staff_actions if self.request.user.has_perms(action.get('permissions'))]
+        all_actions = [action for action in staff_actions if self.request.user.has_perms(action.get('permissions', []))]
 
         if self.request.user.is_superuser:
             all_actions.extend(superuser_actions)
