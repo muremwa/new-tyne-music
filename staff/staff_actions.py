@@ -43,9 +43,27 @@ staff_actions = [
         'name': 'New Album',
         'id': 'create_album',
         'url': reverse_lazy('staff:album-create'),
-        'description': 'Add albums',
+        'description': 'Add a new album',
         'permissions': [
             'music.add_album', 'music.view_album',
+        ]
+    },
+    {
+        'name': 'Manage Artists',
+        'id': 'manage_artists',
+        'url': reverse_lazy('staff:manage-artists'),
+        'description': 'Add, view, edit or delete artists',
+        'permissions': [
+            'music.add_artist', 'music.view_artist', 'music.change_artist', 'music.delete_artist'
+        ]
+    },
+    {
+        'name': 'New Artist',
+        'id': 'create_artist',
+        'url': reverse_lazy('staff:artist-create'),
+        'description': 'Add a new artist',
+        'permissions': [
+            'music.add_artist', 'music.view_artist'
         ]
     }
 ]

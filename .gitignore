@@ -5,3 +5,4 @@ media/*
 .idea/*
 logs/*
 .vscode/*
+*.log
