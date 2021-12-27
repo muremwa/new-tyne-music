@@ -1,0 +1,31 @@
+{% extends 'staff/staff_base.html' %}
+{% load static %}
+
+{% block title %}New song to {{ form.song_disc }}{% endblock title %}
+
+{% block style %}
+    {{ form.media.css }}
+{% endblock style %}
+
+{% block content %}
+    <div class="container">
+        <h2>New song for <a href="{% url 'staff:manage-albums' %}?album-id={{ form.song_disc.album.pk }}#disc-{{ form.song_disc.pk }}">{{ form.song_disc }}</a></h2>
+
+        <form action="" method="post" enctype="multipart/form-data">
+            {{ form.errors }}
+            {% csrf_token %}
+            {% include 'staff/albums/songs/song_form.html' %}
+
+            <hr>
+
+            <div class="form-group">
+                <input class="btn btn-outline-dark" type="submit" value="Save new song">
+                <a href="{% url 'staff:manage-albums' %}?album-id={{ form.song_disc.album.pk }}#disc-{{ form.song_disc.pk }}" class="btn btn-outline-secondary">cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+
+{% block bottomScript %}
+    {{ form.media.js }}
+{% endblock bottomScript %}

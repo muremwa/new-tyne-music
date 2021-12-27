@@ -94,7 +94,7 @@
                                 {% endif %}
                             {% endfor %}
                         </ul>
-                        <a href="" class="btn btn-outline-primary">Add song to {{ disc.name }}</a>
+                        <a href="{% url 'staff:new-song' disc_id=disc.pk %}" class="btn btn-outline-primary">Add song to {{ disc.name }}</a>
                         <button data-name-form-id="{{ disc.pk }}-name-form" class="btn btn-outline-secondary chg-disc-name">Change "{{ disc.name }}" name </button>
 
                         <form data-open="0" action="{% url 'staff:change-disc' disc_id=disc.pk %}" method="post" id="{{ disc.pk }}-name-form" class="col-md-6 disc-name-form alert alert-info">

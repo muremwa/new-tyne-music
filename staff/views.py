@@ -16,7 +16,7 @@ import mutagen
 
 from core.models import User
 from music.models import Album, Artist, Disc, Song
-from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm, SongEditForm
+from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm, SongEditForm, SongForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -745,34 +745,23 @@ def change_disc_name(request, disc_id):
     return redirect(f"{reverse('staff:manage-albums')}?album-id={disc.album.pk}#disc-{disc.pk}")
 
 
-# edit song
-class EditSongView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
-    form_class = SongEditForm
-    template_name = 'staff/albums/songs/edit_song.html'
-    permission_required = (
-        'music.view_song', 'music.change_song', 'music.delete_song'
-    )
+# abstract for song
+class SongAbstract(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
+    def form_invalid(self, form):
+        return render(self.request, self.template_name, {
+            'form': form
+        })
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        song = get_object_or_404(Song, pk=self.kwargs.get('song_id'))
-        kwargs['instance'] = song
-
-        if self.request.method == 'GET':
-            kwargs['initial'] = {
-                key: getattr(song, key) for key in self.form_class().fields_info()
-            }
-        return kwargs
-
-    def form_valid(self, form):
-        song = form.instance
-
+    def extra_steps(self, song):
         # length of song
         song_file = self.request.FILES.get('file')
 
         if song_file:
             song_file_x = mutagen.File(song_file)
             song.length = song_file_x.info.length
+
+        if not song.pk:
+            song.save()
 
         # edit featured artists
         feat_artists = self.request.POST.get('featured-artists', '')
@@ -794,14 +783,52 @@ class EditSongView(StaffAccessMixin, StaffPermissionMixin, generic.FormView):
             for artist in add_artists:
                 song.add_additional_artist(artist)
 
-        form.save()
 
+# edit song
+class EditSongView(SongAbstract):
+    form_class = SongEditForm
+    template_name = 'staff/albums/songs/edit_song.html'
+    permission_required = (
+        'music.view_song', 'music.change_song', 'music.delete_song'
+    )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        song = get_object_or_404(Song, pk=self.kwargs.get('song_id'))
+        kwargs['instance'] = song
+
+        if self.request.method == 'GET':
+            kwargs['initial'] = {
+                key: getattr(song, key) for key in self.form_class().fields_info()
+            }
+        return kwargs
+
+    def form_valid(self, form):
+        song = form.instance
+        self.extra_steps(song)
+        form.save()
         return redirect(f"{reverse('staff:manage-albums')}?album-id={song.disc.album.pk}#disc-{song.disc.pk}")
 
-    def form_invalid(self, form):
-        return render(self.request, self.template_name, {
-            'form': form
-        })
+
+# create a new song
+class CreateSongView(SongAbstract):
+    form_class = SongForm
+    template_name = 'staff/albums/songs/create_song.html'
+    permission_required = (
+        'music.view_song', 'music.change_song', 'music.delete_song'
+    )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['song_disc'] = get_object_or_404(Disc, pk=self.kwargs.get('disc_id'))
+        return kwargs
+
+    def form_valid(self, form):
+        song = form.save(commit=False)
+        disc = get_object_or_404(Disc, pk=self.kwargs.get('disc_id'))
+        song.disc = disc
+        self.extra_steps(song)
+        return redirect(f"{reverse('staff:manage-albums')}?album-id={song.disc.album.pk}#disc-{song.disc.pk}")
 
 
 # delete a song

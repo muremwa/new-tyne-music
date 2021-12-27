@@ -197,21 +197,65 @@ class DiscEditForm(ModelEditWithRelatedFields):
 
 
 class SongForm(SmartForm, forms.ModelForm):
+    file = forms.FileField(required=False, widget=forms.FileInput(attrs={
+        'class': 'form-control',
+        'accept': 'audio/*'
+    }))
     length = forms.IntegerField(required=False, help_text='Length of the file, if it exists')
 
     class Meta:
         model = Song
-        exclude = ('additional_artists', 'likes', 'streams')
+        exclude = ('additional_artists', 'likes', 'streams', 'disc')
+        widgets = {
+            'track_no': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter track number',
+                'min': '1'
+            }),
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter song title'
+            }),
+            'genre': forms.Select(attrs={
+                'class': 'form-select'
+            })
+        }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        file = cleaned_data.get('file')
-        length = cleaned_data.get('length')
+    class Media:
+        js = ('js/ajaxWrapper.js', 'staff/js/select_artists.js')
+        css = {
+            'all': ('staff/css/select_artists.css',)
+        }
 
-        if length and not file:
-            raise ValidationError(__('Length allowed when file is present'))
+    def __init__(self, *args, **kwargs):
+        song_disc = kwargs.pop('song_disc', None)
+        super().__init__(*args, **kwargs)
 
-        return cleaned_data
+        if isinstance(song_disc, Disc):
+            self.song_disc = song_disc
+
+    def clean_track_no(self):
+        track_no = int(self.data.get('track_no'))
+
+        if track_no:
+            if track_no < 1:
+                raise ValidationError(__('No negative track numbers'))
+
+            if self.song_disc.song_set.filter(track_no=track_no):
+                raise ValidationError(__(f'Another song with the track number "{track_no}" exists on this disc'))
+
+        return track_no
+
+    def clean_file(self):
+        file = self.files.get('file')
+
+        if file:
+            x_file = File(file)
+
+            if not x_file or not hasattr(x_file.info, 'length'):
+                raise ValidationError(__('Wrong format audio  file'))
+
+        return file
 
 
 class SongEditForm(ModelEditWithRelatedFields):
