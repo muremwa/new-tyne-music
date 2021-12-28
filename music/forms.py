@@ -77,7 +77,7 @@ class CleanArtist:
     def clean_name(self):
         name = self.cleaned_data.get('name')
 
-        if not name:
+        if not name and not self.instance:
             raise ValidationError(__('Name is required'))
 
         return name
@@ -283,9 +283,10 @@ class SongEditForm(ModelEditWithRelatedFields):
         }
 
     def clean_track_no(self):
-        track_no = int(self.data.get('track_no'))
+        track_no = self.data.get('track_no')
 
         if track_no:
+            track_no = int(track_no)
             if track_no < 1:
                 raise ValidationError(__('No negative track numbers'))
 

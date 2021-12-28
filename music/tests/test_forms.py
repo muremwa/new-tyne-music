@@ -17,6 +17,7 @@ class MusicFormsTestCase(TestCase):
             genre=self.genre
         )
 
+    @tag('music-f-a')
     def test_artist_form(self):
         form = forms.ArtistForm(data={
             'name': 'Quavo',
@@ -136,29 +137,21 @@ class MusicFormsTestCase(TestCase):
             disc.refresh_from_db()
             self.assertEqual(disc.name, 'Disc Two')
 
+    @tag('music-f-sf')
     def test_song_form(self):
         form = forms.SongForm(data={
-            'disc': self.album.disc_one.pk,
             'track_no': 1,
             'title': 'BRUCE.',
             'genre': self.genre.pk,
             'explicit': False,
-            'length': 343
-        })
-        self.assertFalse(form.is_valid())
-
-        form = forms.SongForm(data={
-            'disc': self.album.disc_one.pk,
-            'track_no': 1,
-            'title': 'BRUCE.',
-            'genre': self.genre.pk,
-            'explicit': False,
-        })
+        }, song_disc=self.album.disc_one)
 
         self.assertTrue(form.is_valid())
 
         if form.is_valid():
-            song = form.save()
+            song = form.save(commit=False)
+            song.disc = self.album.disc_one
+            song.save()
             self.assertEqual(song.title, 'BRUCE.')
 
         self.assertEqual(len(self.album.all_songs()), 1)
