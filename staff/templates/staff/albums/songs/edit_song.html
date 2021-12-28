@@ -7,6 +7,8 @@
     {{ form.media.css }}
 {% endblock style %}
 
+{% block staff %}active{% endblock staff %}
+
 {% block content %}
     <div class="container">
         <h2>Edit song '{{ form.instance.title }}' from "<a href="{% url 'staff:manage-albums' %}?album-id={{ form.instance.disc.album.pk }}#disc-{{ form.instance.disc.pk }}">{{ form.instance.disc.album.title}}</a>" on {{ form.instance.disc.name}}</h2>
