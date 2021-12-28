@@ -314,7 +314,7 @@ class StaffRolesView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateVie
 
             context.update({
                 'staff': staff,
-                'q': query if query else None
+                'q': query if query else ''
             })
         return context
 
