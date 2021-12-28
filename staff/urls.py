@@ -87,4 +87,7 @@ urlpatterns = [
     # manage-artists/delete/23/
     path('manage-artists/delete/<int:artist_id>/', views.ArtistDelete.as_view(), name='artist-delete'),
 
+    # manage-creators/
+    path('manage-creators/', views.CreatorsHomeView.as_view(), name='manage-creators'),
+
 ]

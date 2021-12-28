@@ -15,7 +15,7 @@ from django.contrib.messages import add_message, constants as message_constants
 import mutagen
 
 from core.models import User
-from music.models import Album, Artist, Disc, Song
+from music.models import Album, Artist, Disc, Song, Creator
 from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm, SongEditForm, SongForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
@@ -846,3 +846,36 @@ class DeleteSongView(StaffAccessMixin, StaffPermissionMixin, generic.DeleteView)
         song = f'{self.object.title}({self.object.pk})'
         info_log_staff_message(log_action_ids.DELETE_SONG, f'{user} deleted song {song}')
         return f"{reverse('staff:manage-albums')}?album-id={self.object.disc.album.pk}#disc-{self.object.disc.pk}"
+
+
+# list curators
+class CreatorsHomeView(StaffAccessMixin, StaffPermissionMixin, generic.ListView):
+    model = Creator
+    context_object_name = 'creators'
+    template_name = 'staff/creators/creator_list.html'
+    permission_required = (
+        'music.view_creator', 'music.change_creator', 'music.add_creator'
+    )
+
+    def get_queryset(self):
+        q_set = super().get_queryset()
+        query = self.request.GET.get('q')
+
+        if query:
+            q_set_filter = (
+                Q(name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(genres__title__icontains=query)
+            )
+            q_set = q_set.filter(q_set_filter)
+
+        return set(q_set)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data()
+        query = self.request.GET.get('q')
+
+        if query:
+            context['q'] = query
+
+        return context

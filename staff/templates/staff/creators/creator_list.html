@@ -1,0 +1,48 @@
+{% extends 'staff/staff_base.html' %}
+{% load static %}
+
+{% block title %}Manage creators{% endblock title %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'staff/css/creators/creator_list.css' %}" type="text/css">
+{% endblock style %}
+
+{% block search_action %}{% url 'staff:manage-creators' %}{% endblock search_action %}
+
+{% block search_placeholder %}creators{% endblock search_placeholder %}
+
+{% block staff %}active{% endblock staff %}
+
+
+{% block content %}
+
+
+    <div class="container">
+        <h2>Manage creators {% if q %}<small class="x-small">filtered by '{{ q }}' <a href="{% url 'staff:manage-creators' %}" class="btn btn-light">clear</a> </small>{% endif %}</h2>
+        <p>These are responsible for the creation of curations and playlists that are maintained by Tyne Music</p>
+
+
+        <div class="row">
+            <div class="creator text-center skimmy-border add-homage">
+                <a href="">
+                    <img src="{% static 'svg/misc/add_alone.svg' %}" alt="">
+                    <br>
+                    new curator
+                </a>
+            </div>
+            {% for creator in creators %}
+                <div class="creator text-center skimmy-border">
+                    <div class='max'>
+                        <h3>{{ creator.name }}</h3>
+                        <p>{% for genre in creator.genres.all %}<span>{% if forloop.counter > 1 %}, {% endif %}{{ genre.title }}</span>{% endfor %}</p>
+                    </div>
+                    <hr>
+                    <a class="btn col-md-12" href="">go</a>
+                </div>            
+            {% endfor %}
+        </div>
+
+    </div>
+
+
+{% endblock content %}

@@ -1,0 +1,26 @@
+.creator {
+    margin: 1em;
+    width: 21%;
+}
+
+.creator > div.max {
+    height: 60%;
+    text-overflow: ellipsis;
+}
+
+.creator > a:hover, .creator > a:focus {
+    background-color: #212529;
+    color: white;
+}
+
+.add-homage > a {
+    width: 100%;
+    height: 100%;
+    font-size: 1.5em;
+    text-decoration: none;
+    color: black;
+}
+
+.add-homage > a > img {
+    width: 50%;
+}
