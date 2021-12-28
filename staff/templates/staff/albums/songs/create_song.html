@@ -12,7 +12,6 @@
         <h2>New song for <a href="{% url 'staff:manage-albums' %}?album-id={{ form.song_disc.album.pk }}#disc-{{ form.song_disc.pk }}">{{ form.song_disc }}</a></h2>
 
         <form action="" method="post" enctype="multipart/form-data">
-            {{ form.errors }}
             {% csrf_token %}
             {% include 'staff/albums/songs/song_form.html' %}
 
