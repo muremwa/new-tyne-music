@@ -879,3 +879,14 @@ class CreatorsHomeView(StaffAccessMixin, StaffPermissionMixin, generic.ListView)
             context['q'] = query
 
         return context
+
+
+# creator details
+class CreatorDetailView(StaffAccessMixin, StaffPermissionMixin, generic.DetailView):
+    model = Creator
+    template_name = 'staff/creators/creator_detail.html'
+    context_object_name = 'creator'
+    pk_url_kwarg = 'creator_id'
+    permission_required = (
+        'music.view_creator', 'music.change_creator', 'music.delete_creator'
+    )

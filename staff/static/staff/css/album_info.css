@@ -24,15 +24,6 @@ img.album-info-cover-img {
     text-decoration: none;
 }
 
-.notes {
-    overflow-x: auto;
-    white-space: pre-wrap;
-    white-space: -moz-pre-wrap;
-    white-space: -pre-wrap;
-    white-space: -o-pre-wrap;
-    word-wrap: normal;
-}
-
 .disc-name-form {
     margin-top: 1em;
     margin-bottom: 1em;

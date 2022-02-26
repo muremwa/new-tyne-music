@@ -108,7 +108,12 @@ class Creator(models.Model):
     objects = models.Manager()
 
     def add_creator_user(self, user):
-        if hasattr(user, 'is_staff') and user.is_staff:
+        perms_for_curator = [
+            'music.view_creator', 'music.change_creator', 'music.delete_creator',
+            'music.view_creatorsection', 'music.change_creatorsection', 'music.add_creatorsection',
+            'music.delete_creatorsection'
+        ]
+        if hasattr(user, 'is_staff') and user.is_staff and user.has_perms(perms_for_curator):
             self.users.add(user)
 
     def __str__(self):

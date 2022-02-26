@@ -6,6 +6,10 @@ html {
     font-size: 14px;
 }
 
+body {
+    overflow-x: hidden;
+}
+
 #navbar-title {
     color: aliceblue;
     font-size: 2em;
@@ -34,4 +38,17 @@ html {
 .x-small {
     font-size: 0.8em;
     font-weight: lighter;
+}
+
+.notes {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: normal;
+}
+
+.fear-line {
+    margin: 2em;
 }

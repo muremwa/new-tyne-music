@@ -37,7 +37,7 @@
                         <p>{% for genre in creator.genres.all %}<span>{% if forloop.counter > 1 %}, {% endif %}{{ genre.title }}</span>{% endfor %}</p>
                     </div>
                     <hr>
-                    <a class="btn col-md-12" href="">go</a>
+                    <a class="btn col-md-12" href="{% url 'staff:creator-detail' creator_id=creator.pk %}">go</a>
                 </div>            
             {% endfor %}
         </div>

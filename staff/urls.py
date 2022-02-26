@@ -90,4 +90,7 @@ urlpatterns = [
     # manage-creators/
     path('manage-creators/', views.CreatorsHomeView.as_view(), name='manage-creators'),
 
+    # manage-creators/creator/22/
+    path('manage-creators/creator/<int:creator_id>/', views.CreatorDetailView.as_view(), name='creator-detail'),
+
 ]

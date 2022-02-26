@@ -1,0 +1,33 @@
+.top-dock {
+    height: 33vh;
+    width: 100vw;
+    margin-top: -1em;
+    overflow: hidden;
+    background-position: center;
+}
+
+.top-dock > div {
+    height: 100%;
+}
+
+
+img#avi {
+    height: 90%;
+    margin-top: 2%;
+}
+
+.bottom-tier {
+    font-size: 3.5em;
+    height: 100%;
+    margin: 0;
+    padding-top: 20vh;
+    color: wheat;
+}
+
+.desc {
+    overflow: auto;
+}
+
+.dumb-dore {
+    font-size: 1.75em;
+}

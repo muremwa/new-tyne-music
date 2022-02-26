@@ -1,0 +1,116 @@
+{% extends 'staff/staff_base.html' %}
+{% load static %}
+
+{% block title %}Manage {{ creator.name }}{% endblock title %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'staff/css/creators/creator_detail.css' %}" type="text/css">
+{% endblock style %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block content %}
+
+
+    <div>
+        <div class="top-dock row" style="background-image: url('{{ creator.cover.url }}');">
+            <div class="col-md-3 text-center">
+                <img id="avi" src="{{ creator.avi.url }}" alt="">
+            </div>
+
+            <div class="col-md-5">
+                <h1 class="bottom-tier">{{ creator.name }}</h1>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h2>Description</h2>
+                    {% if creator.description %}
+                        <pre class="desc notes alert alert-info">{{ creator.description}}</pre>
+                    {% else %}
+                        <p>No description available</p>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-1"></div>
+
+                <div class="col-md-4 dumb-dore">
+                    <h2>Genres</h2>
+                    <ul class="list-unstyled">
+                        {% for genre in creator.genres.all %}
+                            <ul>{{ genre.title }}</ul>
+                        {% empty %}
+                            <span>No Genres yet</span>
+                        {% endfor %}
+                    </ul>
+                    {% if perms.music.change_creator %}
+                        <a href="" class="btn btn-outline-dark">add genre to {{ creator.name }}</a>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3">
+                    <h2>Curators on {{ creator.name }}</h2>
+
+                    <ul class="list-unstyled">
+                        {% for user in creator.users.all %}
+                            <li class="row">
+                                <span class="col-sm-10 overflow-hidden">{{ user.username }} ({{ user.email }})</span>
+                                {% if perms.music.change_creator and perms.core.view_user %}
+                                    <form action="post" class="col-sm-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="remove-status" value="1">
+                                        <input type="submit" value="remove" class="btn btn-light">
+                                    </form>
+                                {% endif %}
+                            </li>
+                        {% empty %}
+                            <div class="text-center alert alert-warning">No curators yet</div>
+                        {% endfor %}
+                    </ul>
+                    
+                    {% if perms.music.change_creator and perms.core.view_user %}
+                        <a href="" class="btn btn-outline-dark">add curator</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <hr class="fear-line">
+
+
+        {% if perms.music.change_creator and perms.music.delete_creator %}
+            <div class="container">
+                <h2>manage {{ creator.name }}</h2>
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="" class="btn btn-outline-dark">Edit {{ creator.name }}</a>
+                    </div>
+                    <div class="col-md-1"></div>
+                    <div class="col-md-3">
+                        <a href="" class="btn btn-outline-danger">Delete {{ creator.name }}</a>
+                    </div>
+                    <div class="col-md-1"></div>
+                    <div class="col-md-3">
+                        <a href="{% url 'staff:manage-creators' %}" class="btn btn-outline-primary">Other creators</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock content %}
