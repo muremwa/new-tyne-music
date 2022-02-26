@@ -13,12 +13,21 @@
     color: white;
 }
 
+.add-homage {
+    margin: 1em;
+    width: 21%;
+}
+
 .add-homage > a {
     width: 100%;
     height: 100%;
     font-size: 1.5em;
     text-decoration: none;
     color: black;
+}
+
+.add-homage:hover {
+    border-color: #212529;
 }
 
 .add-homage > a > img {

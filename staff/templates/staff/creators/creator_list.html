@@ -23,15 +23,15 @@
 
 
         <div class="row">
-            <div class="creator text-center skimmy-border add-homage">
-                <a href="">
+            <div class="text-center skimmy-border add-homage">
+                <a href="" title="add a new creator">
                     <img src="{% static 'svg/misc/add_alone.svg' %}" alt="">
                     <br>
-                    new curator
+                    new creator
                 </a>
             </div>
             {% for creator in creators %}
-                <div class="creator text-center skimmy-border">
+                <div class="creator text-center skimmy-border" title="{{ creator.name }}">
                     <div class='max'>
                         <h3>{{ creator.name }}</h3>
                         <p>{% for genre in creator.genres.all %}<span>{% if forloop.counter > 1 %}, {% endif %}{{ genre.title }}</span>{% endfor %}</p>
