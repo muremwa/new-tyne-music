@@ -901,18 +901,16 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
 
         3. Remove Curator on the fly
             - code 'rmcrf'
-
-        3. Edit Creator
-            - code 'edct'
-
-        4. Delete Creator
-            - code 'rmct'
     """
     permission_required = ('music.view_creator', 'music.change_creator', 'music.delete_creator')
-    action_codes = ('edgr', 'edcr', 'rmcrf', 'edct', 'rmct')
+    action_codes = ('edgr', 'edcr', 'rmcrf')
     templates = {
-        'edit_genres': 'staff/creators/edit_genres.html',
-        'edit_curators': 'staff/creators/edit_curators.html',
+        'edgr': 'staff/creators/edit_genres.html',
+        'edcr': 'staff/creators/edit_curators.html',
+    }
+    forms = {
+        'edgr': CreatorGenreForm,
+        'edcr': CreatorUsersForm
     }
 
     def get(self, request, **kwargs):
@@ -921,25 +919,15 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
         if action_code not in self.action_codes:
             raise Http404('No Such Action')
 
+        if action_code == 'rmcrf':
+            raise BadRequest('No GET option available')
+
         creator = get_object_or_404(Creator, pk=kwargs.get('creator_id'))
 
-        # edit genre
-        if action_code == 'edgr':
-            return render(request, self.templates.get('edit_genres'), {
-                'creator': creator,
-                'form': CreatorGenreForm(instance=creator)
-            })
-
-        # edit curators
-        elif action_code == 'edcr':
-            return render(request, self.templates.get('edit_curators'), {
-                'creator': creator,
-                'form': CreatorUsersForm(instance=creator)
-            })
-
-        # remove curator on the fly
-        elif action_code == 'rmcrf':
-            raise BadRequest('No GET option available')
+        return render(request, self.templates.get(action_code), {
+            'creator': creator,
+            'form': self.forms.get(action_code)(instance=creator)
+        })
 
     def post(self, request, **kwargs):
         action_code = kwargs.get('action')
@@ -949,42 +937,25 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
 
         creator = get_object_or_404(Creator, pk=kwargs.get('creator_id'))
 
-        # edit genre
-        if action_code == 'edgr':
-            form = CreatorGenreForm(request.POST, instance=creator)
-
-            if form.is_valid() and form.has_changed():
-                form.save()
-                add_message(request, message_constants.SUCCESS, f'Edited genres for {creator.name}')
-
-            else:
-                add_message(request, message_constants.WARNING, f'Could not save any changes')
-
-            return render(request, self.templates.get('edit_genres'), {
-                'creator': creator,
-                'form': CreatorGenreForm(instance=creator)
-            })
-
-        # edit curators
-        elif action_code == 'edcr':
-            form = CreatorUsersForm(request.POST, instance=creator)
-
-            if form.is_valid() and form.has_changed():
-                form.save()
-                add_message(request, message_constants.SUCCESS, f'Edited curators for {creator.name}')
-
-            else:
-                add_message(request, message_constants.WARNING, f'Could not save any changes')
-
-            return render(request, self.templates.get('edit_curators'), {
-                'creator': creator,
-                'form': CreatorUsersForm(instance=creator)
-            })
-
-        elif action_code == 'rmcrf':
+        if action_code == 'rmcrf':
             curator_id = request.POST.get('remove-id')
 
             if curator_id:
                 creator.users.remove(int(curator_id))
 
             return redirect(reverse('staff:creator-detail', kwargs={'creator_id': str(creator.pk)}))
+
+        form = self.forms.get(action_code)(request.POST, instance=creator)
+
+        if form.is_valid() and form.has_changed():
+            form.save()
+            code_name = 'genres' if action_code == 'edgr' else 'curators'
+            add_message(request,  message_constants.SUCCESS, f'Edited {code_name} for {creator.name}')
+
+        else:
+            add_message(request, message_constants.WARNING, f'Could not save any changes')
+
+        return render(request, self.templates.get(action_code), {
+            'creator': creator,
+            'form': self.forms.get(action_code)(instance=creator)
+        })
