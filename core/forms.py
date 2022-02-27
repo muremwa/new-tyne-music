@@ -138,7 +138,7 @@ class CoreUserEditForm(CoreUserCreationForm):
     password = None
     password_2 = None
     username = forms.CharField(required=False, help_text='A unique username')
-    email = forms.CharField(required=False, help_text='You email address')
+    email = forms.CharField(required=False, help_text='Your email address')
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
