@@ -1,0 +1,29 @@
+{% extends 'staff/staff_base.html' %}
+{% load static %}
+
+{% block title %}Delete {{ creator.name }}{% endblock title %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'staff/css/creators/creator_detail.css' %}" type="text/css">
+{% endblock style %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block content %}
+
+    <div class="container text-center">
+        <h2>Are you sure you want to delete "{{ creator.name }}"?</h2>
+
+            <div class="alert alert-info">
+                Deleting may/will cause loss of all sections and playlists owned by {{ creator.name }}
+                <br>Sections - {{ creator.creatorsection_set.count }} <br>Playlists - {{ creator.playlist_set.count }}
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="submit" value="delete" class="btn btn-outline-danger col-sm-4">
+                <a href="{% url 'staff:creator-detail' creator_id=creator.pk %}" class="btn btn-outline-dark col-sm-4">cancel</a>
+            </form>
+    </div>
+
+{% endblock content %}

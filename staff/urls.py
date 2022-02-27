@@ -100,4 +100,7 @@ urlpatterns = [
         name='creator-actions'
     ),
 
+    # manage-creators/creator/delete/22/
+    path('manage-creators/creator/delete/<int:creator_id>/', views.CreatorDeleteView.as_view(), name='creator-delete'),
+
 ]

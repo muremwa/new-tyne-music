@@ -1,6 +1,7 @@
 .creator {
     margin: 1em;
     width: 21%;
+    min-height: 13em;
 }
 
 .creator > div.max {

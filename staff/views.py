@@ -2,7 +2,7 @@ from typing import List, Set
 import logging
 
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views import View, generic
 from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import user_passes_test
@@ -959,3 +959,11 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
             'creator': creator,
             'form': self.forms.get(action_code)(instance=creator)
         })
+
+
+class CreatorDeleteView(StaffAccessMixin, StaffPermissionMixin, generic.DeleteView):
+    model = Creator
+    pk_url_kwarg = 'creator_id'
+    template_name = 'staff/creators/confirm_delete.html'
+    permission_required = ('music.view_creator', 'music.change_creator', 'music.delete_creator')
+    success_url = reverse_lazy('staff:manage-creators')

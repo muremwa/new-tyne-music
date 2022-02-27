@@ -91,7 +91,7 @@
                     </div>
                     <div class="col-md-1"></div>
                     <div class="col-md-3">
-                        <a href="" class="btn btn-outline-danger">Delete {{ creator.name }}</a>
+                        <a href="{% url 'staff:creator-delete' creator_id=creator.pk %}" class="btn btn-outline-danger">Delete {{ creator.name }}</a>
                     </div>
                     <div class="col-md-1"></div>
                 {% endif %}
