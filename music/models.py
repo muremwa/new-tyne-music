@@ -18,6 +18,11 @@ def upload_artist_image(instance: 'Artist', filename: str, cover: bool = False):
     return f'dy/music/artists/{inter_type}/{filename}'
 
 
+# upload_artist_cover = lambda instance, filename: upload_artist_image(instance, filename, True)
+def upload_artist_cover(instance: 'Artist', filename: 'str'):
+    upload_artist_image(instance, filename, True)
+
+
 def upload_creator_image(instance: 'Creator', filename: str):
     return f'dy/music/creators/creators/{instance.pk if instance.pk else "new"}/{filename}'
 
@@ -62,7 +67,7 @@ class Artist(models.Model):
     )
     cover = models.ImageField(
         default='/defaults/artist_large.png',
-        upload_to=lambda instance, filename: upload_artist_image(instance, filename, True),
+        upload_to=upload_artist_cover,
         help_text='A 3x1 image'
     )
 
@@ -103,7 +108,7 @@ class Creator(models.Model):
     description = models.TextField(null=True, blank=True)
     avi = models.ImageField(default='/defaults/creator.png', upload_to=upload_creator_image)
     cover = models.ImageField(default='/defaults/creator_wide.png', upload_to=upload_creator_image)
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True)
     genres = models.ManyToManyField(Genre, blank=True)
     objects = models.Manager()
 
