@@ -1,0 +1,72 @@
+{% extends 'staff/staff_base.html' %}
+{% load static %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block title %}Edit genres for {{ creator.name }}{% endblock title %}
+
+{% block style %}<link href="{% static 'staff/css/creators/edit_genres.css' %}" type="text/css" rel="stylesheet" />{% endblock style %}
+
+
+{% block content %}
+    <div class="container">
+        <h1>Edit genres for {{ creator.name }}</h1>
+
+
+        <form action="" method="post">
+            {% csrf_token %}
+
+            <div class="row">
+
+                <!-- HELP and current genre -->
+                <div class="col-md-4">
+                    <div class="alert alert-info">
+                        Music on this creator are generally from the following genres.
+                    </div>
+                    <h3>Current genres</h3>
+                    <ul>
+                        {% for g in creator.genres.all %}
+                            <li>{{ g.title }}</li>
+                        {% empty %}
+                            No Genres Selected
+                        {% endfor %}
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>Help</strong><br>
+                        Hold down ctrl and click to select or deselect genres <br>
+                        Selected genres are highlighted
+                    </div>
+                    <br>
+                    <a href="{% url 'staff:creator-detail' creator_id=creator.pk %}" class="btn btn-outline-dark">view creator '{{ creator.name }}'</a>
+                </div>
+
+                <!-- Genre select form -->
+                <div class="col-md-4">
+                    <h3>Select Genres</h3>
+                    <div class="form-group">
+                        {{ form.genres }}
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        <input type="submit" value="save genres" class="btn btn-outline-dark">
+                        <input type="reset" value="discard changes" class="btn btn-outline-danger">
+                    </div>
+                </div>
+
+                <!-- Edited genres -->
+                <div class="col-md-4">
+                    <div class="alert alert-info">
+                        Genres to be saved to '{{ creator.name }}' show up below
+                    </div>
+
+                    <ul id="edited-g"></ul>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+
+
+{% block bottomScript %}
+    <script src="{% static 'staff/js/creators/edit_genres.js' %}"></script>
+{% endblock bottomScript %}

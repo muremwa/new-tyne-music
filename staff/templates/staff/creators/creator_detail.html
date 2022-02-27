@@ -46,7 +46,7 @@
                         {% endfor %}
                     </ul>
                     {% if perms.music.change_creator %}
-                        <a href="" class="btn btn-outline-dark">add genre to {{ creator.name }}</a>
+                        <a href="{% url 'staff:creator-actions' creator_id=creator.pk action='edgr' %}" class="btn btn-outline-dark">edit genres on {{ creator.name }}</a>
                     {% endif %}
                 </div>
 

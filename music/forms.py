@@ -369,3 +369,13 @@ class CreatorPlaylistEditForm(ClassicModelEditForm):
     class Meta:
         model = Playlist
         fields = ('title', 'description', 'cover', 'cover_wide', 'timely_cover', 'timely_cover_wide')
+
+
+class CreatorGenreForm(forms.ModelForm):
+
+    class Meta:
+        model = Creator
+        fields = ('genres',)
+        widgets = {
+            'genres': forms.SelectMultiple(attrs={'class': 'form-control'})
+        }

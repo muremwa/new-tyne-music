@@ -16,7 +16,7 @@ import mutagen
 
 from core.models import User
 from music.models import Album, Artist, Disc, Song, Creator
-from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm, SongEditForm, SongForm
+from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm, SongEditForm, SongForm, CreatorGenreForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -890,3 +890,65 @@ class CreatorDetailView(StaffAccessMixin, StaffPermissionMixin, generic.DetailVi
     permission_required = (
         'music.view_creator', 'music.change_creator', 'music.delete_creator'
     )
+
+
+class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View):
+    """
+        Actions include
+        1. Edit Genres
+            - code 'edgr'
+
+        2. Edit Curators
+            - code 'edcr'
+
+        3. Remove Curator on the fly
+            - code 'rmcrf'
+
+        3. Edit Creator
+            - code 'edct'
+
+        4. Delete Creator
+            - code 'rmct'
+    """
+    permission_required = ('music.view_creator', 'music.change_creator', 'music.delete_creator')
+    action_codes = ('edgr', 'edcr', 'rmcrf', 'edct', 'rmct')
+    templates = {
+        'edit_genres': 'staff/creators/edit_genres.html'
+    }
+
+    def get(self, request, **kwargs):
+        action_code = kwargs.get('action')
+
+        if action_code not in self.action_codes:
+            raise Http404('No Such Action')
+
+        creator = get_object_or_404(Creator, pk=kwargs.get('creator_id'))
+
+        if action_code == 'edgr':
+            return render(request, self.templates.get('edit_genres'), {
+                'creator': creator,
+                'form': CreatorGenreForm(instance=creator)
+            })
+
+    def post(self, request, **kwargs):
+        action_code = kwargs.get('action')
+
+        if action_code not in self.action_codes:
+            raise Http404('No Such Action')
+
+        creator = get_object_or_404(Creator, pk=kwargs.get('creator_id'))
+
+        if action_code == 'edgr':
+            form = CreatorGenreForm(request.POST, instance=creator)
+
+            if form.is_valid() and form.has_changed():
+                form.save()
+                add_message(request, message_constants.SUCCESS, f'Edited genres for {creator.name}')
+
+            else:
+                add_message(request, message_constants.WARNING, f'Could not save any changes')
+
+            return render(request, self.templates.get('edit_genres'), {
+                'creator': creator,
+                'form': CreatorGenreForm(instance=creator)
+            })
