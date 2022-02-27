@@ -16,7 +16,8 @@ import mutagen
 
 from core.models import User
 from music.models import Album, Artist, Disc, Song, Creator
-from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm, SongEditForm, SongForm, CreatorGenreForm
+from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm, SongEditForm, SongForm, \
+    CreatorGenreForm, CreatorUsersForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -854,9 +855,7 @@ class CreatorsHomeView(StaffAccessMixin, StaffPermissionMixin, generic.ListView)
     model = Creator
     context_object_name = 'creators'
     template_name = 'staff/creators/creator_list.html'
-    permission_required = (
-        'music.view_creator', 'music.change_creator', 'music.add_creator'
-    )
+    permission_required = ('music.view_creator',)
 
     def get_queryset(self):
         q_set = super().get_queryset()
@@ -888,9 +887,7 @@ class CreatorDetailView(StaffAccessMixin, StaffPermissionMixin, generic.DetailVi
     template_name = 'staff/creators/creator_detail.html'
     context_object_name = 'creator'
     pk_url_kwarg = 'creator_id'
-    permission_required = (
-        'music.view_creator', 'music.change_creator', 'music.delete_creator'
-    )
+    permission_required = ('music.view_creator',)
 
 
 class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View):
@@ -914,7 +911,8 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
     permission_required = ('music.view_creator', 'music.change_creator', 'music.delete_creator')
     action_codes = ('edgr', 'edcr', 'rmcrf', 'edct', 'rmct')
     templates = {
-        'edit_genres': 'staff/creators/edit_genres.html'
+        'edit_genres': 'staff/creators/edit_genres.html',
+        'edit_curators': 'staff/creators/edit_curators.html',
     }
 
     def get(self, request, **kwargs):
@@ -925,10 +923,18 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
 
         creator = get_object_or_404(Creator, pk=kwargs.get('creator_id'))
 
+        # edit genre
         if action_code == 'edgr':
             return render(request, self.templates.get('edit_genres'), {
                 'creator': creator,
                 'form': CreatorGenreForm(instance=creator)
+            })
+
+        # edit curators
+        elif action_code == 'edcr':
+            return render(request, self.templates.get('edit_curators'), {
+                'creator': creator,
+                'form': CreatorUsersForm(instance=creator)
             })
 
     def post(self, request, **kwargs):
@@ -939,6 +945,7 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
 
         creator = get_object_or_404(Creator, pk=kwargs.get('creator_id'))
 
+        # edit genre
         if action_code == 'edgr':
             form = CreatorGenreForm(request.POST, instance=creator)
 
@@ -952,4 +959,20 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
             return render(request, self.templates.get('edit_genres'), {
                 'creator': creator,
                 'form': CreatorGenreForm(instance=creator)
+            })
+
+        # edit curators
+        elif action_code == 'edcr':
+            form = CreatorUsersForm(request.POST, instance=creator)
+
+            if form.is_valid() and form.has_changed():
+                form.save()
+                add_message(request, message_constants.SUCCESS, f'Edited curators for {creator.name}')
+
+            else:
+                add_message(request, message_constants.WARNING, f'Could not save any changes')
+
+            return render(request, self.templates.get('edit_curators'), {
+                'creator': creator,
+                'form': CreatorUsersForm(instance=creator)
             })

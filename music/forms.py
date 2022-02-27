@@ -7,7 +7,7 @@ from django.core.files.images import get_image_dimensions
 from mutagen import File
 
 from core.forms import SmartForm
-from core.models import Profile
+from core.models import Profile, User
 from .models import Artist, Album, Genre, Disc, Song, Creator, CreatorSection, Playlist
 
 
@@ -381,11 +381,26 @@ class CreatorGenreForm(forms.ModelForm):
         }
 
 
+class MultipleUserChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return f'{obj.username} ({obj.email})'
+
+
 class CreatorUsersForm(forms.ModelForm):
+    users = MultipleUserChoiceField(
+        queryset=User.objects.filter(is_staff=True).filter(
+            groups__permissions__codename='add_playlist'
+        ).filter(
+            groups__permissions__codename='change_playlist'
+        ).filter(
+            groups__permissions__codename='add_creatorsection'
+        ).filter(
+            groups__permissions__codename='change_creatorsection'
+        ),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control s-field'}),
+        required=False
+    )
 
     class Meta:
         model = Creator
         fields = ('users',)
-        widgets = {
-            'users': forms.SelectMultiple(attrs={'class': 'form-control s-field'})
-        }

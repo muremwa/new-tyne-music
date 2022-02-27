@@ -1,0 +1,71 @@
+{% extends 'staff/staff_base.html' %}
+{% load static %}
+
+{% block staff %}active{% endblock staff %}
+
+{% block title %}Edit curators for {{ creator.name }}{% endblock title %}
+
+{% block style %}<link href="{% static 'staff/css/creators/edit_m.css' %}" type="text/css" rel="stylesheet" />{% endblock style %}
+
+
+{% block content %}
+    <div class="container">
+        <h1>Edit curators for {{ creator.name }}</h1>
+
+
+        <form action="" method="post">
+            {% csrf_token %}
+
+            <div class="row">
+
+                <!-- HELP and current curators -->
+                <div class="col-md-4">
+                    <div class="alert alert-info">
+                        Staff that can create playlists and sections on behalf of {{ creator.name }}. They are known as curators.
+                    </div>
+                    <h3>Current curators</h3>
+                    <ul>
+                        {% for c in creator.users.all %}
+                            <li>{{ c.username }} ({{c.email}})</li>
+                        {% empty %}
+                            No Curators Yet
+                        {% endfor %}
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>Help</strong><br>
+                        Hold down ctrl and click to select or deselect curators <br>
+                        Selected curators are highlighted
+                    </div>
+                    <br>
+                    <a href="{% url 'staff:creator-detail' creator_id=creator.pk %}" class="btn btn-outline-dark">view creator '{{ creator.name }}'</a>
+                </div>
+
+                <!-- Genre select form -->
+                <div class="col-md-4">
+                    <h3>Select Curators</h3>
+                    <div class="form-group">
+                        {{ form.users }}
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        <input type="submit" value="save curators" class="btn btn-outline-dark">
+                        <input type="reset" value="discard changes" class="btn btn-outline-danger">
+                    </div>
+                </div>
+
+                <!-- Edited genres -->
+                <div class="col-md-4">
+                    <div class="alert alert-info">
+                        Curators to be saved to '{{ creator.name }}' show up below
+                    </div>
+
+                    <ul id="edited-g"></ul>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+
+{% block bottomScript %}
+    <script src="{% static 'staff/js/creators/edit_m.js' %}"></script>
+{% endblock bottomScript %}

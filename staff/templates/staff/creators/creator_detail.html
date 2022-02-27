@@ -69,7 +69,7 @@
                     </ul>
                     
                     {% if perms.music.change_creator and perms.core.view_user %}
-                        <a href="" class="btn btn-outline-dark">add curators</a>
+                        <a href="{% url 'staff:creator-actions' creator_id=creator.pk action='edcr' %}" class="btn btn-outline-dark">add curators</a>
                     {% endif %}
                 </div>
             </div>
