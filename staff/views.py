@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMi
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
 from django.http import Http404, JsonResponse
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, BadRequest
 from django.db.models import Q
 from django.contrib.messages import add_message, constants as message_constants
 
@@ -937,6 +937,10 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
                 'form': CreatorUsersForm(instance=creator)
             })
 
+        # remove curator on the fly
+        elif action_code == 'rmcrf':
+            raise BadRequest('No GET option available')
+
     def post(self, request, **kwargs):
         action_code = kwargs.get('action')
 
@@ -976,3 +980,11 @@ class CreatorDetailActions(StaffAccessMixin, StaffPermissionMixin, generic.View)
                 'creator': creator,
                 'form': CreatorUsersForm(instance=creator)
             })
+
+        elif action_code == 'rmcrf':
+            curator_id = request.POST.get('remove-id')
+
+            if curator_id:
+                creator.users.remove(int(curator_id))
+
+            return redirect(reverse('staff:creator-detail', kwargs={'creator_id': str(creator.pk)}))

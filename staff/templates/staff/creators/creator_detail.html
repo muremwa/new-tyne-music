@@ -44,7 +44,7 @@
                         {% endfor %}
                     </ul>
                     {% if perms.music.change_creator %}
-                        <a href="{% url 'staff:creator-actions' creator_id=creator.pk action='edgr' %}" class="btn btn-outline-dark">edit genres on {{ creator.name }}</a>
+                        <a href="{% url 'staff:creator-actions' creator_id=creator.pk action='edgr' %}" class="btn btn-outline-dark">Edit genres on {{ creator.name }}</a>
                     {% endif %}
                 </div>
 
@@ -53,10 +53,14 @@
 
                     <ul class="list-unstyled">
                         {% for c_user in creator.users.all %}
-                            <li class="row">
-                                <span class="col-sm-10 overflow-hidden">{{ c_user.username }} ({{ c_user.email }}) {% if user.pk == c_user.pk %}<i>(You)</i>{% endif %}</span>
+                            <li class="row c_user">
+                                {% if perms.core.view_user %}
+                                    <a href="{% url 'staff:staff-view' %}?staff-id={{ c_user.pk }}" class="col-sm-10 overflow-hidden">{{ c_user.username }} ({{ c_user.email }}) {% if user.pk == c_user.pk %}<i>(You)</i>{% endif %}</a>
+                                {% else %}
+                                    <span class="col-sm-10 overflow-hidden">{{ c_user.username }} ({{ c_user.email }}) {% if user.pk == c_user.pk %}<i>(You)</i>{% endif %}</span>
+                                {% endif %}
                                 {% if perms.music.change_creator and perms.core.view_user %}
-                                    <form action="post" class="col-sm-2">
+                                    <form method="post" class="col-sm-2" action="{% url 'staff:creator-actions' creator_id=creator.pk action='rmcrf' %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="remove-id" value="{{ c_user.pk }}">
                                         <input type="submit" value="remove" class="btn btn-light">
@@ -69,7 +73,7 @@
                     </ul>
                     
                     {% if perms.music.change_creator and perms.core.view_user %}
-                        <a href="{% url 'staff:creator-actions' creator_id=creator.pk action='edcr' %}" class="btn btn-outline-dark">add curators</a>
+                        <a href="{% url 'staff:creator-actions' creator_id=creator.pk action='edcr' %}" class="btn btn-outline-dark">Edit curators</a>
                     {% endif %}
                 </div>
             </div>
@@ -96,19 +100,5 @@
                 </div>
             </div>
         </div>
-
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
 {% endblock content %}
