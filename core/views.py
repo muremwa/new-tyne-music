@@ -6,6 +6,7 @@ from django.shortcuts import reverse, get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, decorators, logout, login as d_login
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
+from django.conf import settings
 
 from .forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm, ProfileEditForm
 from .serializers import UserSerializer, ProfileSerializer
@@ -359,4 +360,4 @@ def master_login(request):
 @decorators.login_required
 def master_logout(request):
     logout(request)
-    return redirect('/')
+    return redirect(settings.LOGIN_URL)
