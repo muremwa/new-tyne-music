@@ -65,6 +65,15 @@ staff_actions = [
         'permissions': [
             'music.add_artist', 'music.view_artist'
         ]
+    },
+    {
+        'name': 'View all groups',
+        'id': 'view_all_groups',
+        'url': reverse_lazy("staff:staff-groups"),
+        'description': 'View all groups, their members, and permission allocated',
+        'permissions': [
+            'auth.change_group', 'core.change_user'
+        ]
     }
 ]
 
@@ -75,10 +84,4 @@ superuser_actions = [
         'url': reverse_lazy("staff:logs"),
         'description': 'View records of activity by staff and who or what they affected',
     },
-    {
-        'name': 'View all groups',
-        'id': 'view_all_groups',
-        'url': reverse_lazy("staff:staff-groups"),
-        'description': 'View all groups, their members, and permission allocated',
-    }
 ]

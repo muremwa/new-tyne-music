@@ -320,8 +320,9 @@ class StaffRolesView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateVie
 
 
 # view groups and their users
-class GroupInfoView(SuperuserAccessMixin, generic.TemplateView):
+class GroupInfoView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateView):
     template_name = 'staff/groups.html'
+    permission_required = ('auth.change_group', 'core.change_user')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
