@@ -377,5 +377,15 @@ class CreatorGenreForm(forms.ModelForm):
         model = Creator
         fields = ('genres',)
         widgets = {
-            'genres': forms.SelectMultiple(attrs={'class': 'form-control'})
+            'genres': forms.SelectMultiple(attrs={'class': 'form-control s-field'})
+        }
+
+
+class CreatorUsersForm(forms.ModelForm):
+
+    class Meta:
+        model = Creator
+        fields = ('users',)
+        widgets = {
+            'users': forms.SelectMultiple(attrs={'class': 'form-control s-field'})
         }
