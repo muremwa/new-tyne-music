@@ -23,13 +23,16 @@
 
 
         <div class="row">
-            <div class="text-center skimmy-border add-homage">
-                <a href="" title="add a new creator">
-                    <img src="{% static 'svg/misc/add_alone.svg' %}" alt="">
-                    <br>
-                    new creator
-                </a>
-            </div>
+
+            {% if perms.music.add_creator %}
+                <div class="text-center skimmy-border add-homage">
+                    <a href="" title="add a new creator">
+                        <img src="{% static 'svg/misc/add_alone.svg' %}" alt="">
+                        <br>
+                        new creator
+                    </a>
+                </div>
+            {% endif %}
             {% for creator in creators %}
                 <div class="creator text-center skimmy-border" title="{{ creator.name }}">
                     <div class='max'>
