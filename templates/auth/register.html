@@ -1,0 +1,93 @@
+{% extends 'tyne/base.html' %}
+{% load static %}
+
+{% block signup %}active{% endblock signup %}
+
+{% block title %}register{% endblock title %}
+
+{% block style %} <link rel="stylesheet" href="{% static 'auth/css/login.css' %}" type="text/css"> {% endblock style %}
+
+{% block content %}
+
+    <style type="text/css">
+        #login-form {
+            width: 45%;
+            margin-top: 1em;
+            padding-top: 1em;
+        }
+    </style>
+
+    <div class="container">
+
+        <h2 class="text-center">Sign up for tyne music</h2>
+
+        <form id="login-form" action="" method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                {% if form.errors %}
+                    <ul class="alert alert-warning list-unstyled">
+                        {% for error in form.username.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-info">{{ form.username.help_text }}</div>
+                {% endif %}
+
+                <label for="{{ form.username.label_for_id }}">{{ form.username.label }}</label>
+                {{ form.username }}
+            </div>
+
+            <div class="form-group">
+                {% if form.email.errors %}
+                    <ul class="alert alert-warning list-unstyled">
+                        {% for error in form.email.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-info">{{ form.email.help_text }}</div>
+                {% endif %}
+                <label for="{{ form.email.label_for_id }}">{{ form.email.label }}</label>
+                {{ form.email }}
+            </div>
+
+            <div class="form-group">
+                {% if form.password.errors %}
+                    <ul class="alert alert-warning list-unstyled">
+                        {% for error in form.password.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-info">{{ form.password.help_text }}</div>
+                {% endif %}
+                <label for="{{ form.password.label_for_id }}">{{ form.password.label }}</label>
+                {{ form.password }}
+            </div>
+
+            <div class="form-group">
+                {% if form.password_2.errors %}
+                    <ul class="alert alert-warning list-unstyled">
+                        {% for error in form.password_2.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-info">{{ form.password_2.help_text }}</div>
+                {% endif %}
+                <label for="{{ form.password_2.label_for_id }}">Password again</label>
+                {{ form.password_2 }}
+            </div>
+
+            <hr>
+
+            <div class="form-group">
+                <input type="submit" class="btn btn-outline-dark col-md-3" value="sign up">
+            </div>
+        </form>
+    </div>
+
+
+{% endblock content %}

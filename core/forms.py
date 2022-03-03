@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union
 from re import search, compile, findall
 
 from django import forms
@@ -39,10 +39,18 @@ class CoreUserCreationForm(SmartForm, forms.Form):
         And\n
         The user authtoken. -> 'token_key'
     """
-    username = forms.CharField(max_length=191, required=True, help_text='A unique username')
-    email = forms.EmailField(required=True, help_text='Your email address')
-    password = forms.CharField(required=True, help_text='A strong password')
-    password_2 = forms.CharField(required=True, help_text='Repeat the password')
+    username = forms.CharField(max_length=191, required=True, help_text='A unique username', widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Enter a username'}
+    ))
+    email = forms.EmailField(required=True, help_text='Your email address', widget=forms.EmailInput(
+        attrs={'class': 'form-control', 'placeholder': 'Your working email'}
+    ))
+    password = forms.CharField(required=True, help_text='A strong password', widget=forms.PasswordInput(
+        attrs={'class': 'form-control', 'placeholder': 'Strong password'}
+    ))
+    password_2 = forms.CharField(required=True, help_text='Repeat the password', widget=forms.PasswordInput(
+        attrs={'class': 'form-control', 'placeholder': 'Repeat the password'}
+    ))
 
     @property
     def errors(self):
@@ -103,7 +111,7 @@ class CoreUserCreationForm(SmartForm, forms.Form):
             raise ValidationError(__(f'The email \'{email}\' already exists'))
         return email
 
-    def save(self):
+    def save(self) -> Dict[str, Union[User, Token]]:
         """
             If form is valid and data changed, returns \n
             {\n

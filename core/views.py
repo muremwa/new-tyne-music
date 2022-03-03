@@ -7,6 +7,8 @@ from django.contrib.auth import authenticate, decorators, logout, login as d_log
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.conf import settings
+from django.views.generic import TemplateView
+from django.contrib.messages import add_message, constants as message_constants
 
 from .forms import CoreUserCreationForm, CoreUserEditForm, ProfileCreateForm, ProfileEditForm
 from .serializers import UserSerializer, ProfileSerializer
@@ -361,3 +363,33 @@ def master_login(request):
 def master_logout(request):
     logout(request)
     return redirect(settings.LOGIN_URL)
+
+
+def master_signup(request):
+    if request.method == 'GET' and request.user.is_anonymous:
+        return render(request, 'auth/register.html', {
+            'form': CoreUserCreationForm()
+        })
+
+    elif request.method == 'POST' and request.user.is_anonymous:
+        form = CoreUserCreationForm(request.POST)
+
+        if form.is_valid():
+            obj = form.save()
+            password = request.POST.get('password')
+            user = obj.get('new_user')
+            authenticated_user = authenticate(request, username=user.username, password=password)
+
+            if authenticated_user is not None:
+                d_login(request, authenticated_user)
+                return redirect('/')
+
+        else:
+            add_message(request, message_constants.WARNING, 'Fix the errors in the details you provided')
+            return render(request, 'auth/register.html', {
+                'form': form
+            })
+
+
+class TempHomePage(TemplateView):
+    template_name = 'auth/home.html'
