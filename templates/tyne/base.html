@@ -36,12 +36,12 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link {% block account %}{% endblock account %}" aria-current="page" href="/">Account</a>
+                                <a class="nav-link {% block account %}{% endblock account %}" aria-current="page" href="/">Account - {{ user.username }}</a>
                             </li>
 
                             {% if user.is_staff %}
                                 <li class="nav-item">
-                                    <a class="nav-link" aria-current="page" href="">Staff</a>
+                                    <a class="nav-link" aria-current="page" href="{% url 'staff:home' %}">Staff</a>
                                 </li>
                             {% endif %}
 
@@ -52,6 +52,9 @@
                             <li class="nav-item">
                                 <a class="nav-link {% block signin %}{% endblock signin %}" aria-current="page" href="{% url 'master-login' %}">Sign In</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% block signup %}{% endblock signup %}" aria-current="page" href="{% url 'master-signup' %}">Sign Up</a>
+                            </li>
                         {% endif %}
 
                     </ul>
@@ -60,6 +63,14 @@
         </nav>
 
 		<div id="top" class="container"></div>
+        {% if messages %}
+            {% for message in messages %}                    
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
 		<div id="main">
 			{% block content %}{% endblock content %}

@@ -1,0 +1,30 @@
+{% extends 'tyne/base.html' %}
+
+{% block title %}home{% endblock title %}
+
+{% block home %}active{% endblock home %}
+
+{% block content %}
+
+    <div class="container text-center">
+        <h2>This site is still under construction</h2>
+        <h4>Avaliable actions</h4>
+
+        <div class="row">
+            {% if user.is_authenticated %}
+                <a class="col-md-3 btn btn-outline-dark" href="{% url 'master-logout' %}">Log out</a>
+            {% else %}
+                <a class="col-md-3 btn btn-outline-dark" href="{% url 'master-signup' %}">Sign Up</a>
+                <div class="col-md-1"></div>
+                <a class="col-md-3 btn btn-outline-dark" href="{% url 'master-login' %}">Sign In</a>
+            {% endif %}
+            {% if user.is_staff %}
+                <div class="col-md-1"></div>
+                <a class="col-md-3 btn btn-outline-dark" href="{% url 'staff:home' %}">Staff Page</a>
+                <div class="col-md-1"></div>
+                <a class="col-md-3 btn btn-outline-dark" href="{% url 'admin:index' %}">Admin Page</a>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock content %}
