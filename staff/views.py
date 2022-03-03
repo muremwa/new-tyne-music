@@ -421,7 +421,7 @@ class PublishAlbums(StaffAccessMixin, StaffPermissionMixin, View):
         'music.view_album', 'music.change_album',
     )
 
-    def log_message(self, album: Album, action: bool=True):
+    def log_message(self, album: Album, action: bool = True):
         message = 'published' if action else 'un published'
         title = strip_punctuation(album.title)
         info_log_staff_message(
