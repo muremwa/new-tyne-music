@@ -74,6 +74,13 @@ staff_actions = [
         'permissions': [
             'auth.change_group', 'core.change_user'
         ]
+    },
+    {
+        'name': 'View creators',
+        'id': 'view_all_creators',
+        'url': reverse_lazy("staff:manage-creators"),
+        'description': 'View all creators and their curators',
+        'permissions': ['music.view_creator']
     }
 ]
 
