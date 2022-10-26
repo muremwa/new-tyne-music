@@ -3,6 +3,6 @@
 media/*
 !*defaults*
 .idea/*
-logs/*
+#logs/*
 .vscode/*
-*.log
+#*.log
