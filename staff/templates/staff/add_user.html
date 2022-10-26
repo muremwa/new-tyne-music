@@ -30,7 +30,7 @@
                             <form action="{% url 'staff:add-users' %}" method="post" class="skimmy-border">
                                 {% csrf_token %}
                                 <h4>'{{ manage.username }}' is staff, change this</h4>
-                                <div class="alert alert-danger">By clicking the button below, '{{ manage.username }}' will no longer a staff member, They will lose all thier access.<br />Are you sure?</div>
+                                <div class="alert alert-danger">By clicking the button below, '{{ manage.username }}' will no longer be a staff member, They will lose all thier access.<br />Are you sure?</div>
                                 <input type="hidden" value="{{ manage.email }}" name="email">
                                 <input type="hidden" value="1" name="remove-staff" />
                                 <div class="form-group">
