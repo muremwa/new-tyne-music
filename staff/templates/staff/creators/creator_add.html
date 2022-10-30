@@ -1,0 +1,31 @@
+{% extends 'staff/staff_base.html' %}
+
+{% load static %}
+
+{% block title %}New creator{% endblock %}
+
+{% block staff %}active{% endblock %}
+
+{% block style %}
+<link type="text/css" rel="stylesheet" href="{% static 'staff/css/creators/creator_fr.css' %}" />
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>New creator</h2>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include 'staff/creators/x_creator_form.html' %}
+            <hr>
+            <div class="form-group">
+                <input type="submit" value="save changes" class="btn btn-outline-dark">
+                <a href="{% url 'staff:manage-creators' %}" class="btn btn-outline-dark">Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block bottomScript %}
+    <script src="{% static 'staff/js/aspectRatioCheck.js' %}"></script>
+{% endblock %}

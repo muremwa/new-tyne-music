@@ -339,6 +339,12 @@ class CreatorEditForm(ClassicModelEditForm):
     class Meta:
         model = Creator
         exclude = ('users', 'genres',)
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': '6'}),
+            'avi': forms.FileInput(attrs={'class': 'form-control'}),
+            'cover': forms.FileInput(attrs={'class': 'form-control'}),
+        }
 
 
 class CreatorSectionForm(SmartForm, forms.ModelForm):

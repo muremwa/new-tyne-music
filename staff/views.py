@@ -17,7 +17,7 @@ import mutagen
 from core.models import User
 from music.models import Album, Artist, Disc, Song, Creator
 from music.forms import AlbumEditForm, AlbumForm, ArtistEditForm, ArtistForm, SongEditForm, SongForm, \
-    CreatorGenreForm, CreatorUsersForm, CreatorForm
+    CreatorGenreForm, CreatorUsersForm, CreatorForm, CreatorEditForm
 from tyne_utils.funcs import is_string_true_or_false, strip_punctuation
 from .models import HelpArticle
 from .forms import HelpArticleForm, HelpArticleEditForm, LogSearchForm
@@ -972,7 +972,7 @@ class CreatorDeleteView(StaffAccessMixin, StaffPermissionMixin, generic.DeleteVi
 # Add or edit a creator
 class CreatorUpdateView(StaffAccessMixin, StaffPermissionMixin, generic.UpdateView):
     model = Creator
-    form_class = CreatorForm
+    form_class = CreatorEditForm
     pk_url_kwarg = 'creator_id'
     context_object_name = 'creator'
     template_name = 'staff/creators/creator_edit.html'
@@ -980,3 +980,15 @@ class CreatorUpdateView(StaffAccessMixin, StaffPermissionMixin, generic.UpdateVi
 
     def get_success_url(self):
         return reverse('staff:creator-detail', kwargs={'creator_id': self.kwargs.get(self.pk_url_kwarg)})
+
+
+class CreatorNewView(StaffAccessMixin, StaffPermissionMixin, generic.CreateView):
+    model = Creator
+    form_class = CreatorForm
+    pk_url_kwarg = 'creator_id'
+    context_object_name = 'creator'
+    template_name = 'staff/creators/creator_add.html'
+    permission_required = ('music.view_creator', 'music.change_creator', 'music.delete_creator')
+
+    def get_success_url(self):
+        return reverse('staff:creator-detail', kwargs={'creator_id': self.object.pk})

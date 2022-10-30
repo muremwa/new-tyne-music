@@ -81,7 +81,14 @@ staff_actions = [
         'url': reverse_lazy("staff:manage-creators"),
         'description': 'View all creators and their curators',
         'permissions': ['music.view_creator']
-    }
+    },
+    {
+        'name': 'Add creator',
+        'id': 'add_new_creator',
+        'url': reverse_lazy("staff:creator-create"),
+        'description': 'Add a new creator',
+        'permissions': ['music.view_creator', 'music.change_creator', 'music.delete_creator']
+    },
 ]
 
 superuser_actions = [
