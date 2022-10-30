@@ -374,7 +374,7 @@ class StaffLogs(SuperuserAccessMixin, generic.TemplateView):
 
 
 class StaffAlbumView(StaffAccessMixin, StaffPermissionMixin, generic.TemplateView):
-    template_name = 'staff/albums.html'
+    template_name = 'staff/albums/albums.html'
     permission_required = (
         'music.add_album', 'music.view_album', 'music.change_album', 'music.delete_album'
     )
@@ -511,7 +511,7 @@ class AlbumEditingAbstract(StaffAccessMixin, StaffPermissionMixin, generic.FormV
 # edit an album
 class AlbumEditView(AlbumEditingAbstract):
     form_class = AlbumEditForm
-    template_name = 'staff/edit_album.html'
+    template_name = 'staff/albums/edit_album.html'
     permission_required = (
         'music.view_album', 'music.change_album',
     )
@@ -536,7 +536,7 @@ class AlbumEditView(AlbumEditingAbstract):
 class StaffAlbumCreateView(AlbumEditingAbstract):
     new_album = True
     form_class = AlbumForm
-    template_name = 'staff/create_album.html'
+    template_name = 'staff/albums/create_album.html'
     permission_required = (
         'music.add_album', 'music.view_album',
     )
@@ -558,7 +558,7 @@ class AlbumDelete(StaffAccessMixin, StaffPermissionMixin, generic.DeleteView):
     pk_url_kwarg = 'album_pk'
     context_object_name = 'album'
     permission_required = ('music.delete_album', 'music.change_album')
-    template_name = 'staff/album_confirm_delete.html'
+    template_name = 'staff/albums/album_confirm_delete.html'
 
     def get_success_url(self):
         album = f'{strip_punctuation(self.object.title)}({self.object.pk})'

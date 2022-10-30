@@ -24,7 +24,7 @@
         {% endif %}
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {% include 'staff/album_form.html' with initial_artists=album.artists %}
+            {% include 'staff/albums/album_form.html' with initial_artists=album.artists %}
             <hr>
             <div class="form-group">
                 <button class="btn btn-outline-dark">Edit album</button>
