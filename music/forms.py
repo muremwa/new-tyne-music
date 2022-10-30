@@ -119,9 +119,9 @@ class ArtistEditForm(CleanArtist, ClassicModelEditForm):
 class AlbumForm(SmartForm, forms.ModelForm):
 
     class Media:
-        js = ('js/ajaxWrapper.js', 'staff/js/album_form.js', 'staff/js/select_artists.js')
+        js = ('js/ajaxWrapper.js', 'staff/js/albums/album_form.js', 'staff/js/select_artists.js')
         css = {
-            'all': ('staff/css/album_form.css', 'staff/css/select_artists.css')
+            'all': ('staff/css/albums/album_form.css', 'staff/css/select_artists.css')
         }
 
     class Meta:
@@ -155,9 +155,9 @@ class AlbumEditForm(ModelEditWithRelatedFields):
     }))
 
     class Media:
-        js = ('js/ajaxWrapper.js', 'staff/js/album_form.js', 'staff/js/select_artists.js')
+        js = ('js/ajaxWrapper.js', 'staff/js/albums/album_form.js', 'staff/js/select_artists.js')
         css = {
-            'all': ('staff/css/album_form.css', 'staff/css/select_artists.css')
+            'all': ('staff/css/albums/album_form.css', 'staff/css/select_artists.css')
         }
 
     def clean(self):
