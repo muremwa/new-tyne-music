@@ -89,14 +89,14 @@
         {% endif %}
 
         <label for="{{ form.avi.id_for_label }}">{{ form.avi.label }}</label>
-        <div class="current-image js-img-pr">
+        <div class="current-image js-aspect-check" data-aspect-ratio="1:1" data-input-id="{{ form.avi.id_for_label }}">
             {% if form.instance.avi.url %}
-                <img src="{{ form.instance.avi.url }}" alt="current avi" data-aspect-ratio="1:1" data-input-name="avi">
+                <img src="{{ form.instance.avi.url }}" alt="current avi">
             {% else %}
-                <img src="" alt="current avi" data-aspect-ratio="1:1" data-input-name="avi">
+                <img src="" alt="current avi" data-input-name="avi">
             {% endif %}
+            <p class="alert alert-danger" id="alert-avi">Image is not 1:1</p>
         </div>
-        <p class="alert alert-danger visually-hidden" id="alert-avi">Image is not 1:1</p>
         {{ form.avi }}
     </div>
     
@@ -116,14 +116,14 @@
         {% endif %}
         
         <label for="{{ form.cover.id_for_label }}">{{ form.cover.label }}</label>
-        <div class="current-image js-img-pr">
+        <div class="current-image js-aspect-check" data-aspect-ratio="3:1" data-input-id="{{ form.cover.id_for_label }}">
             {% if form.instance.cover.url %}
-                <img src="{{ form.instance.cover.url }}" alt="current cover" data-aspect-ratio="3:1" data-input-name="cover">
+                <img src="{{ form.instance.cover.url }}" alt="current cover">
             {% else %}
-                <img src="" alt="current cover" data-aspect-ratio="3:1" data-input-name="cover">
+                <img src="" alt="current cover">
             {% endif %}
+            <p class="alert alert-danger way-point" id="alert-cover">Image is not 3:1</p>
         </div>
-        <p class="alert alert-danger way-point visually-hidden" id="alert-cover">Image is not 3:1</p>
         <div class="way-point">
             {{ form.cover }}
         </div>

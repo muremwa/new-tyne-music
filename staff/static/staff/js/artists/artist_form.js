@@ -1,56 +1,3 @@
-
-
-/* Preview images and refuse aspect ratio */
-const hiddingClass = 'visually-hidden';
-const invalidClass = 'is-invalid';
-
-[...document.getElementsByClassName('js-img-pr')].forEach((element) => {
-    const image = element.firstElementChild;
-
-    if (image) {
-        const aspectRatio = image.dataset.aspectRatio.split(':').map((int) => parseInt(int));
-        const inputName = image.dataset.inputName;
-
-        if (inputName && aspectRatio) {
-            const alertDiv = document.getElementById(`alert-${inputName}`);
-            const imageInput = document.getElementById(`id_${inputName}`);
-
-            if (imageInput) {
-                imageInput.addEventListener('change', (event_) => {
-                    const reader = new FileReader();
-                    const pimage = new Image();
-
-                    pimage.onload = (imageEvent) => {
-                        const height = imageEvent.target.height;
-                        const width = imageEvent.target.width;
-                        
-                        if (width && height) {
-                            if (((width / height) * aspectRatio[1]) === aspectRatio[0]) {
-                                alertDiv.classList.add(hiddingClass);
-                                imageInput.classList.remove(invalidClass);
-                                imageInput.setCustomValidity('');
-                            } else {
-                                alertDiv.classList.remove(hiddingClass);
-                                imageInput.classList.add(invalidClass);
-                                imageInput.setCustomValidity(`The dimensions of '${inputName}' are not ${aspectRatio[0]} × ${aspectRatio[1]}`);
-                            };
-                        };                        
-                    };
-
-                    reader.onload = (readerEvent) => {
-                        const newImage = readerEvent.target.result;
-                        image.src = newImage;
-                        pimage.src = newImage;
-                    };
-                    reader.readAsDataURL(event_.target.files[0])
-                });
-            };
-        };
-    };
-});
-
-
-
 /* Add nicknames */
 const nicknamesModal = document.getElementById('nicknames-modal');
 const nicknamesformInput = document.getElementById('id_nicknames');
@@ -79,7 +26,7 @@ if (nicknamesModal && nicknamesformInput) {
                 li.remove();
                 if (!nicknames.length) {
                     nicknamesHome.innerHTML = nonames
-                };
+                }
             });
             return li;
         });
@@ -90,7 +37,7 @@ if (nicknamesModal && nicknamesformInput) {
             nm.forEach((element) => nicknamesHome.appendChild(element));
         } else {
             nicknamesHome.innerHTML = nonames;
-        };
+        }
     };
 
     const addNickname = (event_) => {
@@ -126,8 +73,8 @@ if (nicknamesModal && nicknamesformInput) {
             savednicknameElements.forEach((nameElement) => savedNicknames.appendChild(nameElement));
         } else {
             savedNicknames.innerHTML = '<div class="alert alert-info">No nicknames</div>'
-        };
+        }
 
         nicknamesformInput.value = nicknames.join(',') 
     });
-};
+}

@@ -79,8 +79,8 @@
             <div class="alert alert-info">Album cover</div>
         {% endif %}
         <label for="{{ form.cover.id_for_label }}">{{ form.cover.label }}</label>
-        <div class="album-cover-div">
-            <img src="{{ form.instance.cover.url }}" class="album-cover" id="album-cover-preview">
+        <div class="js-aspect-check" data-aspect-ratio="1:1" data-input-id="{{ form.cover.id_for_label }}">
+            <img alt="current cover for {{ album.title }}" src="{{ form.instance.cover.url }}" class="album-cover" id="album-cover-preview">
             <span class="alert alert-danger one-by">Image is not 1:1</span>
         </div>
         {{ form.cover }}
@@ -92,6 +92,7 @@
         {{ form.is_single }}
 
         <div class="alert alert-info">Long Play, Extended Play or single?</div>
+        <label for="type-select">Type</label>
         <input type="hidden" value="{{ form.instance.al_code }}" id="album-code">
         <select id="type-select" class="form-select">
             <option value="LP">Long Play (Album)</option>

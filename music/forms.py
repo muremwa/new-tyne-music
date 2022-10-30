@@ -45,7 +45,10 @@ class CleanArtist:
         css = {
             'all': ('staff/css/artists/artist_form.css',)
         }
-        js = ('staff/js/artists/artist_form.js',)
+        js = (
+            'staff/js/artists/artist_form.js',
+            'staff/js/aspectRatioCheck.js',
+        )
 
     class Meta:
         model = Artist
@@ -119,7 +122,12 @@ class ArtistEditForm(CleanArtist, ClassicModelEditForm):
 class AlbumForm(SmartForm, forms.ModelForm):
 
     class Media:
-        js = ('js/ajaxWrapper.js', 'staff/js/albums/album_form.js', 'staff/js/select_artists.js')
+        js = (
+            'js/ajaxWrapper.js',
+            'staff/js/aspectRatioCheck.js',
+            'staff/js/albums/album_form.js',
+            'staff/js/select_artists.js',
+        )
         css = {
             'all': ('staff/css/albums/album_form.css', 'staff/css/select_artists.css')
         }
@@ -155,7 +163,12 @@ class AlbumEditForm(ModelEditWithRelatedFields):
     }))
 
     class Media:
-        js = ('js/ajaxWrapper.js', 'staff/js/albums/album_form.js', 'staff/js/select_artists.js')
+        js = (
+            'js/ajaxWrapper.js',
+            'staff/js/aspectRatioCheck.js',
+            'staff/js/albums/album_form.js',
+            'staff/js/select_artists.js',
+        )
         css = {
             'all': ('staff/css/albums/album_form.css', 'staff/css/select_artists.css')
         }
