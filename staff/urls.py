@@ -103,4 +103,7 @@ urlpatterns = [
     # manage-creators/creator/delete/22/
     path('manage-creators/creator/delete/<int:creator_id>/', views.CreatorDeleteView.as_view(), name='creator-delete'),
 
+    # manage-creators/creator/edit/22/
+    path('manage-creators/creator/edit/<int:creator_id>/', views.CreatorUpdateView.as_view(), name='creator-edit'),
+
 ]

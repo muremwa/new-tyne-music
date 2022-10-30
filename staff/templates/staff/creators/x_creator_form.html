@@ -1,0 +1,81 @@
+<div class=" row skimmy-border">
+    <!-- Name -->
+    <div class="form-group col-md-4">
+        {% if form.name.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.name.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Name of the creator</div>
+        {% endif %}
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+    </div>
+
+    <div class="form-group col-md-1"></div>
+
+    <!-- Name -->
+    <div class="form-group col-md-7">
+        {% if form.description.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.description.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">A fitting description of the creator</div>
+        {% endif %}
+        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+        {{ form.description }}
+    </div>
+</div>
+
+<hr>
+
+<div class="row skimmy-border">
+    <!-- avi -->
+    <div class="form-group col-md-4">
+        {% if form.avi.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.avi.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Avi for the creator</div>
+        {% endif %}
+        <label for="{{ form.avi.id_for_label }}">{{ form.avi.label }}</label>
+
+        <div class="form-img-prev-home js-aspect-check" data-aspect-ratio="1:1" data-input-id="{{ form.avi.id_for_label }}">
+            <img alt="current avi for {{ creator.name }}" src="{{ form.instance.avi.url }}" class="form-img-prev" />
+            <span class="alert alert-danger image-alert">Image is not 1:1</span>
+        </div>
+
+        {{ form.avi }}
+    </div>
+
+    <div class="form-group col-md-1"></div>
+
+    <!-- cover -->
+    <div class="form-group col-md-7">
+        {% if form.cover.errors %}
+            <ul class="alert alert-danger list-unstyled">
+                {% for error in form.cover.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Cover for the creator</div>
+        {% endif %}
+        <label for="{{ form.cover.id_for_label }}">{{ form.cover.label }}</label>
+
+        <div class="form-img-prev-home js-aspect-check" data-aspect-ratio="3:1" data-input-id="{{ form.cover.id_for_label }}">
+            <img alt="current cover for {{ creator.name }}" src="{{ form.instance.cover.url }}" class="form-img-prev" />
+            <span class="alert alert-danger image-alert">Image is not 3:1</span>
+        </div>
+
+        {{ form.cover }}
+    </div>
+</div>

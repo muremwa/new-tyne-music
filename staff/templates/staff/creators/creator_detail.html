@@ -87,7 +87,7 @@
             <div class="row">
                 {% if perms.music.change_creator and perms.music.delete_creator %}
                     <div class="col-md-3">
-                        <a href="" class="btn btn-outline-dark">Edit {{ creator.name }}</a>
+                        <a href="{% url 'staff:creator-edit' creator.pk %}" class="btn btn-outline-dark">Edit {{ creator.name }}</a>
                     </div>
                     <div class="col-md-1"></div>
                     <div class="col-md-3">

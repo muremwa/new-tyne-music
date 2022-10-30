@@ -1,0 +1,27 @@
+{% extends 'staff/staff_base.html' %}
+
+{% load static %}
+
+{% block title %}Edit creator "{{ creator.name }}"{% endblock %}
+
+{% block staff %}active{% endblock %}
+
+{% block style %}
+<link type="text/css" rel="stylesheet" href="{% static 'staff/css/creators/creator_fr.css' %}" />
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Edit <a class="text-decoration-none" href="{% url 'staff:creator-detail' creator.pk %}">{{ creator.name }}</a></h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {% include 'staff/creators/x_creator_form.html' %}
+            <hr>
+            <div class="form-group">
+                <input type="submit" value="save changes to {{ creator.name }}" class="btn btn-outline-dark">
+                <a href="{% url 'staff:creator-detail' creator.pk %}" class="btn btn-outline-dark">Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}
