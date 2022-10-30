@@ -99,7 +99,8 @@
 
                         <form data-open="0" action="{% url 'staff:change-disc' disc_id=disc.pk %}" method="post" id="{{ disc.pk }}-name-form" class="col-md-6 disc-name-form alert alert-info">
                             {% csrf_token %}
-                            <input type="text" name="disc-name" class="form-control" placeholder="Enter new disc name for '{{ disc.name }}'" required>
+                            <label for="disc-name-add">Disc name</label>
+                            <input id="disc-name-add" type="text" name="disc-name" class="form-control" placeholder="Enter new disc name for '{{ disc.name }}'" required>
                             <hr>
                             <input type="submit" value="save new name" class="btn btn-outline-dark">
                         </form>
