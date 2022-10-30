@@ -14,7 +14,7 @@
     <div class="container">
         <h2>Edit <a class="text-decoration-none" href="{% url 'staff:creator-detail' creator.pk %}">{{ creator.name }}</a></h2>
 
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% include 'staff/creators/x_creator_form.html' %}
             <hr>
