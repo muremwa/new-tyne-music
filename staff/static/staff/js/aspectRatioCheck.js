@@ -45,6 +45,11 @@ function check(aspectRatio, preview, error, file, field) {
     const errorHome = element.children[1];
     const input = document.getElementById(element.dataset.inputId);
     const aspectRatio = element.dataset.aspectRatio.split(':').map((ass) => parseInt(ass));
+    const fileInit = input.files[0];
+
+    if (fileInit) {
+        check(aspectRatio, preview, errorHome, fileInit, input);
+    }
 
     input.addEventListener('change', (changeEvent) => {
         const file = changeEvent.target.files[0];
