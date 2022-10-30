@@ -33,7 +33,7 @@
                         <li>Artists Display Name: <strong>{{ album.artists|album_artists }}</strong></li>
                         <li>Genre: <strong>{{ album.genre.title }}</strong></li>
                         <li>Likes: <strong>{{ album.likes }}</strong></li>
-                        <li>Copyright: <strong><pre>{{ album.copyright }}</pre></strong></li>
+                        <li>Copyright: <pre>{{ album.copyright }}</pre></li>
                     </ul>
                     <a href="{% url 'staff:manage-albums' %}" class="btn btn-outline-dark">All albums</a>
                     <a href="{% url 'staff:album-edit' album.pk %}" class="btn btn-outline-secondary">Edit '{{ album.title }}'</a>
