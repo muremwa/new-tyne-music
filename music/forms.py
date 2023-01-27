@@ -1,7 +1,7 @@
 from django import forms
 from django.db.models import Model
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as __
+from django.utils.translation import gettext_lazy as __
 from django.core.files.images import get_image_dimensions
 
 from mutagen import File

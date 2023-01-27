@@ -1,9 +1,9 @@
 from typing import Union, List
 
-from django.utils.timezone import datetime
+from django.utils import timezone
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as __
+from django.utils.translation import gettext_lazy as __
 
 from .models import HelpArticle
 from .widgets import MarkdownEditor
@@ -93,7 +93,7 @@ class LogSearchForm(forms.Form):
         start_time = self.cleaned_data.get('start_time')
         end_time = self.cleaned_data.get('end_time')
 
-        if type(start_time) == datetime and type(end_time) == datetime:
+        if type(start_time) == timezone.datetime and type(end_time) == timezone.datetime:
             if start_time > end_time:
                 raise ValidationError(__('Start time cannot be more recent compared to end time.'))
 

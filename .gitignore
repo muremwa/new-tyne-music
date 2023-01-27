@@ -6,3 +6,4 @@ media/*
 logs/*
 .vscode/*
 *.log
+*migrations*

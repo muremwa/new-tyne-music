@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'tyne.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / 'db.sqlite3'),
+        'NAME': str(BASE_DIR / 'tyne_music.sqlite3'),
     }
 }
 

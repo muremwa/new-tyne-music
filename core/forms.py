@@ -3,7 +3,7 @@ from re import search, compile, findall
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as __
+from django.utils.translation import gettext_lazy as __
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import validate_email
 from rest_framework.authtoken.models import Token
