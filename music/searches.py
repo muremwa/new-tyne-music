@@ -11,7 +11,7 @@ from . import models as ms_models, serializers as ms_serializers
 class MusicSearch:
     """
     Search music
-        ms_search = MusicSearch('drake', False)
+        ms_search = MusicSearch(term='drake', staff_view=False)
     takes two args
         1. term = search term
         2. staff_view = True if used in a staff view else False for normal users view
